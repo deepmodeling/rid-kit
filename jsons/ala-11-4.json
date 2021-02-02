@@ -1,0 +1,27 @@
+{
+    "_comment" : "moleculer settings",
+    "nalpha" :		10,
+    "alpha_idx_fmt":	"%02d",
+    "angle_idx_fmt":	"%02d",
+    "angle_idxes":	[ [5, 7, 9, 15],
+			  [7, 9, 15, 17],
+			  [6, 5, 7, 9],
+			  [9, 15, 17, 18] ],
+    "bf_traj_stride":	500,
+
+    "_comment" : "restraint settings",
+    "res_kappa":	500,
+    "res_traj_stride":	500,
+    "res_ang_stride":	5,
+    "res_prt_file":	"plm.res.out",
+
+    "_comment" : "afed settings",
+    "afed_temp":	3000,
+    "afed_kappa":	500,
+    "afed_gamma":	0.1,
+    "afed_tau":		10.0,
+    "afed_traj_stride":	500,
+    "afed_prt_file":	"plm.afed.out",
+
+    "_comment" : "that's all"
+}

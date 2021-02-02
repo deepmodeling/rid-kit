@@ -208,17 +208,11 @@ def make_res (iter_index,
                         cluster_threshold=cluster_threshold*0.95
                         cls_sel = sel_from_cluster (sel_angles, cluster_threshold)
                         test_numb_cluster=len(set(cls_sel))
-                        print(cluster_threshold)
-                        print(test_numb_cluster)
                     elif test_numb_cluster > init_numb_cluster[1]:
                         cluster_threshold=cluster_threshold*1.05
                         cls_sel = sel_from_cluster (sel_angles, cluster_threshold)
                         test_numb_cluster=len(set(cls_sel))
-                        print(cluster_threshold)
-                        print(test_numb_cluster)
                     else:
-                        print(cluster_threshold)
-                        print(cluster_threshold)
                         np.savetxt (walker_path + 'cluster_threshold.dat', [cluster_threshold], fmt = '%f')
                         np.savetxt ('cluster_threshold.dat', [cluster_threshold], fmt = '%f')
                         break

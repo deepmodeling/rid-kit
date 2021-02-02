@@ -1,0 +1,19 @@
+{
+    "_comment":	   " dihedral angles: phi, psi ",
+    "dih_angles" : [ [ {"name" : ["C"],  "resid_shift" : -1},
+		       {"name" : ["N"],  "resid_shift" : 0},
+		       {"name" : ["CA"], "resid_shift" : 0},
+		       {"name" : ["C"],  "resid_shift" : 0} ], 
+		     [ {"name" : ["N"],  "resid_shift" : 0}, 
+		       {"name" : ["CA"], "resid_shift" : 0},
+		       {"name" : ["C"],  "resid_shift" : 0},
+		       {"name" : ["N"],  "resid_shift" : 1} ]
+		   ],
+    "alpha_idx_fmt":	"%03d",
+    "angle_idx_fmt":	"%02d",
+    "_comment":	   " hydorphobic contacts ",
+    "hp_residues":	["ALA", "VAL", "ILE", "LEU", "MET", "PHE", "TYR", "TRP", "PRO", "NME", "ACE"],
+    "dist_atom":	["CH3"],
+    "dist_excl":	1,    
+    "_comment":	   " that's all "
+}

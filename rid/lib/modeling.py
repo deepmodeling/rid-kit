@@ -54,7 +54,7 @@ def make_walker_name (walker_index) :
 
 def record_iter (record, ii, jj) :
     with open (record, "a") as frec :
-        frec.write ("%d %d\n" % (ii, jj))        
+        frec.write ("%d %d\n" % (ii, jj))
 
 def log_iter (task, ii, jj) :
     logging.info ((log_iter_head + "%s") % (ii, jj, task))

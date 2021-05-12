@@ -1,0 +1,15 @@
+{
+    "_comment":	   " dihedral angles: phi, psi ",
+    "dih_angles" : [ [ {"name" : ["C"],  "resid_shift" : -1},
+		       {"name" : ["N"],  "resid_shift" : 0},
+		       {"name" : ["CA"], "resid_shift" : 0},
+		       {"name" : ["C"],  "resid_shift" : 0} ], 
+		     [ {"name" : ["N"],  "resid_shift" : 0}, 
+		       {"name" : ["CA"], "resid_shift" : 0},
+		       {"name" : ["C"],  "resid_shift" : 0},
+		       {"name" : ["N"],  "resid_shift" : 1} ]
+		   ],
+    "selected_index":  [0, 1, 2, 3, 4, 5, 8],
+    "alpha_idx_fmt":	"%03d",
+    "angle_idx_fmt":	"%02d"
+}

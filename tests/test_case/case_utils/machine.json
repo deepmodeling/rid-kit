@@ -1,0 +1,10 @@
+{
+    "_comment": "test utils",
+    "abcd_number_node": 1,
+    "abcd_cpu_per_node": 8,
+    "abcd_gpu_per_node": 1,
+    "queue_name": "V100",
+    "abcd_group_size": 2,
+    "if_cuda_multi_devices": false,
+    "_comment": "That's all"
+}

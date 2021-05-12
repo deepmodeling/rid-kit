@@ -1,3 +1,11 @@
 __pycache__
 *.pyc
 .nfs*
+ridkit.egg-info
+tests/__pycache__
+*.egg
+dist
+build
+ridkit
+.gitignore
+

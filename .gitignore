@@ -8,4 +8,4 @@ dist
 build
 ridkit
 .gitignore
-
+tests/scrip_tt.py

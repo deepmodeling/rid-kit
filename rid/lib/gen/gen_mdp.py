@@ -1,7 +1,8 @@
 import re, os
+from rid import ROOT_PATH
 
 
-def general_mdp(title, temperature=300, define=None, dt=0.002, nsteps=50000, frame_freq=500):
+def _general_mdp(title, temperature=300, define=None, dt=0.002, nsteps=50000, frame_freq=500):
     if define is None:
         define = ''
     ret = ";  {}.mdp was generated.\n".format(title)
@@ -93,6 +94,26 @@ def general_mdp(title, temperature=300, define=None, dt=0.002, nsteps=50000, fra
     ret += "userreal4                = 0\n"
     return ret
 
+def general_mdp(title, temperature=300, define=None, dt=0.002, nsteps=50000, frame_freq=500):
+    ret = ";   File {} was generated.\n".format(title)
+    with open("{}/template/grompp.mdp".format(ROOT_PATH), 'r') as mdp:
+        ret += mdp.read()
+    ret = re.sub("ref-t.*=.*", "ref-t = {} {}".format(temperature, temperature), ret)
+    ret = re.sub("gen-temp.*=.*", "gen-temp = {}".format(temperature), ret)
+    if define is None:
+        pass
+    else:
+        ret = re.sub("define.*=.*", "define = {}".format(define), ret)
+    ret = re.sub("dt.*=.*", "dt = {}".format(dt), ret)
+    ret = re.sub("nsteps.*=.*", "nsteps = {}".format(nsteps), ret)
+    # nstxout  nstenergy
+    ret = re.sub("nstxout.*=.*", "nstxout = {}".format(frame_freq), ret)
+    ret = re.sub("nstvout.*=.*", "nstvout = {}".format(frame_freq), ret)
+    ret = re.sub("nstfout.*=.*", "nstfout = {}".format(frame_freq), ret)
+    ret = re.sub("nstenergy.*=.*", "nstenergy = {}".format(frame_freq), ret)
+    ret = re.sub("nstxtcout.*=.*", "nstxtcout = {}".format(frame_freq), ret)
+    return ret
+
 
 def gen_grompp_bias (nsteps, frame_freq, title='bias_md', temperature=300, define=None, dt=0.002) :
     # re.sub (pattern, subst, file_string)
@@ -102,10 +123,10 @@ def gen_grompp_bias (nsteps, frame_freq, title='bias_md', temperature=300, defin
 
 def gen_grompp_res (nsteps, frame_freq, title='res_md', temperature=300, define="-DPOSRE", dt=0.002) :
     ret = general_mdp(title, temperature=temperature, define=define, nsteps=nsteps, frame_freq=frame_freq, dt=dt)
-    re.sub("nstxout.*=.*", "nstxout = %d" % 0, ret)
-    re.sub("nstvout.*=.*", "nstvout = %d" % 0, ret)
-    re.sub("nstfout.*=.*", "nstfout = %d" % 0, ret)
-    re.sub("nstenergy.*=.*", "nstenergy = %d" % 0, ret)
+    ret = re.sub("nstxout.*=.*", "nstxout = %d" % 0, ret)
+    ret = re.sub("nstvout.*=.*", "nstvout = %d" % 0, ret)
+    ret = re.sub("nstfout.*=.*", "nstfout = %d" % 0, ret)
+    ret = re.sub("nstenergy.*=.*", "nstenergy = %d" % 0, ret)
     return ret
 
 def make_grompp(out_path, mdp_type, nsteps, frame_freq, title=None, temperature=300, define=None, dt=0.002):
@@ -121,10 +142,13 @@ def make_grompp(out_path, mdp_type, nsteps, frame_freq, title=None, temperature=
             out_path = os.path.abspath(out_path) + "/grompp_restraint.mdp"
         if title is None:
             title = 'res_md'
+        if define is None:
+            define = "-DPOSRE"
         ret = gen_grompp_res (nsteps, frame_freq, title=title, temperature=temperature, define=define, dt=dt)
     
     with open(out_path, 'w') as mdp:
         mdp.write(ret)
+
 
 
 def modify_grompp_bias (gro_file, nsteps, frame_freq) :

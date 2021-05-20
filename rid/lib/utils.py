@@ -52,9 +52,11 @@ def copy_file_list(file_list, from_path, to_path) :
                 shutil.copy(os.path.join(from_path, jj)+'/'+ff, os.path.join(to_path, jj)+'/'+ff)
 
 def checkfile(file_path):
-    ### ???? why I have this function?
     if os.path.exists(file_path):
-        shutil.rmtree(file_path)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+        elif os.path.isdir(file_path):
+            shutil.rmtree(file_path)
 
 def log_task (message) :
     header = repeat_to_length (" ", len(log_iter_head % (0, 0)))
@@ -166,13 +168,10 @@ def get_checkpoint(record_file):
                 if len(content) == 0:
                     continue
                 else:
-                    checkpoint = [int(content[1]), int(content[3])]
+                    checkpoint = [int(content[0]), int(content[1])]
         print("The process will start after iteration {} task {}".format(checkpoint[0], checkpoint[1]))
         return checkpoint
 
 
 if __name__ == '__main__':
-    # replace("/home/dongdong/wyz/rid-kit/tests/tmp_utils/replace.txt", 'MODEL=[^ ] ', "MODEL=test.pd ")
-    # print(type(set_machine('/home/dongdong/wyz/rid-kit/tests/test_case/case_utils/slurm.json')).__name__)
     ret = print_list(['we', 'rng', 'edg'], suffix='0')
-    # print(ret)

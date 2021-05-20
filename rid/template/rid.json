@@ -14,8 +14,8 @@
   "numb_walkers": 2,
   "bias_trust_lvl_1": 2,
   "bias_trust_lvl_2": 3,
-  "bias_nsteps": 2000,
-  "bias_frame_freq": 2,
+  "bias_nsteps": 20000,
+  "bias_frame_freq": 20,
   "sel_threshold": 2,
   "cluster_threshold": 1.5,
   "num_of_cluster_threshhold": 8,
@@ -58,7 +58,6 @@
   "res_decay_rate": 0.96,
 
 
-
   "_comment": "system resources",
   "machine_type": "Slurm",
   "queue_name": "GPU_2080Ti",
@@ -81,6 +80,15 @@
   "res_cpu_per_node": 8,
   "res_gpu_per_node": 1,
   "res_group_size": 10,
+
+  "cmpf_number_node": 1,
+  "cmpf_cpu_per_node": 2,
+  "cmpf_gpu_per_node": 0,
+
+  "train_number_node": 1,
+  "train_cpu_per_node": 8,
+  "train_gpu_per_node": 1,
+  "train_group_size": 1,
 
   "if_cuda_multi_devices": false,
   "export_sources": [

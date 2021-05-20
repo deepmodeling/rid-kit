@@ -143,6 +143,7 @@ def make_res (iter_index,
               json_file) :
     fp = open (json_file, 'r')
     jdata = json.load (fp)
+    fp.close()
     numb_walkers = jdata["numb_walkers"]
     template_dir = jdata["template_dir"]    
     bias_nsteps = jdata["bias_nsteps"]

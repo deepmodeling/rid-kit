@@ -83,16 +83,34 @@ def general_plumed (TASK,
     angle_names, angle_atom_idxes = make_general_angle_def(residue_atoms, dih_angles, fmt_alpha, fmt_angle)
 
     dist_names, dist_atom_idxes = make_general_dist_def(residues, residue_atoms, hp_residues, dist_atom, fmt_alpha, dist_excl)
+    
+    if "selected_index" in jdata:
+        selected_index = jdata["selected_index"]
+        selected_angle_index=[]
+        for ssi in selected_index:
+            if ssi==0:
+                selected_angle_index.append(0)
+            elif ssi !=0 :
+                selected_angle_index.append(ssi*2-1)
+                selected_angle_index.append(ssi*2)
+
+        newselected_angle_index=[i for i in selected_angle_index if i<len(angle_names)]
+        new_angle_names=[angle_names[i] for i in newselected_angle_index]
+        new_angle_atom_idxes=[angle_atom_idxes[i] for i in newselected_angle_index]
+    else:
+        new_angle_names=angle_names
+        new_angle_atom_idxes=angle_atom_idxes
+
     ret = ""
 
     if len(dist_names) > 0 :
         ret += make_wholemolecules(protein_atom_idxes)
         ret += "\n"
-    ret += (make_angle_def(angle_names, angle_atom_idxes))
+    ret += (make_angle_def(new_angle_names, new_angle_atom_idxes))
     ret += (make_dist_def(dist_names, dist_atom_idxes))
     ret += "\n"
 
-    cv_names = angle_names + dist_names
+    cv_names = new_angle_names + dist_names
     if TASK == "res" :
         ptr, ptr_names = make_restraint(cv_names, kappa, 0.0)
         ret += (ptr)

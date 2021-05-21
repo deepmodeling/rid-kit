@@ -71,6 +71,7 @@
   "enhc_gpu_per_node": 1,
   "enhc_group_size": 1,
 
+  "post_if_local": true,
   "post_number_node": 1,
   "post_cpu_per_node": 4,
   "post_gpu_per_node": 0,

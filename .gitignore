@@ -6,11 +6,8 @@ tests/__pycache__
 *.egg
 dist
 build
-ridkit
 .gitignore
-tests/scrip_tt.py
 rid/old
 markdown.py
 examples
-.gitignore
-./tests/
+tests

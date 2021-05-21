@@ -13,4 +13,4 @@ rid/old
 markdown.py
 examples
 .gitignore
-tests/test_case
+./tests

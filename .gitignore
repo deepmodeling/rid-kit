@@ -10,3 +10,7 @@ ridkit
 .gitignore
 tests/scrip_tt.py
 rid/old
+markdown.py
+examples
+.gitignore
+tests/test_case

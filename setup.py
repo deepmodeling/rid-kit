@@ -18,11 +18,13 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="",
     python_requires=">=3.6",
-    packages=['rid', 'rid/lib', 'rid/lib/gen', 'rid/lib/nn'],
+    packages=['rid', 'rid/lib', 'rid/lib/gen', 'rid/lib/nn', 'rid/template'],
     classifiers=[
         "Programming Language :: Python :: 3.6",
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
     ],
+    package_data={'rid/template': ['*.json', '*.sh', '*.mdp']},
+    include_package_data=True,
     keywords='enhanced sampling reinforced dynamics RiD',
     install_requires=install_requires,    
 )

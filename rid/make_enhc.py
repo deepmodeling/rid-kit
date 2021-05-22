@@ -83,13 +83,13 @@ def make_enhc (iter_index,
 
     create_path(work_path)
 
-    mol_files=["topol.top","posre.itp"]
+    mol_files=["topol.top"]
     for walker_idx in range (numb_walkers) :
         walker_path = work_path + make_walker_name(walker_idx) + "/"
         create_path (walker_path)
        
         make_grompp(walker_path + "grompp.mdp", "bias", nsteps, frame_freq, temperature=temperature, dt=dt, define='')
-        make_grompp(walker_path + "grompp_restraint.mdp", "res", nsteps, frame_freq, temperature=temperature, dt=dt, define='-DPOSRE')
+        # make_grompp(walker_path + "grompp_restraint.mdp", "res", nsteps, frame_freq, temperature=temperature, dt=dt, define='-DPOSRE')
         
         for ii in mol_files:
             checkfile(walker_path + ii)

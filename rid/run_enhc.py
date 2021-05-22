@@ -18,7 +18,7 @@ def run_enhc (iter_index,
     fp = open (json_file, 'r')
     jdata = json.load (fp)
     fp.close()
-    gmx_prep = jdata["gmx_prep"] + ' -f grompp_restraint.mdp -r conf_init.gro'
+    gmx_prep = jdata["gmx_prep"]
     gmx_run = jdata["gmx_run"]
     enhc_thread = jdata["enhc_thread"]
     gmx_run = gmx_run + (" -nt %d" % enhc_thread)

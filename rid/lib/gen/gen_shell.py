@@ -35,6 +35,7 @@ def gen_res_shell(shell_path):
         shell_path = os.path.abspath(shell_path) + "/general_mkres.sh"
     with open(shell_path, 'w') as sh:
         sh.write(ret)
+    shell_path = os.path.abspath(shell_path)
     print(shell_path + " was generated.")
 
 if __name__ == '__main__':

@@ -47,4 +47,4 @@ if __name__ == "__main__":
     parser.add_argument('-c','--cv-dih-dim', type=int,
                         help='the list of cv dimension number(dihidral)')
     args = parser.parse_args()
-    cmpf(args.cv_dim_list)
+    cmpf(args.cv_dih_dim)

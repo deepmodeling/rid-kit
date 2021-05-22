@@ -27,10 +27,8 @@ def make_sel_list(nconf, sel_idx):
     return sel_list
 
 def make_conf(nconf, res_path, walker_idx, walker_path, sel_idx, jdata, mol_path, conf_start=0, conf_every=1):
-    # mol_files=["grompp.mdp","grompp_restraint.mdp", "topol.top","posre.itp"]
-    # res_files=["cmpf.sh", "cmpf.py", "general_mkres.sh", "plumed.res.templ", "tools"]
     mol_path = os.path.abspath(mol_path) + "/"
-    mol_files = ["topol.top", "posre.itp"]
+    mol_files = ["topol.top"]
     nsteps = jdata["res_nsteps"]
     frame_freq = jdata["res_frame_freq"]
     dt = jdata["res_dt"]

@@ -60,10 +60,12 @@ def checkfile(file_path):
 
 def log_task (message) :
     header = repeat_to_length (" ", len(log_iter_head % (0, 0)))
+    print(header + message)
     logging.info (header + message)
 
 def log_iter (task, ii, jj) :
     logging.info ((log_iter_head + "%s") % (ii, jj, task))
+    print((log_iter_head + "%s") % (ii, jj, task))
 
 def repeat_to_length(string_to_expand, length):
     ret = ""

@@ -151,9 +151,9 @@ def make_res (iter_index,
     cv_dih_dim = cv_dim_list[0]
     ret_list = [True for ii in range(numb_walkers)]
 
-    cls_sel = None
     ## check if we have graph in enhc
     for walker_idx in range(numb_walkers) :
+        cls_sel = None
         walker_path = enhc_path + walker_format % walker_idx + "/"
         graph_files = glob.glob (walker_path + "/*.pb")
         if len (graph_files) != 0 :
@@ -193,7 +193,6 @@ def make_res (iter_index,
 
         sel_idx = np.array (sel_idx, dtype = np.int)
         assert (len(sel_idx) == sel_angles.shape[0])
-        
         sel_idx = config_cls(sel_idx, cls_sel, max_sel, walker_path, cluster_threshold, sel_angles)
 
         res_angles = np.loadtxt (walker_path + enhc_out_angle)

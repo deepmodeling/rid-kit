@@ -36,11 +36,11 @@ class Reader(object):
         if self.use_mix :
             tr_data_new = np.loadtxt(self.data_path+'data.new.raw')
             tr_data_new = np.reshape(tr_data_new, [-1, self.cv_dim * 2])
-            tr_data_new[:,cv_dim:] *= f_cvt
+            tr_data_new[:,self.cv_dim:] *= f_cvt
             self.inputs_train_new = tr_data_new[:,:]
             tr_data_old = np.loadtxt(self.data_path+'data.old.raw')
             tr_data_old = np.reshape(tr_data_old, [-1, self.cv_dim * 2])
-            tr_data_old[:,cv_dim:] *= f_cvt
+            tr_data_old[:,self.cv_dim:] *= f_cvt
             self.inputs_train_old = tr_data_old[:,:]        
             self.train_size_new = self.inputs_train_new.shape[0]
             self.train_size_old = self.inputs_train_old.shape[0]

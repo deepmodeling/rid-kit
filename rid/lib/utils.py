@@ -80,17 +80,12 @@ def cmd_append_log (cmd,
     ret = ret + " 2> " + log_file
     return ret
 
-def set_resource(json_file, target='enhc'):
+def set_resource(json_file, target='enhcMD'):
     fp = open (json_file, 'r')
     jdata = json.load (fp)
     fp.close()
-    return Resources(
-        number_node=jdata['{}_number_node'.format(target)], 
-        cpu_per_node=jdata['{}_cpu_per_node'.format(target)], 
-        gpu_per_node=jdata['{}_gpu_per_node'.format(target)], 
-        queue_name=jdata['queue_name'], 
-        group_size=jdata['{}_group_size'.format(target)], 
-        if_cuda_multi_devices=jdata['if_cuda_multi_devices']) 
+    args_dir = jdata[target]
+    return Resources(**args_dir, queue_name=jdata['queue_name'], if_cuda_multi_devices=jdata['if_cuda_multi_devices']) 
 
 def set_machine(json_file):
     fp = open (json_file, 'r')

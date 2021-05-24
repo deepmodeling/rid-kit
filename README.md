@@ -17,20 +17,20 @@ Now you have all dependence of RiD (Gromacs, Tensorflow and a conda environment)
 cd ritkit-master
 python setup.py install
 ~~~
-Open python, try `import ridkit`.
+Open python, try `import rid`.
 
 Install successfully if you get no error.
 
 ## Quick Start
-We offer a simple but complete example in `ridkit/examples`
+We offer a simple but complete example in `rid-kit/examples`
 
 Try:
 ```
 cd examples
-python test.py
+python main.py rid.json -c cv.json -s machine.json -i ./mol -o ./test_examples 
 ```
 
-To begin with, you should offer a rid configeration file(rid.json), a CV file(phipsi_selected.json) and a dictory(mol/) containing initial conformation files in detail, and the number of conformation files should be equal to the number of walkers for parallel.
+To begin with, you should offer a rid parameters file(rid.json), a CV file(cv.json), a machine configuration(machine.json) and a dictory(mol/) containing initial conformation files in detail, and the number of conformation files should be equal to the number of walkers for parallel.
 
 All these files are presented in `examples` dictory where the users can adjust the parameter as their will.
 
@@ -121,6 +121,8 @@ Two necessary json files are required to get start a RiD procedure.
 
 **Setting for training and neuro network**
 
+| Parameters | Type | Description | Default/Example |
+| :----: | :----: | :----: | :----: |
 | numb_model | int | number of nn models | 4 |
 | neurons | list&int | number of nodes for each layer | [256, 128, 64, 32] |
 | resnet | bool | whether to use Resnet | True |
@@ -138,23 +140,3 @@ Two necessary json files are required to get start a RiD procedure.
 
 **Settings for job submission**
 
-| machine_type | str | Type of job management system | Slurm |
-| queue_name | str | name of quene | GPU_2080Ti |
-| cleanup | bool | whether clean unnecessary files  | True |
-| enhc_thread | int | number of threads of biased MD | 8 |
-| res_thread | int | number of threads of restrained MD | 8 |
-| train_thread | int | number of threads for training | 8 |
-| enhc_number_node | int | number of nodes for job submission of biased MD | 1 |
-| enhc_cpu_per_node | int | number of CPU for biased MD | 8 |
-| enhc_gpu_per_node | int | number of GPU for biased MD | 1 |
-| enhc_group_size | int | number of tasks in each submission | 1 |
-| post_number_node | int | number of nodes for job submission of postprocess | 1 |
-| post_cpu_per_node | int | number of CPU for postprocess | 4 |
-| post_gpu_per_node | int | number of GPU for postprocess | 0 |
-| post_group_size | int | number of tasks in each submission | 1 |
-| res_number_node | int | number of nodes for job submission of restrained MD | 1 |
-| res_cpu_per_node | int | number of CPU for restrained MD | 8 |
-| res_gpu_per_node | int | number of GPU for restrained MD | 1 |
-| res_group_size | int | number of tasks in each submission | 10 |
-| if_cuda_multi_devices | bool | * | False |
-| export_sources | list&str | * | ['PATH=(RiD PATH)/bin:$PATH'] |

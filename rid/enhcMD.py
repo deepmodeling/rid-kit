@@ -5,13 +5,13 @@ from rid.lib.utils import replace
 from rid.lib.utils import make_iter_name
 from rid.lib.utils import make_walker_name
 from rid.lib.utils import checkfile
-from ridkit.lib.utils import cmd_append_log, set_resource, set_machine, log_task
+from rid.lib.utils import cmd_append_log, set_resource, set_machine, log_task
 
 from rid.lib.gen.gen_mdp import make_grompp
 from rid.lib.gen.gen_plumed import make_plumed
 from rid.lib.gen.gen_plumed import conf_enhc_plumed
-from ridkit.lib.cal_cv_dim import cal_cv_dim
-from ridkit.lib.cmpf import cmpf
+from rid.lib.cal_cv_dim import cal_cv_dim
+from rid.lib.cmpf import cmpf
 
 from dpdispatcher.submission import Submission, Job, Task, Resources
 from dpdispatcher.lazy_local_context import LazyLocalContext
@@ -146,6 +146,7 @@ def make_enhc (iter_index,
 
 def post_enhc (iter_index, 
                json_file,
+               machine_json,
                base_dir="./") :
     base_dir = os.path.abspath(base_dir) + "/"
     iter_name = make_iter_name (iter_index)
@@ -175,8 +176,8 @@ def post_enhc (iter_index,
     print('rid.py:post_enhc:gmx_split_cmd', gmx_split_cmd)
     print('rid.py:post_enhc:work path', work_path)
 
-    machine = set_machine(json_file)
-    resources = set_resource(json_file, target="post")
+    machine = set_machine(machine_json)
+    resources = set_resource(machine_json, target="post_enhc")
     all_task_relpath = [os.path.relpath(ii, work_path) for ii in all_task]
     gmx_split_task = [ Task(command=gmx_split_cmd, task_work_path=ii, outlog='gmx_split.log', errlog='gmx_split.log') for ii in all_task_relpath ]
     gmx_split_submission = Submission(work_base=work_path, resources=resources, batch=machine, task_list=gmx_split_task)
@@ -191,6 +192,7 @@ def post_enhc (iter_index,
 
 def run_enhc (iter_index,
               json_file,
+              machine_json,
               base_dir='./') :
     json_file = os.path.abspath(json_file)
     base_dir = os.path.abspath(base_dir) + "/"
@@ -226,8 +228,8 @@ def run_enhc (iter_index,
     print('run_enhc:all_task:', all_task)
     print('run_enhc:all_task_basedir:', all_task_basedir)
     
-    machine = set_machine(json_file)
-    resources = set_resource(json_file, target="enhc")
+    machine = set_machine(machine_json)
+    resources = set_resource(machine_json, target="enhcMD")
 
     gmx_prep_task = [ Task(command=gmx_prep_cmd, task_work_path=ii, outlog='gmx_grompp.log', errlog='gmx_grompp.log') for ii in all_task_basedir ]
     gmx_prep_submission = Submission(work_base=work_path, resources=resources, batch=machine, task_list=gmx_prep_task)

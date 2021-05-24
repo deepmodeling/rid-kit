@@ -230,6 +230,7 @@ def make_res (iter_index,
 
 def run_res (iter_index,
              json_file,
+             machine_json,
              base_dir="./") :
     json_file = os.path.abspath(json_file)
     fp = open (json_file, 'r')
@@ -265,8 +266,8 @@ def run_res (iter_index,
     all_task.sort()
     all_task_basedir = [os.path.relpath(ii, res_path) for ii in all_task]
 
-    res_resources = set_resource(json_file, target="res")
-    machine = set_machine(json_file)
+    res_resources = set_resource(machine_json, target="resMD")
+    machine = set_machine(machine_json)
 
     gmx_prep_task = [ Task(command=gmx_prep_cmd, task_work_path=ii, outlog='gmx_grompp.log', errlog='gmx_grompp.log') for ii in all_task_basedir ]
     gmx_prep_submission = Submission(work_base=res_path, resources=res_resources, batch=machine, task_list=gmx_prep_task)
@@ -277,13 +278,13 @@ def run_res (iter_index,
     gmx_run_submission.run_submission()
 
 
-
-
 def post_res (iter_index,
               json_file,
+              machine_json,
               cv_file,
               base_dir="./") :
     json_file = os.path.abspath(json_file)
+    machine_json = os.path.abspath(machine_json)
     cv_file = os.path.abspath(cv_file)
     base_dir = os.path.abspath(base_dir) + "/"
     iter_name = make_iter_name (iter_index)
@@ -316,19 +317,10 @@ def post_res (iter_index,
     cmpf_cmd += " -c %d" % cv_dih_dim
     cmpf_log = "cmpf.log"
     
-    group_size = int((len(all_task)+1) // 8)
     print("rid.post_res.post_res:cmpf_cmd:", cmpf_cmd)
-    print("rid.post_res.post_res:cmpf_group_size:", group_size)
-
-    target = "cmpf"
-    cmpf_resources =  Resources(
-        number_node=jdata['{}_number_node'.format(target)], 
-        cpu_per_node=jdata['{}_cpu_per_node'.format(target)], 
-        gpu_per_node=jdata['{}_gpu_per_node'.format(target)], 
-        queue_name=jdata['queue_name'], 
-        group_size=group_size, 
-        if_cuda_multi_devices=jdata['if_cuda_multi_devices']) 
-    machine = set_machine(json_file)
+    
+    cmpf_resources =  set_resource(machine_json, target="cmpf")
+    machine = set_machine(machine_json)
 
     cmpf_task = [ Task(command=cmpf_cmd, task_work_path="{}".format(ii), outlog=cmpf_log, errlog=cmpf_log) for ii in all_task_reldir ]
     cmpf_submission = Submission(work_base=res_path, resources=cmpf_resources, batch=machine, task_list=cmpf_task)

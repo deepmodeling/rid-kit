@@ -56,45 +56,7 @@
   "res_olddata_ratio": 7,
   "res_decay_steps": 120,
   "res_decay_rate": 0.96,
-
-
-  "_comment": "system resources",
-  "machine_type": "Slurm",
-  "queue_name": "GPU_2080Ti",
-  "cleanup": true,
-  "enhc_thread": 8,
-  "res_thread": 8,
-  "train_thread": 8,
   
-  "enhc_number_node": 1,
-  "enhc_cpu_per_node": 8,
-  "enhc_gpu_per_node": 1,
-  "enhc_group_size": 1,
-
-  "post_if_local": true,
-  "post_number_node": 1,
-  "post_cpu_per_node": 4,
-  "post_gpu_per_node": 0,
-  "post_group_size": 1,
-  
-  "res_number_node": 1,
-  "res_cpu_per_node": 8,
-  "res_gpu_per_node": 1,
-  "res_group_size": 10,
-
-  "cmpf_number_node": 1,
-  "cmpf_cpu_per_node": 2,
-  "cmpf_gpu_per_node": 0,
-
-  "train_number_node": 1,
-  "train_cpu_per_node": 8,
-  "train_gpu_per_node": 1,
-  "train_group_size": 1,
-
-  "if_cuda_multi_devices": false,
-  "export_sources": [
-    "PATH=/home/dongdong/gromacs-dp-rid/bin:$PATH"
-  ],
   "_comment": "That's all"
 }
 

@@ -110,6 +110,7 @@ def check_new_data(iter_index, train_path, base_path):
 
 def run_train (iter_index, 
                json_file, 
+               machine_json,
                cv_file,
                base_dir="./") :
     json_file = os.path.abspath(json_file)
@@ -178,8 +179,8 @@ def run_train (iter_index,
     # lazy_local_context = LazyLocalContext(local_root='./', work_profile=None)
     # pbs = PBS(context=lazy_local_context)
     # slurm = Slurm(context=lazy_local_context)
-    resources = set_resource(json_file, target="train")
-    machine = set_machine(json_file)
+    resources = set_resource(machine_json, target="train")
+    machine = set_machine(machine_json)
 
     train_task = [ Task(command=train_cmd, task_work_path=ii, outlog='train.log', errlog='train.log') for ii in task_dirs ]
     train_submission = Submission(work_base=train_path, resources=resources, batch=machine, task_list=train_task)

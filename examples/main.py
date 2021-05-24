@@ -11,7 +11,8 @@ def main(out_dir, mol_dir, rid_json, machine_json, cv_file, init_model, record_n
     fp = open(rid_json, 'r')
     jdata = json.load(fp)
     fp.close()
-    record_file = out_dir + record_name
+    # record_file = out_dir + record_name
+    record_file = os.path.join(out_dir, record_name)
     checkpoint = get_checkpoint(record_file)
     max_tasks = 10
     number_tasks = 8

@@ -43,11 +43,15 @@ def adjust_lvl(prev_enhc_path, num_of_cluster_threshhold, jdata):
 
 def prep_graph(graph_files, walker_path):
     # copy graph files
+    cwd = os.getcwd()
     for ii in graph_files :
         file_name = os.path.basename(ii)
-        abs_path = os.path.abspath(ii)        
+        abs_path = os.path.abspath(ii)   
+        rel_path = os.path.relpath(abs_path, os.path.abspath(walker_path))     
         checkfile(walker_path + file_name)
-        os.symlink(abs_path, walker_path + file_name)    
+        os.chdir(walker_path)
+        os.symlink(rel_path, walker_path + file_name)    
+        os.chdir(cwd)
 
 def get_graph_list(graph_files):
     graph_list=""
@@ -118,7 +122,8 @@ def make_enhc (iter_index,
             prev_enhc_path = os.path.abspath(prev_enhc_path) + "/"
             if os.path.isfile (prev_enhc_path + "confout.gro") :
                 os.remove (walker_path + "conf.gro")
-                os.symlink (prev_enhc_path + "confout.gro", walker_path + "conf.gro")
+                rel_prev_enhc_path = os.path.relpath(prev_enhc_path + "confout.gro", walker_path)
+                os.symlink (rel_prev_enhc_path, walker_path + "conf.gro")
             else :
                 raise RuntimeError("cannot find prev output conf file  " + prev_enhc_path + 'confout.gro')
             log_task ("use conf of iter " + make_iter_name(iter_index-1) + " walker " + make_walker_name(walker_idx) )

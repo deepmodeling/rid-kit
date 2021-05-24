@@ -30,11 +30,20 @@ cd examples
 python main.py rid.json -c cv.json -s machine.json -i ./mol -o ./test_examples 
 ```
 
-To begin with, you should offer a rid parameters file(rid.json), a CV file(cv.json), a machine configuration(machine.json) and a dictory(mol/) containing initial conformation files in detail, and the number of conformation files should be equal to the number of walkers for parallel.
+To begin with, you should offer a rid parameters file(rid.json), a CV file(cv.json), a machine configuration(machine.json) and a folder(mol/) containing initial conformation files in detail, and the number of conformation files should be equal to the number of walkers for parallel.
 
 All these files are presented in `examples` dictory where the users can adjust the parameter as their will.
 
+The process of running will be recorded in `(work_path)/recoord.txt` file in which its iteration index and task index will be written after finishing every task. If you want to rerun the process and a record file exists in the work path, the program will restart from the next one of the end of the record(just use the same command to resatrt). If a task was restarted, but a working folder (which this task should generate) has already existed, this existed folder will be backed off as `folder_name.bk000` and so on. That is, you can restart the process at any individual task node through modifying the recording file.
 
+However, if there is NOT a record file in the working path, the whole process will restrat at the very beginning. The old one will become a back-up folder as `old_folder.bk000`.
+
+### CV selection
+In this version, the user can choose the dihedral angles as CV. rid-kit will remove the dihedral angles of the end of the proteins automatically. In the CV file(`cv.file`), the user can write the index of the selected residues, the two dihedral angle ($\psi$ and $\phi$) will be both set as the CV. 
+
+Plumed will output all selected angles in every md process, the user can find them in `work_path/iter.0000xx/00.enhcMD/00x/plm.out`, file `angle.rad.out` in the same path is the edition but removing the frame index.
+
+We will add more features for users to select more different (and customed) CV.
 
 ## Main procedure of RiD
 

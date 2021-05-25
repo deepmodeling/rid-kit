@@ -60,7 +60,7 @@ dpdispatcher is a tool for job submitting.
 
 
 Now you have all dependence of RiD (Gromacs, Tensorflow and a conda environment).
-~~~
+~~~bash
 cd rit-kit
 python setup.py install
 ~~~
@@ -72,7 +72,7 @@ Installation finishs successfully if you get no error.
 We offer a simple but complete example in `rid-kit/examples`
 
 Try:
-```
+```bash
 cd examples
 python main.py rid.json -c cv.json -s machine.json -i ./mol -o ./test_examples 
 ```

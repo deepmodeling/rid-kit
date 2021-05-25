@@ -127,7 +127,6 @@ Two necessary json files are required to get start a RiD procedure.
 | :----: | :----: | :----: | :----: |
 | gmx_prep | str | Gromacs preparation command | gmx grompp -maxwarn 1 |
 | gmx_run | str | Gromacs md run command | gmx mdrun -ntmpi 1 |
-| gmx_split_traj | str | split trajctory | echo 0 '|' gmx trjconv -sep -f traj.trr -o confs/conf.gro -vel |
 | init_graph | list&str | initial graph files list | [] |
 | numb_iter | int | number of iterations | 3 |
 | numb_walkers | int | number of walkers | 2 |

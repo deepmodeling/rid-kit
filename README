@@ -1,1 +1,0 @@
-python gen.py rid ./jsons/default_gen.json ./jsons/phipsi.json ./mol/alan/amber99sb/01/ -o ala-2

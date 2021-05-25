@@ -1,7 +1,0 @@
-{
-    "_comment":		"Gromacs settings",
-    "machine_type":	"local",
-    "virtual_cores":	true,
-    "gmxrc":		"/home/wanghan/local/gromacs/5.1.4-plumed-fe/bin/GMXRC",
-    "_comment":		"That's all"
-}

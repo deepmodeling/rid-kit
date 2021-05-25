@@ -1,0 +1,46 @@
+{
+    "_comment": "system resources",
+    "machine_type": "Slurm",
+    "queue_name": "GPU_2080Ti",
+    "cleanup": true,
+
+    "enhcMD": {
+        "number_node": 1,
+        "cpu_per_node": 8,
+        "gpu_per_node": 1,
+        "group_size": 1
+    },
+
+    "post_enhc": {
+        "number_node": 1,
+        "cpu_per_node": 4,
+        "gpu_per_node": 0,
+        "group_size": 1
+    },
+
+    "resMD": {
+        "number_node": 1,
+        "cpu_per_node": 8,
+        "gpu_per_node": 1,
+        "group_size": 10
+    },
+
+    "cmpf": {
+        "number_node": 1,
+        "cpu_per_node": 2,
+        "gpu_per_node": 0,
+        "group_size": 1000
+    },
+
+    "train": {
+        "number_node": 1,
+        "cpu_per_node": 8,
+        "gpu_per_node": 1,
+        "group_size": 1
+    },
+
+    "if_cuda_multi_devices": false,
+    "export_sources": [
+      "PATH=/home/dongdong/gromacs-dp-rid/bin:$PATH"
+    ]
+}

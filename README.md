@@ -45,11 +45,19 @@ cd build
 make -j 4
 make install
 ```
-
 Set the bashrc
 ```bash
 source /software/GMX20192plumed/bin/GMXRC.bash
 ```
+
+5, Install dpdispatcher
+```
+git clone https://github.com/deepmodeling/dpdispatcher.git
+cd dpdispatcher
+python setup.py install
+```
+dpdispatcher is a tool for job submitting.
+
 
 Now you have all dependence of RiD (Gromacs, Tensorflow and a conda environment).
 ~~~

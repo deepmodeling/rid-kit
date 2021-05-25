@@ -141,10 +141,10 @@ Two necessary json files are required to get start a RiD procedure.
 | bias_trust_lvl_2 | int | trust lower level | 3 |
 | bias_nsteps | int | total number of steps of biased MD | 20000 |
 | bias_frame_freq | int | frame frequency for recording | 20 |
-| **sel_threshold** | int | * | 2 |
-| **cluster_threshold** | * | * | 1.5 |
-| **num_of_cluster_threshhold** | * | * | 8 |
-| max_sel | int | * | 30 |
+| sel_threshold | float/int | initial threshold for selection | 2 |
+| cluster_threshold | float | * | 1.5 |
+| num_of_cluster_threshhold | int | minimum of cluster number | 8 |
+| max_sel | int | maximum of selection of clusters | 30 |
 | bias_dt | float | time interval of biased MD | 0.002 |
 | bias_temperature | float/int | temperature for biased MD | 320 |
 
@@ -158,8 +158,8 @@ Two necessary json files are required to get start a RiD procedure.
 | res_temperature | int | temperature for restrained MD | 320 |
 | res_kappa | float/int | force constant for restraining CV | 500 |
 | **res_traj_stride** | int | brute force trajectory stride | 500 |
-| res_ang_stride | * | * | 5 |
-| res_prt_file | * | * | plm.res.out |
+| res_ang_stride | int | step stride of angle | 5 |
+| res_prt_file | str | file name | plm.res.out |
 | init_numb_cluster_upper | int | upper limit of cluster selection | 26 |
 | init_numb_cluster_lower | int | lower limit of cluster selection | 16 |
 | conf_start | int | the index of the first conformation selected | 0 |
@@ -178,7 +178,7 @@ Two necessary json files are required to get start a RiD procedure.
 | decay_steps | int | decay steps of lr | 120 |
 | decay_rate | float | decay rate of lr | 0.96 |
 | **res_iter** | int | after this iteration, old data will be reduced | 13 |
-| res_numb_epoches | restrat setting | * | 2000 |
+| res_numb_epoches | int | restrat setting | 2000 |
 | res_starter_lr | float | restrat setting | 0.0008 |
 | res_olddata_ratio | int/float | restrat setting | 7 |
 | res_decay_steps | int | restrat setting | 120 |

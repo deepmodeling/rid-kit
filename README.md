@@ -1,19 +1,38 @@
-# Rid-kit
 
-## Introduction
+# Rid-kit
+## 0. **Content**
+<!-- vscode-markdown-toc -->
+* 1. [Introduction](#Introduction)
+* 2. [Installation](#Installation)
+	* 2.1. [Environment installation](#Environmentinstallation)
+	* 2.2. [Install rid package](#Installridpackage)
+* 3. [Quick Start](#QuickStart)
+	* 3.1. [CV selection](#CVselection)
+	* 3.2. [Dispatching](#Dispatching)
+		* 3.2.1. [Batch Job](#BatchJob)
+		* 3.2.2. [Local Job](#LocalJob)
+* 4. [Main procedure of RiD](#MainprocedureofRiD)
+		* 4.1. [a. Biased MD](#a.BiasedMD)
+		* 4.2. [b. Restrained MD](#b.RestrainedMD)
+		* 4.3. [c. Neuro network training](#c.Neuronetworktraining)
+* 5. [RiD settings](#RiDsettings)
+	* 5.1. [rid.json](#rid.json)
+
+
+##  1. <a name='Introduction'></a>**Introduction**
 
 Rid-kit is a python package for enhanced sampling via RiD(Reinforced Dynamics) method.
 
-## Installation
+##  2. <a name='Installation'></a>**Installation**
 
-#### Environment installation
+###  2.1. <a name='Environmentinstallation'></a>**Environment installation**
 
-1, Install python and tensorflow (version<=1.15)
+#### **Install python and tensorflow** (version<=1.15)
 
-2, Install tensorflow's C++ interface
+#### **Install tensorflow's C++ interface**
 The tensorflow's C++ interface will be compiled from the source code, can be found [here](https://github.com/deepmodeling/deepmd-kit/blob/master/doc/install-tf.1.8.md).
 
-3, Install plumed2.5.2
+#### **Install plumed2.5.2**
 
 ```bash
 tar -xvzf plumed-2.5.2.tgz
@@ -33,7 +52,7 @@ export INCLUDE=$PLUMED2_HOME/include:$INCLUDE
 export PLUMED_KERNEL=/home/dongdong/software/plumed252/lib/libplumedKernel.so
 ```
 
-4, Install gromacs 2019.2
+#### **Install gromacs 2019.2**
 
 ```bash
 tar -xzvf gromacs-2019.2.tar.gz
@@ -50,7 +69,7 @@ Set the bashrc
 source /software/GMX20192plumed/bin/GMXRC.bash
 ```
 
-5, Install dpdispatcher
+#### **Install dpdispatcher**
 ```
 git clone https://github.com/deepmodeling/dpdispatcher.git
 cd dpdispatcher
@@ -58,7 +77,7 @@ python setup.py install
 ```
 dpdispatcher is a tool for job submitting.
 
-
+###  2.2. <a name='Installridpackage'></a>**Install rid package**
 Now you have all dependence of RiD (Gromacs, Tensorflow and a conda environment).
 ~~~bash
 cd rit-kit
@@ -68,13 +87,18 @@ Open python, try `import rid`.
 
 Installation finishs successfully if you get no error.
 
-## Quick Start
-We offer a simple but complete example in `rid-kit/examples`
+##  3. <a name='QuickStart'></a>**Quick Start**
+We offer a simple but complete example in `rid-kit/examples`. RiD process can run either on batch or locally.
 
-Try:
+if running locally, please try:
 ```bash
 cd examples
-python main.py rid.json -c cv.json -s machine.json -i ./mol -o ./test_examples 
+python main.py jsons/rid.json -c jsons/cv.json -s jsons/local.json -i ./mol -o ./test_examples 
+```
+if running on batch, please try:
+```bash
+cd examples
+python main.py jsons/rid.json -c jsons/cv.json -s jsons/machine.json -i ./mol -o ./test_examples 
 ```
 
 To begin with, you should offer a rid parameters file(rid.json), a CV file(cv.json), a machine configuration file(machine.json) and a folder(mol/) containing initial conformation files in detail, and the number of conformation files should be equal to the number of walkers for parallel.
@@ -85,14 +109,63 @@ The process of running will be recorded in `(work_path)/recoord.txt` in which it
 
 However, if there is NOT a record file in the working path, the whole process will restrat at the very beginning. The old one will become a back-up folder as `old_folder.bk000`.
 
-### CV selection
-In this version, the user can choose the dihedral angles as CVs. rid-kit will remove the dihedral angles of the end of the proteins automatically. In the CV file(`cv.json`), the user can write the index of the selected residues, the two dihedral angle ($\psi$ and $\phi$) will be both setted as the CV. 
+###  3.1. <a name='CVselection'></a>**CV selection**
+In this version, the users can choose the dihedral angles as CVs. rid-kit will remove the dihedral angles of the end of the proteins automatically. In the CV file(`cv.json`), the users can write the indexes of the selected residues, the two dihedral angles ($\psi$ and $\phi$) will be both setted as the CVs. 
 
-Plumed will output all selected angles in every md process, the user can find them in `work_path/iter.0000xx/00.enhcMD/00x/plm.out`, file `angle.rad.out` in the same path is a copy but removing the frame index.
+Plumed will output all selected angles during every md process, and the users can find them in `work_path/iter.0000xx/00.enhcMD/00x/plm.out`, file `angle.rad.out` in the same path is a copy but removing the frame indexes.
 
 We will add more features for users to select more different (and customed) CVs.
 
-## Main procedure of RiD
+###  3.2. <a name='Dispatching'></a>**Dispatching**
+Every task of RiD can be assigned to either compute nodes or local machine, which can be achived in machine configuration file(for instance, `machine.json or local.json`). These settings give the messages of users to `dpdispatcher` whcih can automatically distribute resources.
+
+####  3.2.1. <a name='BatchJob'></a>**Batch Job**
+If you want to submit jobs to dispatchng system, like Slurm or PBS, please follow settings like this:
+```json
+    "enhcMD": {
+        "batch":{
+            "batch_type": "slurm",
+            "context_type": "lazy_local",
+            "local_root": "./",
+            "remote_root": "./"
+        },
+        "resources":{
+            "queue_name": "GPU_2080Ti",
+            "number_node": 1,
+            "cpu_per_node": 8,
+            "gpu_per_node": 1,
+            "group_size": 1,
+            "if_cuda_multi_devices": false
+        }
+    },
+```
+`"enhcMD"` represents the name of your job. Key `"batch"` decides where the jobs run, as for batch jobs, set `batch_type=your_dispatching_system`. Key `"resources"` means the resource you apply from the dispatching system. `"group_size"` is the size of each group of tasks which you have submitted, for example, you have 20 Tasks(a command, a Task, like `"gmx mdrun"`) and have `group_size = 10`, then the program will submit `20/10=2` Jobs to the dispatching system for parallel running, and each Job contains 10 Tasks(commands) going sequentially. At last, `"if_cuda_multi_devices"` can help assign tasks to one GPU.
+
+[TOC]
+####  3.2.2. <a name='LocalJob'></a>**Local Job**
+If you want to run jobs locally, please follow settings like this:
+```json
+    "cmpf": {
+        "batch":{
+            "batch_type": "shell",
+            "context_type": "lazy_local",
+            "local_root": "./",
+            "remote_root": "./"
+        },
+        "resources":{
+            "queue_name": null,
+            "number_node": null,
+            "cpu_per_node": null,
+            "gpu_per_node": 0,
+            "group_size": 1000
+        }
+    },
+```
+Just set `batch_type` to `shell`. When you submit jobs to local machine, some keys(`"queue_name", "number_node", "cpu_per_node"`) become unnecessary. In these cases, local machine will use full resource to carry out commands by default. If you have a quite large `group_size`, it will be the same as you run the command in a new shell.
+
+By adjusting these settings, the users can assign any task to anywhere.
+
+##  4. <a name='MainprocedureofRiD'></a>**Main procedure of RiD**
 
 RiD will run in iterations. Every iteration contains tasks below:
 
@@ -100,15 +173,15 @@ RiD will run in iterations. Every iteration contains tasks below:
 2. Restrained MD;
 3. Training neuro network.
 
-#### a. Biased MD
+####  4.1. <a name='a.BiasedMD'></a>a. **Biased MD**
 
 Just like Metadynamics, RiD will sample based on a bias potential given by NN models. A uncertainty indicator will direct the process of adding bias potential.
 
-#### b. Restrained MD
+####  4.2. <a name='b.RestrainedMD'></a>b. **Restrained MD**
 
 This procedure will calculate mean force based on the sampling results, which can generate data set for training. 
 
-#### c. Neuro network training
+####  4.3. <a name='c.Neuronetworktraining'></a>c. **Neuro network training**
 
 A fully connected NN will be trained via sampling data. This network will generate a map from selected CV to free energy.
 
@@ -117,9 +190,7 @@ A more detail description of RiD is published now, please see:
 >  J. Chem. Phys. **148**, 124113 (2018); https://doi.org/10.1063/1.5019675
 
 
-
- # RiD settings
-
+##  5. <a name='RiDsettings'></a>**RiD settingss**
 
 
 Two necessary json files are required to get start a RiD procedure.
@@ -127,7 +198,7 @@ Two necessary json files are required to get start a RiD procedure.
 1. rid.json for configuration of simulation.
 2. cv.json for specifying CV.
 
-### rid.json
+###  5.1. <a name='rid.json'></a>**rid.json**
 
 **General setting**
 

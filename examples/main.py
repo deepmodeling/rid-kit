@@ -1,3 +1,4 @@
+from context import rid
 from rid import enhcMD, resMD, train, gen_rid
 from rid.lib.utils import record_iter, get_checkpoint, make_iter_name
 import json, os, glob
@@ -21,7 +22,7 @@ def main(out_dir, mol_dir, rid_json, machine_json, cv_file, init_model, record_n
 
     if sum(checkpoint) < 0:
         print("prepare gen_rid")
-        gen_rid.gen_rid (out_dir, mol_dir, rid_json)
+        gen_rid (out_dir, mol_dir, rid_json)
     
     for iter_idx in range(iter_numb):
         if iter_idx > 0 :

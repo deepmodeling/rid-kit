@@ -1,0 +1,52 @@
+{
+    "abcd": {
+        "batch":{
+            "batch_type": "slurm",
+            "context_type": "lazy_local",
+            "local_root": "./",
+            "remote_root": "./"
+        },
+        "resources":{
+            "queue_name": "V100",
+            "number_node": 1,
+            "cpu_per_node": 8,
+            "gpu_per_node": 1,
+            "group_size": 2,
+            "if_cuda_multi_devices": false
+        }
+    },
+
+    "slurm": {
+        "batch":{
+            "batch_type": "Slurm",
+            "context_type": "lazy_local",
+            "local_root": "./",
+            "remote_root": "./"
+        },
+        "resources":{
+            "queue_name": "GPU_2080Ti",
+            "number_node": 1,
+            "cpu_per_node": 8,
+            "gpu_per_node": 1,
+            "group_size": 1,
+            "if_cuda_multi_devices": false
+        }
+    },
+
+    "pbs": {
+        "batch":{
+            "batch_type": "pbs",
+            "context_type": "lazy_local",
+            "local_root": "./",
+            "remote_root": "./"
+        },
+        "resources":{
+            "queue_name": "GPU_2080Ti",
+            "number_node": 1,
+            "cpu_per_node": 8,
+            "gpu_per_node": 1,
+            "group_size": 1,
+            "if_cuda_multi_devices": false
+        }
+    }
+}

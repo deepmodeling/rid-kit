@@ -1,8 +1,7 @@
 __pycache__
 *.pyc
 .nfs*
-ridkit.egg-info
-tests/__pycache__
+rid.egg-info
 *.egg
 dist
 build
@@ -15,5 +14,8 @@ examples/test*
 examples/*.slurm
 examples/context.py
 examples/dpdisp.log
-tests
+example_for_plumed
+tests/dpdisp.log
+tests/scrip_tt.py
+tests/__pycache__
 rid.egg-info

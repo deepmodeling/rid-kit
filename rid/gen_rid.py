@@ -1,5 +1,5 @@
 import os, glob, json
-from ridkit.lib.utils import create_path
+from rid.lib.utils import create_path
 
 def gen_rid (out_dir, mol_dir, rid_json) :
     mol_dir = os.path.abspath(mol_dir) + "/"

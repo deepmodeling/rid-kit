@@ -1,11 +1,11 @@
 import os, json, glob, shutil
 from rid.lib.utils import create_path
 from rid.lib.utils import log_task
-from rid.lib.utils import make_iter_name, make_walker_name, cmd_append_log, set_resource, set_machine
+from rid.lib.utils import make_iter_name, make_walker_name, cmd_append_log
 from rid.lib.cal_cv_dim import cal_cv_dim
 from rid.lib.nn import NN_PATH
 
-from dpdispatcher.lazy_local_context import LazyLocalContext
+from rid.lib.machine import set_resource, set_batch
 from dpdispatcher.submission import Submission, Job, Task
 
 enhc_name="00.enhcMD"
@@ -176,18 +176,15 @@ def run_train (iter_index,
     print('lib.modeling.run_train:train_path:', train_path)
     print('lib.modeling.run_train:task_dirs:', task_dirs)
     
-    # lazy_local_context = LazyLocalContext(local_root='./', work_profile=None)
-    # pbs = PBS(context=lazy_local_context)
-    # slurm = Slurm(context=lazy_local_context)
     resources = set_resource(machine_json, target="train")
-    machine = set_machine(machine_json)
+    batch = set_batch(machine_json, target="train")
 
     train_task = [ Task(command=train_cmd, task_work_path=ii, outlog='train.log', errlog='train.log') for ii in task_dirs ]
-    train_submission = Submission(work_base=train_path, resources=resources, batch=machine, task_list=train_task)
+    train_submission = Submission(work_base=train_path, resources=resources, batch=batch, task_list=train_task)
     train_submission.run_submission()
 
     freez_task = [ Task(command=freez_cmd, task_work_path=ii, outlog='freeze.log', errlog='freeze.log') for ii in task_dirs ]
-    freez_submission = Submission(work_base=train_path, resources=resources, batch=machine, task_list=freez_task)
+    freez_submission = Submission(work_base=train_path, resources=resources, batch=batch, task_list=freez_task)
     freez_submission.run_submission()
     
     os.chdir(train_path)

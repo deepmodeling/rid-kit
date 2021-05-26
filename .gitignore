@@ -9,6 +9,11 @@ build
 .gitignore
 rid/old
 markdown.py
-examples
+examples/__pycache__
+examples/logs
+examples/test*
+examples/*.slurm
+examples/context.py
+examples/dpdisp.log
 tests
 rid.egg-info

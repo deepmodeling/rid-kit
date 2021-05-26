@@ -1,14 +1,9 @@
 import re, os, shutil, logging, json, datetime, glob
-from dpdispatcher.lazy_local_context import LazyLocalContext
-from dpdispatcher.submission import Task, Resources
-from dpdispatcher.pbs import PBS
-from dpdispatcher.slurm import Slurm
 
 iter_format = "%06d"
 walker_format = "%03d"
 task_format = "%02d"
 log_iter_head = "iter " + iter_format + " task " + task_format + ": "
-
 
 def make_iter_name(iter_index):
     return "iter." + (iter_format % iter_index)
@@ -79,23 +74,6 @@ def cmd_append_log (cmd,
     ret = ret + " 1> " + log_file
     ret = ret + " 2> " + log_file
     return ret
-
-def set_resource(json_file, target='enhcMD'):
-    fp = open (json_file, 'r')
-    jdata = json.load (fp)
-    fp.close()
-    args_dir = jdata[target]
-    return Resources(**args_dir, queue_name=jdata['queue_name'], if_cuda_multi_devices=jdata['if_cuda_multi_devices']) 
-
-def set_machine(json_file):
-    fp = open (json_file, 'r')
-    jdata = json.load (fp)
-    fp.close()
-    lazy_local_context = LazyLocalContext(local_root='./', work_profile=None)
-    if jdata["machine_type"] == "Slurm" or jdata["machine_type"] == "slurm":
-        return Slurm(context=lazy_local_context)
-    if jdata["machine_type"] == "PBS" or jdata["machine_type"] == "pbs":
-        return PBS(context=lazy_local_context)
 
 
 def print_list (tmp, 
@@ -168,6 +146,7 @@ def get_checkpoint(record_file):
                     checkpoint = [int(content[0]), int(content[1])]
         print("The process will start after iteration {} task {}".format(checkpoint[0], checkpoint[1]))
         return checkpoint
+
 
 
 if __name__ == '__main__':

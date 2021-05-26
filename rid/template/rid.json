@@ -59,6 +59,8 @@
   "res_decay_steps": 120,
   "res_decay_rate": 0.96,
   "train_thread": 8,
+  
+  "cleanup": false,
 
   "_comment": "That's all"
 }

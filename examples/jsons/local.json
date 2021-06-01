@@ -55,7 +55,7 @@
 
     "cmpf": {
         "machine":{
-            "batch": "Shell",
+            "batch_type": "Shell",
             "context_type": "LazyLocalContext",
             "local_root": "./",
             "remote_root": "./"

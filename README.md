@@ -151,7 +151,7 @@ Plumed will output all selected angles during every md process, and the users ca
 ...
 -1.240340 2.390756
 ```
-The first column is $\phi$ angle, the second column is $\psi$ angle. These datas will be fed to neural networks later.
+The first column is $\phi$ angle, the second column is $\psi$ angle.
 
 We will add more features for users to select more different (and customed) CVs.
 

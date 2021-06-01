@@ -163,7 +163,7 @@ If you want to submit jobs to dispatchng system, like Slurm or PBS, please follo
 ```json
     "enhcMD": {
         "machine":{
-            "batch_type": "slurm",
+            "batch_type": "Slurm",
             "context_type": "LazyLocalContext",
             "local_root": "./",
             "remote_root": "./"
@@ -185,7 +185,7 @@ If you want to run jobs locally, please follow settings like this:
 ```json
     "cmpf": {
         "machine":{
-            "batch_type": "shell",
+            "batch_type": "Shell",
             "context_type": "LazyLocalContext",
             "local_root": "./",
             "remote_root": "./"

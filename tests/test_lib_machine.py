@@ -1,6 +1,6 @@
 from context import rid
 import unittest, os, shutil, json, glob, filecmp
-from rid.lib.machine import set_batch, set_resource
+from rid.lib.machine import set_machine, set_resource
 import mock
 
 class TestUtilsMachine(unittest.TestCase):
@@ -22,10 +22,10 @@ class TestUtilsMachine(unittest.TestCase):
         set_resource(self.machine_json, target="abcd")
         mock_resources.assert_called_with(**args)
 
-    def test_set_batch(self):
-        machine = set_batch(self.machine_json, target="pbs")
+    def test_set_machine(self):
+        machine = set_machine(self.machine_json, target="pbs")
         self.assertTrue(type(machine).__name__ == "PBS")
-        machine = set_batch(self.machine_json, target="slurm")
+        machine = set_machine(self.machine_json, target="slurm")
         self.assertTrue(type(machine).__name__ == "Slurm")
 
 

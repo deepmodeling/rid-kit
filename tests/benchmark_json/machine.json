@@ -3,9 +3,9 @@
     
 
     "enhcMD": {
-        "batch":{
-            "batch_type": "slurm",
-            "context_type": "lazy_local",
+        "machine":{
+            "batch_type": "Slurm",
+            "context_type": "LazyLocalContext",
             "local_root": "./",
             "remote_root": "./"
         },
@@ -20,9 +20,9 @@
     },
 
     "post_enhc": {
-        "batch":{
-            "batch_type": "slurm",
-            "context_type": "lazy_local",
+        "machine":{
+            "batch_type": "Slurm",
+            "context_type": "LazyLocalContext",
             "local_root": "./",
             "remote_root": "./"
         },
@@ -38,8 +38,8 @@
 
     "resMD": {
         "batch":{
-            "batch_type": "slurm",
-            "context_type": "lazy_local",
+            "batch_type": "Slurm",
+            "context_type": "LazyLocalContext",
             "local_root": "./",
             "remote_root": "./"
         },
@@ -55,8 +55,8 @@
 
     "cmpf": {
         "batch":{
-            "batch_type": "shell",
-            "context_type": "lazy_local",
+            "batch_type": "Shell",
+            "context_type": "LazyLocalContext",
             "local_root": "./",
             "remote_root": "./"
         },
@@ -71,9 +71,9 @@
     },
 
     "train": {
-        "batch":{
-            "batch_type": "slurm",
-            "context_type": "lazy_local",
+        "machine":{
+            "batch_type": "Slurm",
+            "context_type": "LazyLocalContext",
             "local_root": "./",
             "remote_root": "./"
         },

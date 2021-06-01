@@ -13,7 +13,7 @@ from rid.lib.gen.gen_plumed import conf_enhc_plumed
 from rid.lib.cal_cv_dim import cal_cv_dim
 from rid.lib.cmpf import cmpf
 
-from rid.lib.machine import set_resource, set_batch
+from rid.lib.machine import set_resource, set_machine
 from dpdispatcher.submission import Submission, Job, Task
 
 enhc_name="00.enhcMD"
@@ -187,16 +187,16 @@ def run_enhc (iter_index,
     print('run_enhc:all_task:', all_task)
     print('run_enhc:all_task_basedir:', all_task_basedir)
     
-    batch = set_batch(machine_json, target="enhcMD")
+    machine = set_machine(machine_json, target="enhcMD")
     resources = set_resource(machine_json, target="enhcMD")
 
     gmx_prep_task = [ Task(command=gmx_prep_cmd, task_work_path=ii, outlog='gmx_grompp.log', errlog='gmx_grompp.log') for ii in all_task_basedir ]
-    gmx_prep_submission = Submission(work_base=work_path, resources=resources, batch=batch, task_list=gmx_prep_task)
+    gmx_prep_submission = Submission(work_base=work_path, machine=machine, resources=resources, task_list=gmx_prep_task)
 
     gmx_prep_submission.run_submission()
     
     gmx_run_task =  [ Task(command=gmx_run_cmd, task_work_path=ii, outlog='gmx_mdrun.log', errlog='gmx_mdrun.log') for ii in all_task_basedir ]
-    gmx_run_submission = Submission(work_base=work_path, resources=resources, batch=batch, task_list=gmx_run_task)
+    gmx_run_submission = Submission(work_base=work_path, machine=machine, resources=resources, task_list=gmx_run_task)
     gmx_run_submission.run_submission()
 
 

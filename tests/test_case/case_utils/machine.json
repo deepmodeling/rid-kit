@@ -1,8 +1,8 @@
 {
     "abcd": {
-        "batch":{
-            "batch_type": "slurm",
-            "context_type": "lazy_local",
+        "machine":{
+            "batch_type": "Slurm",
+            "context_type": "LazyLocalContext",
             "local_root": "./",
             "remote_root": "./"
         },
@@ -17,9 +17,9 @@
     },
 
     "slurm": {
-        "batch":{
+        "machine":{
             "batch_type": "Slurm",
-            "context_type": "lazy_local",
+            "context_type": "LazyLocalContext",
             "local_root": "./",
             "remote_root": "./"
         },
@@ -34,9 +34,9 @@
     },
 
     "pbs": {
-        "batch":{
-            "batch_type": "pbs",
-            "context_type": "lazy_local",
+        "machine":{
+            "batch_type": "PBS",
+            "context_type": "LazyLocalContext",
             "local_root": "./",
             "remote_root": "./"
         },

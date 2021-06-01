@@ -80,7 +80,7 @@ source /software/GMX20192plumed/bin/GMXRC.bash
 ```
 
 #### 2.2. <a name='Installdpdispatcher'></a>**Install dpdispatcher**
-```
+```bash
 git clone https://github.com/deepmodeling/dpdispatcher.git
 cd dpdispatcher
 python setup.py install
@@ -95,7 +95,7 @@ python setup.py install
 ~~~
 Open python, try `import rid`.
 
-Installation finishs successfully if you get no error.
+Installation finishes successfully if you get no error.
 
 ##  3. <a name='QuickStart'></a>**Quick Start**
 We offer a simple but complete example in `rid-kit/examples`. RiD process can run either on batch or locally.
@@ -140,7 +140,9 @@ Let's begin with a simple example, ala2, which has a sequence (1ACE, 2ALA, 3NME)
     "angle_idx_fmt":	"%02d"
 }
 ```
-`"dih_angles"` is our defination of dihedral angles($\phi$, $\psi$) by default. Users can write the list of `"selected_index"` as their wish. Rid-kit will remove the non-existed dihedral angles of the terminal residues automatically. In this example, `"selected_index":  [0, 1, 2]` means we select dihedral angles of the 1st, 2nd and 3rd residues as our CVs. However, the terminal residues (or caps) only have either $\phi$ or $\psi$, or even none of them (e.g. 1ACE and 3NME have no dihedral angles, 2ALA has $\phi$ and $\psi$), so even if we have selected the indexes of 1ACE and 3NME, the total dimension of CVs is **2** which comes from the two dihedral angles of 2ALA.  
+`"dih_angles"` is our defination of dihedral angles($\phi$, $\psi$) by default. Users can write the list of `"selected_index"` as their wish. Rid-kit will remove the non-existed dihedral angles of the terminal residues automatically. In this example, `"selected_index":  [0, 1, 2]` means we select dihedral angles of the 1st, 2nd and 3rd residues as our CVs. However, the terminal residues (or caps) have only either $\phi$ or $\psi$, or none of them (e.g. 1ACE and 3NME have no dihedral angles, 2ALA has $\phi$ and $\psi$), so even if we have selected the indexes of 1ACE and 3NME, the total dimension of CVs is **2**, which comes from the two dihedral angles of 2ALA.  
+
+> ***Note***: The indexes in `cv.json` start from **0**, while the indexes of residues in `.gro` file start from **1**.
 
 Plumed will output all selected angles during every md process, and the users can find them in `work_path/iter.0000xx/00.enhcMD/00x/plm.out`, file `angle.rad.out` in the same path is a copy but removing the frame indexes. Thus, in the previous example of ala2, the processed output `angle.rad.out` will look like:
 ```
@@ -223,7 +225,8 @@ A fully connected NN will be trained via sampling data. This network will genera
 
 A more detail description of RiD is published now, please see:
 
->  J. Chem. Phys. **148**, 124113 (2018); https://doi.org/10.1063/1.5019675
+>  [1]  J. Chem. Phys. **148**, 124113 (2018); https://doi.org/10.1063/1.5019675
+>  [2]  Wang D , Zhang L , Wang H , et al. Efficient sampling of high-dimensional free energy landscapes using adaptive reinforced dynamics[J]. 2021. (Preprints)
 
 
 ##  5. <a name='RiDsettings'></a>**RiD settingss**

@@ -11,7 +11,7 @@ from rid.lib.cluster_cv import sel_from_cluster
 from rid.lib.cmpf import cmpf
 from rid.lib import LIB_PATH
 
-from rid.lib.machine import set_resource, set_batch
+from rid.lib.machine import set_resource, set_machine
 from dpdispatcher.submission import Submission, Job, Task
 
 res_plm="plumed.res.dat"
@@ -266,14 +266,14 @@ def run_res (iter_index,
     all_task_basedir = [os.path.relpath(ii, res_path) for ii in all_task]
 
     res_resources = set_resource(machine_json, target="resMD")
-    batch = set_batch(machine_json, target="resMD")
+    machine = set_machine(machine_json, target="resMD")
 
     gmx_prep_task = [ Task(command=gmx_prep_cmd, task_work_path=ii, outlog='gmx_grompp.log', errlog='gmx_grompp.log') for ii in all_task_basedir ]
-    gmx_prep_submission = Submission(work_base=res_path, resources=res_resources, batch=batch, task_list=gmx_prep_task)
+    gmx_prep_submission = Submission(work_base=res_path, machine=machine, resources=res_resources, task_list=gmx_prep_task)
     gmx_prep_submission.run_submission()
 
     gmx_run_task =  [ Task(command=gmx_run_cmd, task_work_path=ii, outlog='gmx_mdrun.log', errlog='gmx_mdrun.log') for ii in all_task_basedir ]
-    gmx_run_submission = Submission(work_base=res_path, resources=res_resources, batch=batch, task_list=gmx_run_task)
+    gmx_run_submission = Submission(work_base=res_path, machine=machine, resources=res_resources, task_list=gmx_run_task)
     gmx_run_submission.run_submission()
 
 
@@ -319,10 +319,10 @@ def post_res (iter_index,
     print("rid.post_res.post_res:cmpf_cmd:", cmpf_cmd)
     
     cmpf_resources =  set_resource(machine_json, target="cmpf")
-    batch = set_batch(machine_json, target="cmpf")
+    machine = set_machine(machine_json, target="cmpf")
 
     cmpf_task = [ Task(command=cmpf_cmd, task_work_path="{}".format(ii), outlog=cmpf_log, errlog=cmpf_log) for ii in all_task_reldir ]
-    cmpf_submission = Submission(work_base=res_path, resources=cmpf_resources, batch=batch, task_list=cmpf_task)
+    cmpf_submission = Submission(work_base=res_path, machine=machine, resources=cmpf_resources, task_list=cmpf_task)
     cmpf_submission.run_submission()
     print('cmpf done')
 

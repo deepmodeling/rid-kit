@@ -232,11 +232,11 @@ def post_enhc (iter_index,
     print('rid.py:post_enhc:gmx_split_cmd', gmx_split_cmd)
     print('rid.py:post_enhc:work path', work_path)
 
-    batch = set_batch(machine_json, target="post_enhc")
+    machine = set_machine(machine_json, target="post_enhc")
     resources = set_resource(machine_json, target="post_enhc")
     all_task_relpath = [os.path.relpath(ii, work_path) for ii in all_task]
     gmx_split_task = [ Task(command=gmx_split_cmd, task_work_path=ii, outlog='gmx_split.log', errlog='gmx_split.log') for ii in all_task_relpath ]
-    gmx_split_submission = Submission(work_base=work_path, resources=resources, batch=batch, task_list=gmx_split_task)
+    gmx_split_submission = Submission(work_base=work_path, resources=resources, machine=machine, task_list=gmx_split_task)
     gmx_split_submission.run_submission()
     
     for ii in range(numb_walkers) :

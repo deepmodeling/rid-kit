@@ -21,7 +21,7 @@
 
     "post_enhc": {
         "machine":{
-            "batch_type": "slurm",
+            "batch_type": "Slurm",
             "context_type": "LazyLocalContext",
             "local_root": "./",
             "remote_root": "./"
@@ -38,7 +38,7 @@
 
     "resMD": {
         "machine":{
-            "batch_type": "slurm",
+            "batch_type": "Slurm",
             "context_type": "LazyLocalContext",
             "local_root": "./",
             "remote_root": "./"
@@ -55,7 +55,7 @@
 
     "cmpf": {
         "machine":{
-            "batch_type": "shell",
+            "batch_type": "Shell",
             "context_type": "LazyLocalContext",
             "local_root": "./",
             "remote_root": "./"
@@ -72,7 +72,7 @@
 
     "train": {
         "machine":{
-            "batch_type": "slurm",
+            "batch_type": "Slurm",
             "context_type": "LazyLocalContext",
             "local_root": "./",
             "remote_root": "./"

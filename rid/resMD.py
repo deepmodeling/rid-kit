@@ -163,7 +163,7 @@ def make_res (iter_index,
     for walker_idx in range(numb_walkers) :
         cls_sel = None
         walker_path = enhc_path + walker_format % walker_idx + "/"
-        graph_files = glob.glob (walker_path + "/*.pb")
+        graph_files = glob.glob (walker_path + "*.pb")
         if len (graph_files) != 0 :
             cluster_threshold = np.loadtxt(base_dir + "cluster_threshold.dat")
             os.chdir (walker_path)
@@ -193,6 +193,7 @@ def make_res (iter_index,
             np.savetxt(walker_path + 'sel.angle.out', sel_angles, fmt = '%.6f')
             cls_sel, cluster_threshold = make_threshold(walker_idx, walker_path, base_dir, sel_angles, cluster_threshold, init_numb_cluster, cv_dih_dim)
         if cls_sel is None:
+            print(sel_angles, cluster_threshold, cv_dih_dim)
             cls_sel = sel_from_cluster (sel_angles, cluster_threshold, cv_dih_dim)
         
 

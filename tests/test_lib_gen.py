@@ -18,10 +18,6 @@ PRINT STRIDE=5 ARG=dih-001-00,dih-001-01,dist-001-002 FILE=plm.out
 """
 
 class TestMakeNdx(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        pass
-
     def setUp(self):
         self.conf = "benchmark_mol/conf0.gro"
         self.cv_file = "benchmark_json/cv.json"

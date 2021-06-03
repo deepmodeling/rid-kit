@@ -8,7 +8,6 @@ class TestMakeRid(unittest.TestCase):
         if os.path.exists("tmp_rid"):
             shutil.rmtree("tmp_rid")
         os.mkdir("tmp_rid/")
-        pass
 
     def setUp(self):
         self.test_dir = "tmp_rid"
@@ -19,10 +18,8 @@ class TestMakeRid(unittest.TestCase):
         # self.benchmark_dir = "benchmark_rid"
     
     def test_gen_rid(self):
-        
         rid.gen_rid(out_dir=self.test_rid_out, mol_dir=self.benchmark_mol_dir, rid_json=self.json_file)
         self.assertTrue(os.path.exists(self.test_rid_out))
-        pass
 
     def test_gen_rid_existed(self):
         self.test_rid_out_exists = "tmp_rid/test_existed"

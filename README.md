@@ -278,7 +278,7 @@ Two necessary json files are required to get start a RiD procedure.
 | res_ang_stride | int | step stride of angle | 5 |
 | res_prt_file | str | file name | plm.res.out |
 | init_numb_cluster_upper | int | upper limit of cluster selection | 26 |
-| init_numb_cluster_lower | int | lower limit of cluster selection | 16 |
+| init_numb_cluster_lower | int | lower limit of cluster selection, must be > 1 | 16 |
 | conf_start | int | the index of the first conformation selected | 0 |
 | conf_every | int | the stride of conformation selection | 1 |
 

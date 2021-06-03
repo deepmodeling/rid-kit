@@ -21,7 +21,7 @@
   "res_prt_file":	"plm.res.out",
   "res_cmpf_error": false,
   "init_numb_cluster_upper": 26,
-  "init_numb_cluster_lower": 1,
+  "init_numb_cluster_lower": 2,
   "_comment": "for md without bias",
   "conf_start": 0,
   "conf_every": 1,

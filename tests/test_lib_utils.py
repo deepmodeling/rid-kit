@@ -45,6 +45,19 @@ class TestUtilsFiles(unittest.TestCase):
         if os.path.exists("tmp_utils/"):
             shutil.rmtree("tmp_utils")
         os.mkdir("tmp_utils")
+        if not os.path.exists("test_case/case_utils/record.txt"):
+            fp = open("test_case/case_utils/record.txt", "w")
+            fp.write("0 0\n7 3\n")
+            fp.close()
+        if not os.path.exists("test_case/case_utils/rid_foo.txt"):
+            fp = open("test_case/case_utils/rid_foo.txt", "w")
+            fp.write("1")
+            fp.close()
+        if not os.path.exists("test_case/case_utils/rid_foo2.txt"):
+            fp = open("test_case/case_utils/rid_foo2.txt", "w")
+            fp.write("")
+            fp.close()
+
 
     def setUp(self):
         self.test_dir = "tmp_utils/"
@@ -108,7 +121,13 @@ class TestUtilsFiles(unittest.TestCase):
     def tearDownClass(cls):
         if os.path.exists("tmp_utils/"):
             shutil.rmtree("tmp_utils")
-        pass
+        if os.path.exists("test_case/case_utils/record.txt"):
+            os.remove("test_case/case_utils/record.txt")
+        if os.path.exists("test_case/case_utils/rid_foo.txt"):
+            os.remove("test_case/case_utils/rid_foo.txt")
+        if os.path.exists("test_case/case_utils/rid_foo2.txt"):
+            os.remove("test_case/case_utils/rid_foo2.txt")
+
 
 
 

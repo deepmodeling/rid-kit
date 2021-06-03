@@ -3,6 +3,7 @@ import unittest, os, shutil, glob
 import numpy as np
 from rid.lib import std
 from rid.lib import LIB_PATH
+from convert import convert_pbtxt_to_pb
 
 
 class TestStd(unittest.TestCase):
@@ -12,10 +13,16 @@ class TestStd(unittest.TestCase):
         if os.path.exists("test_case/case_std"):
             shutil.rmtree("test_case/case_std")
         os.makedirs("test_case/case_std/000")
+        graph_txt_list = [os.path.abspath(kk) for kk in glob.glob("benchmark_case/000/*.pbtxt")]
+        for ii, gtf in enumerate(graph_txt_list):
+            convert_pbtxt_to_pb(gtf, "benchmark_case/000/graph.{:03d}.pb".format(ii))
         ff_list = [os.path.abspath(kk) for kk in glob.glob("benchmark_case/000/*")]
         os.chdir("test_case/case_std/000")
         for ff in ff_list:
             os.symlink(ff, os.path.basename(ff))
+        pbtxt_list = glob.glob("*.pbtxt")
+        for pbtxt in pbtxt_list:
+            os.remove(pbtxt)
         os.chdir(cwd)
 
     def setUp(self):
@@ -62,6 +69,9 @@ class TestStd(unittest.TestCase):
     def tearDownClass(cls):
         if os.path.exists("test_case/case_std"):
             shutil.rmtree("test_case/case_std")
+        graph_list = [os.path.abspath(kk) for kk in glob.glob("benchmark_case/000/*.pb")]
+        for gf in graph_list:
+            os.remove(gf)
 
 
 if __name__ == "__main__":

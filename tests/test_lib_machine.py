@@ -9,7 +9,7 @@ class TestUtilsMachine(unittest.TestCase):
         self.case_dir = "test_case/case_utils"
         self.machine_json = os.path.join(self.case_dir, 'machine.json')
 
-    @mock.patch('rid.lib.machine.Resources')
+    @mock.patch('rid.lib.machine.Resources.load_from_dict')
     def test_set_resource(self, mock_resources):
         args = {
             "number_node": 1,
@@ -20,7 +20,7 @@ class TestUtilsMachine(unittest.TestCase):
             "if_cuda_multi_devices": False
         }
         set_resource(self.machine_json, target="abcd")
-        mock_resources.assert_called_with(**args)
+        mock_resources.assert_called_with(args)
 
     def test_set_machine(self):
         machine = set_machine(self.machine_json, target="pbs")

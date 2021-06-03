@@ -1,9 +1,10 @@
 from context import rid
 import unittest, os, shutil, json, glob, filecmp
 from rid.resMD import make_res
+from convert import convert_pbtxt_to_pb
 
 angle_out_content = """-2.503469 2.463779
--2.429547 2.465544
+-2.999999 3.000000
 -2.397668 2.357936
 """
 class TestMakeRes(unittest.TestCase):
@@ -13,7 +14,10 @@ class TestMakeRes(unittest.TestCase):
             shutil.rmtree("test_case/case_make_res")
         cwd = os.getcwd()
         ff_list = [os.path.abspath(kk) for kk in glob.glob("benchmark_mol/*.gro")]
-        graph_list = [os.path.abspath(kk) for kk in glob.glob("benchmark_case/*.pb")]
+        graph_txt_list = [os.path.abspath(kk) for kk in glob.glob("benchmark_case/000/*.pbtxt")]
+        for ii, gtf in enumerate(graph_txt_list):
+            convert_pbtxt_to_pb(gtf, "benchmark_case/000/graph.{:03d}.pb".format(ii))
+        graph_list = [os.path.abspath(kk) for kk in glob.glob("benchmark_case/000/*.pb")]
         for jj in range(2):
             for its in range(2):
                 os.makedirs("test_case/case_make_res/test_iter{}/iter.{:06d}/00.enhcMD/{:03d}".format(jj, jj, its))
@@ -30,6 +34,10 @@ class TestMakeRes(unittest.TestCase):
                         os.symlink(graph_list[gf], "graph.{:03d}.pb".format(gf))
                         if not os.path.exists("../graph.{:03d}.pb".format(gf)):
                             os.symlink(graph_list[gf], "../graph.{:03d}.pb".format(gf))
+                    os.chdir("../../..")
+                    if not os.path.exists("cluster_threshold.dat"):
+                        with open("cluster_threshold.dat", "w") as clust:
+                            clust.write("1.500000")
                 os.chdir(cwd)
 
     def setUp(self):
@@ -80,6 +88,10 @@ class TestMakeRes(unittest.TestCase):
     def tearDownClass(cls):
         if os.path.exists("test_case/case_make_res"):
             shutil.rmtree("test_case/case_make_res")
+        graph_list = [os.path.abspath(kk) for kk in glob.glob("benchmark_case/000/*.pb")]
+        for gf in graph_list:
+            os.remove(gf)
+        pass
     
 
 if __name__ == "__main__":

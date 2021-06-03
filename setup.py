@@ -7,7 +7,7 @@ import setuptools, datetime
 
 today = datetime.date.today().strftime("%b-%d-%Y")
 
-install_requires=["numpy", "sklearn", "dpdispatcher", "tensorflow"]
+install_requires=["numpy", "sklearn", "dpdispatcher", "tensorflow", "google"]
 
 setuptools.setup(
     name='rid',

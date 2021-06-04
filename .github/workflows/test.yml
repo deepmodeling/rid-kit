@@ -8,25 +8,24 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Setup Python
-        uses: actions/setup-python@v2.2.2
-        with:
-          python-version: 3.6
-      - name: rid unittest
-      - run: cd ./tests
-      - run: python test_cal_cv.py
-      - run: python test_gen_rid.py
-      - run: python test_lib_gen.py
-      - run: python test_lib_machine.py
-      - run: python test_lib_make.py
-      - run: python test_lib_std.py
-      - run: python test_lib_utils.py
-      - run: python test_make_enhc.py
-      - run: python test_make_res.py
-      - run: python test_make_train.py
-      - run: python test_post_enhc.py
-      - run: python test_post_res.py
-      - run: python test_run_enhc.py
-      - run: python test_run_res.py
-      - run: python test_run_train.py
+    - uses: actions/checkout@v2
+    - name: Setup Python
+      uses: actions/setup-python@v2.2.2
+      with:
+        python-version: 3.6
+    - run: cd ./tests
+    - run: python test_cal_cv.py
+    - run: python test_gen_rid.py
+    - run: python test_lib_gen.py
+    - run: python test_lib_machine.py
+    - run: python test_lib_make.py
+    - run: python test_lib_std.py
+    - run: python test_lib_utils.py
+    - run: python test_make_enhc.py
+    - run: python test_make_res.py
+    - run: python test_make_train.py
+    - run: python test_post_enhc.py
+    - run: python test_post_res.py
+    - run: python test_run_enhc.py
+    - run: python test_run_res.py
+    - run: python test_run_train.py

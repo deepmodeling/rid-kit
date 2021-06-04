@@ -255,7 +255,7 @@ Two necessary json files are required to get start a RiD procedure.
 
 | Parameters | Type | Description | Default/Example |
 | :----: | :----: | :----: | :----: |
-| bias_trust_lvl_1 | int | trust upper lecel | 2 |
+| bias_trust_lvl_1 | int | trust upper level | 2 |
 | bias_trust_lvl_2 | int | trust lower level | 3 |
 | bias_nsteps | int | total number of steps of biased MD | 20000 |
 | bias_frame_freq | int | frame frequency for recording | 20 |
@@ -283,7 +283,7 @@ Two necessary json files are required to get start a RiD procedure.
 | conf_start | int | the index of the first conformation selected | 0 |
 | conf_every | int | the stride of conformation selection | 1 |
 
-**Setting for training and neuro network**
+**Setting for training and neural network**
 
 | Parameters | Type | Description | Default/Example |
 | :----: | :----: | :----: | :----: |

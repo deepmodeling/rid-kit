@@ -225,11 +225,12 @@ A fully connected NN will be trained via sampling data. This network will genera
 
 A more detail description of RiD is published now, please see:
 
->  [1]  J. Chem. Phys. **148**, 124113 (2018); https://doi.org/10.1063/1.5019675
->  [2]  Wang D , Zhang L , Wang H , et al. Efficient sampling of high-dimensional free energy landscapes using adaptive reinforced dynamics[J]. 2021. (Preprints)
+>  [1]  Zhang, L., Wang, H., E, W.. Reinforced dynamics for enhanced sampling in large atomic and molecular systems[J]. The Journal of chemical physics, 2018, 148(12): 124113.
+>  
+>  [2]  Wang, D., Zhang, L., Wang, H., E, W.. Efficient sampling of high-dimensional free energy landscapes using adaptive reinforced dynamics[J]. arXiv preprint arXiv:2104.01620, 2021.
 
 
-##  5. <a name='RiDsettings'></a>**RiD settingss**
+##  5. <a name='RiDsettings'></a>**RiD settings**
 
 
 Two necessary json files are required to get start a RiD procedure.

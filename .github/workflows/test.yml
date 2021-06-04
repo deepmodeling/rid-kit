@@ -13,6 +13,11 @@ jobs:
       uses: actions/setup-python@v2.2.2
       with:
         python-version: 3.6
+    - name: Setup package
+      run: |
+        pip install numpy
+        pip install sklearn
+        pip install dpdispatcher
     - run: |
         cd ./tests
         python -m unittest

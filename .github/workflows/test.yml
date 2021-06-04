@@ -1,3 +1,4 @@
+# /home/runner/work/rid-kit/rid-kit
 name: rid python package test
 
 on:
@@ -15,19 +16,20 @@ jobs:
         python-version: 3.6
     - name: Setup package
       run: |
-          echo $PATH
-          pwd
-
-#         wget https://github.com/Dead-fisher/rid-kit/releases/download/v1.0/gromacs-dp-rid-0.0.5-float-gpu-Linux-x86_64.sh
-#         sh gromacs-dp-rid-0.0.5-float-gpu-Linux-x86_64.sh
-
-#         pip install numpy
-#         pip install sklearn
-#         pip install dpdispatcher
-#         pip insta
-#     - run: |
-#         cd ./tests
-#         python -m unittest
+          wget https://github.com/Dead-fisher/rid-kit/releases/download/v1.0/gromacs-dp-rid-0.0.5-float-gpu-Linux-x86_64.sh > download.log
+          sh gromacs-dp-rid-0.0.5-float-gpu-Linux-x86_64.sh
+          rid_bin=$(pwd)/gromacs-dp-rid/bin
+          export PATH="$rid_bin:$PATH"
+          which python
+          pip install numpy
+          pip install sklearn
+          pip install dpdispatcher
+          pip install unittest
+          pip install mock
+    - name: Run unittest
+      run: |
+        cd ./tests
+        python -m unittest
 #     - run: python test_cal_cv.py
 #     - run: python test_gen_rid.py
 #     - run: python test_lib_gen.py

@@ -43,7 +43,7 @@ If you install environment of rid through the one-click installer we offered at 
 The tensorflow's C++ interface will be compiled from the source code, can be found [here](https://github.com/deepmodeling/deepmd-kit/blob/master/doc/install-tf.1.8.md).
 
 #### 2.1.3 <a name='Installplumed2.5.2'></a>**Install plumed2.5.2**
-
+You need copy compiled `DeePFE.cpp` to the plumed directory. This file locats at `rid-kit/install/DeePFE.cpp`
 ```bash
 tar -xvzf plumed-2.5.2.tgz
 cp DeePFE.cpp plumed-2.5.2/src/bias

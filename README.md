@@ -156,7 +156,7 @@ These datas are nothing but the dihedral angles in every frame. The first column
 We will add more features for users to select more different (and customed) CVs.
 
 ###  3.2. <a name='Dispatching'></a>**Dispatching**
-Every task of RiD can be assigned to either compute nodes or local machine, which can be achived in machine configuration file(for instance, `machine.json or local.json`). These settings give the messages of users to `dpdispatcher` whcih can automatically distribute resources.
+Every task of RiD can be assigned to either compute nodes or local machine, which can be achived in machine configuration file(for instance, `machine.json or local.json`). These settings give the messages of users to `dpdispatcher` which can automatically distribute resources.
 
 ####  3.2.1. <a name='BatchJob'></a>**Batch Job**
 If you want to submit jobs to dispatchng system, like Slurm or PBS, please follow settings like this:

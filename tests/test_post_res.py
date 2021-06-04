@@ -2,7 +2,7 @@ from context import rid
 import unittest, mock, os, shutil
 from rid.resMD import post_res
 import numpy as np
-
+from rid.lib import LIB_PATH
 
 def create_file(file_path, content=None):
     fp = open(file_path, 'w')
@@ -39,7 +39,7 @@ class TestPostRes(unittest.TestCase):
         post_res(0, self.json_file, self.machine, self.cv_file, base_dir=self.base_dir)
         for ii in range(2):
             args_1 = {
-                'command': "python3 /home/dongdong/wyz/rid-kit/rid/lib/cmpf.py -c 2",
+                'command': "python3 {}/cmpf.py -c 2".format(LIB_PATH),
                 'task_work_path': "{:03d}".format(ii),
                 'outlog': 'cmpf.log', 
                 'errlog': 'cmpf.log'

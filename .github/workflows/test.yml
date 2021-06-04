@@ -15,14 +15,19 @@ jobs:
         python-version: 3.6
     - name: Setup package
       run: |
-        pip install numpy
-        pip install sklearn
-        pip install dpdispatcher
-        wget https://github.com/Dead-fisher/rid-kit/releases/download/v1.0/gromacs-dp-rid-0.0.5-float-gpu-Linux-x86_64.sh
-        sh gromacs-dp-rid-0.0.5-float-gpu-Linux-x86_64.sh
-    - run: |
-        cd ./tests
-        python -m unittest
+          echo $PATH
+          pwd
+
+#         wget https://github.com/Dead-fisher/rid-kit/releases/download/v1.0/gromacs-dp-rid-0.0.5-float-gpu-Linux-x86_64.sh
+#         sh gromacs-dp-rid-0.0.5-float-gpu-Linux-x86_64.sh
+
+#         pip install numpy
+#         pip install sklearn
+#         pip install dpdispatcher
+#         pip insta
+#     - run: |
+#         cd ./tests
+#         python -m unittest
 #     - run: python test_cal_cv.py
 #     - run: python test_gen_rid.py
 #     - run: python test_lib_gen.py

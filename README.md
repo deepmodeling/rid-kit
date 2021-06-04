@@ -219,7 +219,7 @@ Just like Metadynamics, RiD will sample based on a bias potential given by NN mo
 
 This procedure will calculate mean force based on the sampling results, which can generate data set for training. 
 
-####  4.3. <a name='c.Neuronetworktraining'></a>c. **Neuro network training**
+####  4.3. <a name='c.Neuralnetworktraining'></a>c. **Neural network training**
 
 A fully connected NN will be trained via sampling data. This network will generate a map from selected CV to free energy.
 

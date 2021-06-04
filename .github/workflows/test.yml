@@ -14,7 +14,7 @@ jobs:
       with:
         python-version: 3.6
     - run: |
-        cd ./tests，
+        cd ./tests,
         python -m unittest
 #     - run: python test_cal_cv.py
 #     - run: python test_gen_rid.py

@@ -19,7 +19,7 @@
 * 4. [Main procedure of RiD](#MainprocedureofRiD)
 		* 4.1. [a. Biased MD](#a.BiasedMD)
 		* 4.2. [b. Restrained MD](#b.RestrainedMD)
-		* 4.3. [c. Neuro network training](#c.Neuronetworktraining)
+		* 4.3. [c. Neural network training](#c.Neuralnetworktraining)
 * 5. [RiD settings](#RiDsettings)
 	* 5.1. [rid.json](#rid.json)
 

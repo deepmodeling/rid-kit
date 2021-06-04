@@ -12,13 +12,8 @@ jobs:
     - name: Setup package
       run: |
           echo $GITHUB_ACTION_PATH
-          cd $GITHUB_ACTION_PATH
-          ls -l
           echo $GITHUB_EVENT_PATH
-          cd $GITHUB_EVENT_PATH
-          ls -l
           echo $GITHUB_WORKSPACE
-          cd $GITHUB_WORKSPACE
           ls -l
         
 #       run: |

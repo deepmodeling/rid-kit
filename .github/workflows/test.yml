@@ -5,23 +5,22 @@ on:
   - pull_request
 
 jobs:
-  build:
+  Unittest:
     runs-on: ubuntu-latest
     steps:
-      - name: rid unittest
-      - run: cd ./tests
-      - run: python test_cal_cv.py
-      - run: python test_gen_rid.py
-      - run: python test_lib_gen.py
-      - run: python test_lib_machine.py
-      - run: python test_lib_make.py
-      - run: python test_lib_std.py
-      - run: python test_lib_utils.py
-      - run: python test_make_enhc.py
-      - run: python test_make_res.py
-      - run: python test_make_train.py
-      - run: python test_post_enhc.py
-      - run: python test_post_res.py
-      - run: python test_run_enhc.py
-      - run: python test_run_res.py
-      - run: python test_run_train.py
+    - uses: actions/checkout@v2
+    - name: Setup package
+      run: |
+          wget -q https://github.com/Dead-fisher/rid-kit/releases/download/v1.0/gromacs-dp-rid-0.0.5-float-gpu-Linux-x86_64.sh > download.log
+          sh gromacs-dp-rid-0.0.5-float-gpu-Linux-x86_64.sh
+          export PATH="$HOME/gromacs-dp-rid/bin:$PATH"
+          which python
+          pip install numpy
+          pip install sklearn
+          pip install dpdispatcher
+          pip install mock
+    - name: Run unittest
+      run: |
+        export PATH="$HOME/gromacs-dp-rid/bin:$PATH"
+        cd ./tests
+        python -m unittest

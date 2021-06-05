@@ -191,9 +191,9 @@ If you want to run jobs locally, please follow settings like this:
             "remote_root": "./"
         },
         "resources":{
-            "queue_name": null,
-            "number_node": null,
-            "cpu_per_node": null,
+            "queue_name": "queue_name",
+            "number_node": 0,
+            "cpu_per_node": 0,
             "gpu_per_node": 0,
             "group_size": 1000
         }

@@ -19,7 +19,7 @@
 * 4. [Main procedure of RiD](#MainprocedureofRiD)
 		* 4.1. [a. Biased MD](#a.BiasedMD)
 		* 4.2. [b. Restrained MD](#b.RestrainedMD)
-		* 4.3. [c. Neuro network training](#c.Neuronetworktraining)
+		* 4.3. [c. Neural network training](#c.Neuralnetworktraining)
 * 5. [RiD settings](#RiDsettings)
 	* 5.1. [rid.json](#rid.json)
 
@@ -191,9 +191,9 @@ If you want to run jobs locally, please follow settings like this:
             "remote_root": "./"
         },
         "resources":{
-            "queue_name": null,
-            "number_node": null,
-            "cpu_per_node": null,
+            "queue_name": "queue_name",
+            "number_node": 0,
+            "cpu_per_node": 0,
             "gpu_per_node": 0,
             "group_size": 1000
         }
@@ -219,17 +219,18 @@ Just like Metadynamics, RiD will sample based on a bias potential given by NN mo
 
 This procedure will calculate the mean force based on the sampling results, which can generate data set for training. 
 
-####  4.3. <a name='c.Neuronetworktraining'></a>c. **Neuro network training**
+####  4.3. <a name='c.Neuralnetworktraining'></a>c. **Neural network training**
 
 A fully connected NN will be trained via sampling data. This network will generate a map from selected CV to free energy.
 
 A more detailed description of RiD is published now, please see:
 
->  [1]  J. Chem. Phys. **148**, 124113 (2018); https://doi.org/10.1063/1.5019675
->  [2]  Wang D , Zhang L , Wang H , et al. Efficient sampling of high-dimensional free energy landscapes using adaptive reinforced dynamics[J]. 2021. (Preprints)
+>  [1]  Zhang, L., Wang, H., E, W.. Reinforced dynamics for enhanced sampling in large atomic and molecular systems[J]. The Journal of chemical physics, 2018, 148(12): 124113.
+>  
+>  [2]  Wang, D., Zhang, L., Wang, H., E, W.. Efficient sampling of high-dimensional free energy landscapes using adaptive reinforced dynamics[J]. arXiv preprint arXiv:2104.01620, 2021.
 
 
-##  5. <a name='RiDsettings'></a>**RiD settingss**
+##  5. <a name='RiDsettings'></a>**RiD settings**
 
 
 Two necessary JSON files are required to get start a RiD procedure.
@@ -254,7 +255,7 @@ Two necessary JSON files are required to get start a RiD procedure.
 
 | Parameters | Type | Description | Default/Example |
 | :----: | :----: | :----: | :----: |
-| bias_trust_lvl_1 | int | trust upper lecel | 2 |
+| bias_trust_lvl_1 | int | trust upper level | 2 |
 | bias_trust_lvl_2 | int | trust lower level | 3 |
 | bias_nsteps | int | total number of steps of biased MD | 20000 |
 | bias_frame_freq | int | frame frequency for recording | 20 |
@@ -282,7 +283,7 @@ Two necessary JSON files are required to get start a RiD procedure.
 | conf_start | int | the index of the first conformation selected | 0 |
 | conf_every | int | the stride of conformation selection | 1 |
 
-**Setting for training and neuro network**
+**Setting for training and neural network**
 
 | Parameters | Type | Description | Default/Example |
 | :----: | :----: | :----: | :----: |

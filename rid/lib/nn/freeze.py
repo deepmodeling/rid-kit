@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
 
-import os, argparse
+import os
+import argparse
 import sys
 
 import tensorflow as tf
 from tensorflow.python.framework import graph_util
 from tensorflow.python.framework import ops
 
-def freeze_graph(model_folder, 
-                 output, 
+
+def freeze_graph(model_folder,
+                 output,
                  output_node_names="o_energy,o_forces"):
     # We retrieve our checkpoint fullpath
     checkpoint = tf.train.get_checkpoint_state(model_folder)
     input_checkpoint = checkpoint.model_checkpoint_path
-    
+
     # We precise the file fullname of our freezed graph
     absolute_model_folder = "/".join(input_checkpoint.split('/')[:-1])
     output_graph = absolute_model_folder + "/" + output
@@ -25,9 +27,10 @@ def freeze_graph(model_folder,
 
     # We clear devices to allow TensorFlow to control on which device it will load operations
     clear_devices = True
-    
+
     # We import the meta graph and retrieve a Saver
-    saver = tf.train.import_meta_graph(input_checkpoint + '.meta', clear_devices=clear_devices)
+    saver = tf.train.import_meta_graph(
+        input_checkpoint + '.meta', clear_devices=clear_devices)
 
     # We retrieve the protobuf graph definition
     graph = tf.get_default_graph()
@@ -39,10 +42,11 @@ def freeze_graph(model_folder,
 
         # We use a built-in TF helper to export variables to constants
         output_graph_def = graph_util.convert_variables_to_constants(
-            sess, # The session is used to retrieve the weights
-            input_graph_def, # The graph_def is used to retrieve the nodes 
-            output_node_names.split(",") # The output node names are used to select the usefull nodes
-        ) 
+            sess,  # The session is used to retrieve the weights
+            input_graph_def,  # The graph_def is used to retrieve the nodes
+            # The output node names are used to select the usefull nodes
+            output_node_names.split(",")
+        )
 
         # Finally we serialize and dump the output graph to the filesystem
         with tf.gfile.GFile(output_graph, "wb") as f:
@@ -55,11 +59,11 @@ if __name__ == '__main__':
     default_frozen_nodes = "o_energy,o_forces"
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-d", "--folder", type=str, default = ".", 
+    parser.add_argument("-d", "--folder", type=str, default=".",
                         help="path to checkpoint folder")
-    parser.add_argument("-o", "--output", type=str, default = "frozen_model.pb", 
+    parser.add_argument("-o", "--output", type=str, default="frozen_model.pb",
                         help="name of graph, will output to the checkpoint folder")
-    parser.add_argument("-n", "--nodes", type=str, default = default_frozen_nodes,
+    parser.add_argument("-n", "--nodes", type=str, default=default_frozen_nodes,
                         help="the frozen nodes, defaults is " + default_frozen_nodes)
     args = parser.parse_args()
 

@@ -30,11 +30,11 @@ res_name = "01.resMD"
 res_plm = "plumed.res.dat"
 
 
-def adjust_lvl(prev_enhc_path, num_of_cluster_threshhold, jdata):
+def adjust_lvl(prev_enhc_path, num_of_cluster_threshold, jdata):
     # adaptive trust level
     num_of_cluster = np.loadtxt(prev_enhc_path+'num_of_cluster.dat')
     pre_trust_lvl1 = np.loadtxt(prev_enhc_path+'trust_lvl1.dat')
-    if num_of_cluster < num_of_cluster_threshhold:
+    if num_of_cluster < num_of_cluster_threshold:
         enhc_trust_lvl_1 = pre_trust_lvl1 * 1.5
         enhc_trust_lvl_2 = enhc_trust_lvl_1+1
     else:
@@ -90,7 +90,7 @@ def make_enhc(iter_index,
     enhc_trust_lvl_2 = jdata["bias_trust_lvl_2"]
     nsteps = jdata["bias_nsteps"]
     frame_freq = jdata["bias_frame_freq"]
-    num_of_cluster_threshhold = jdata["num_of_cluster_threshhold"]
+    num_of_cluster_threshold = jdata["num_of_cluster_threshold"]
     dt = jdata["bias_dt"]
     temperature = jdata["bias_temperature"]
 
@@ -143,7 +143,7 @@ def make_enhc(iter_index,
                                                           1) + " walker " + make_walker_name(walker_idx))
 
             enhc_trust_lvl_1, enhc_trust_lvl_2 = adjust_lvl(
-                prev_enhc_path, num_of_cluster_threshhold, jdata)
+                prev_enhc_path, num_of_cluster_threshold, jdata)
 
         np.savetxt(walker_path+'trust_lvl1.dat',
                    [enhc_trust_lvl_1], fmt='%.6f')

@@ -18,7 +18,7 @@
   "bias_frame_freq": 2,
   "sel_threshold": 2,
   "cluster_threshold": 1.5,
-  "num_of_cluster_threshhold": 8,
+  "num_of_cluster_threshold": 8,
   "max_sel": 30,
   "bias_dt": 0.002,
   "bias_temperature": 320,

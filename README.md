@@ -261,7 +261,7 @@ Two necessary JSON files are required to get start a RiD procedure.
 | bias_frame_freq | int | frame frequency for recording | 20 |
 | sel_threshold | float/int | initial threshold for selection | 2 |
 | cluster_threshold | float | * | 1.5 |
-| num_of_cluster_threshhold | int | minimum of cluster number | 8 |
+| num_of_cluster_threshold | int | minimum of cluster number | 8 |
 | max_sel | int | maximum of selection of clusters | 30 |
 | bias_dt | float | time interval of biased MD | 0.002 |
 | bias_temperature | float/int | temperature for biased MD | 320 |

@@ -7,7 +7,7 @@
   "bias_frame_freq": 2,
   "sel_threshold": 2,
   "cluster_threshold": 1.5,
-  "num_of_cluster_threshhold": 2,
+  "num_of_cluster_threshold": 2,
   "max_sel": 30,
 
   "_comment": "01.res",

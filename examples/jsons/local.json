@@ -1,0 +1,89 @@
+{
+    "_comment": "system resources",
+    
+
+    "enhcMD": {
+        "machine":{
+            "batch_type": "Shell",
+            "context_type": "LazyLocalContext",
+            "local_root": "./",
+            "remote_root": "./"
+        },
+        "resources":{
+            "queue_name": "shell",
+            "number_node": 0,
+            "cpu_per_node": 0,
+            "gpu_per_node": 1,
+            "group_size": 1,
+            "if_cuda_multi_devices": false
+        }
+    },
+
+    "post_enhc": {
+        "machine":{
+            "batch_type": "Shell",
+            "context_type": "LazyLocalContext",
+            "local_root": "./",
+            "remote_root": "./"
+        },
+        "resources":{
+            "queue_name": "shell",
+            "number_node": 0,
+            "cpu_per_node": 0,
+            "gpu_per_node": 0,
+            "group_size": 1,
+            "if_cuda_multi_devices": false
+        }
+    },
+
+    "resMD": {
+        "machine":{
+            "batch_type": "Shell",
+            "context_type": "LazyLocalContext",
+            "local_root": "./",
+            "remote_root": "./"
+        },
+        "resources":{
+            "queue_name": "shell",
+            "number_node": 0,
+            "cpu_per_node": 0,
+            "gpu_per_node": 1,
+            "group_size": 10,
+            "if_cuda_multi_devices": false
+        }
+    },
+
+    "cmpf": {
+        "machine":{
+            "batch_type": "Shell",
+            "context_type": "LazyLocalContext",
+            "local_root": "./",
+            "remote_root": "./"
+        },
+        "resources":{
+            "queue_name": "shell",
+            "number_node": 0,
+            "cpu_per_node": 0,
+            "gpu_per_node": 0,
+            "group_size": 1000,
+            "if_cuda_multi_devices": false
+        }
+    },
+
+    "train": {
+        "machine":{
+            "batch_type": "Shell",
+            "context_type": "LazyLocalContext",
+            "local_root": "./",
+            "remote_root": "./"
+        },
+        "resources":{
+            "queue_name": "shell",
+            "number_node": 0,
+            "cpu_per_node": 0,
+            "gpu_per_node": 1,
+            "group_size": 1,
+            "if_cuda_multi_devices": false
+        }
+    }
+}

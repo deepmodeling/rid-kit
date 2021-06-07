@@ -1,0 +1,32 @@
+{
+  "_comment": "00.bias",
+  "numb_walkers": 2,
+  "bias_trust_lvl_1": 2,
+  "bias_trust_lvl_2": 3,
+  "bias_nsteps": 2000,
+  "bias_frame_freq": 2,
+  "sel_threshold": 2,
+  "cluster_threshold": 1.5,
+  "num_of_cluster_threshold": 2,
+  "max_sel": 30,
+
+  "_comment": "01.res",
+  "res_nsteps": 25000,
+  "res_frame_freq": 50,
+  "res_dt": 0.002,
+  "res_temperature": 320,
+  "res_kappa":	500,
+  "res_traj_stride":	500,
+  "res_ang_stride":	5,
+  "res_prt_file":	"plm.res.out",
+  "res_cmpf_error": false,
+  "init_numb_cluster_upper": 26,
+  "init_numb_cluster_lower": 2,
+  "_comment": "for md without bias",
+  "conf_start": 0,
+  "conf_every": 1,
+
+  "_comment": "That's all"
+}
+
+

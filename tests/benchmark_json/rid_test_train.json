@@ -1,0 +1,42 @@
+{
+  
+
+  "_comment": "02.train",
+  "numb_model": 2,
+
+  "_comment": "training parameters",
+  "neurons": [ 10, 11, 12, 13 ],
+  "resnet": true,
+  "batch_size": 128,
+  "numb_epoches": 2000,
+  "starter_lr": 0.0008,
+  "decay_steps": 120,
+  "decay_rate": 0.96,
+  "res_iter": 13,
+  "res_numb_epoches": 2000,
+  "res_starter_lr": 0.0008,
+  "res_olddata_ratio": 7,
+  "res_decay_steps": 120,
+  "res_decay_rate": 0.96,
+
+  "_comment": "system resources",
+  "machine_type": "Slurm",
+  "queue_name": "GPU_2080Ti",
+  "cleanup": true,
+  "enhc_thread": 8,
+  "res_thread": 8,
+  "train_thread": 8,
+
+  "train_number_node": 1,
+  "train_cpu_per_node": 8,
+  "train_gpu_per_node": 1,
+  "train_group_size": 1,
+
+  "if_cuda_multi_devices": false,
+  "export_sources": [
+    "PATH=/home/dongdong/gromacs-dp-rid/bin:$PATH"
+  ],
+  "_comment": "That's all"
+}
+
+

@@ -11,7 +11,6 @@ def main(out_dir, mol_dir, rid_json, machine_json, cv_file, init_model, record_n
     fp = open(rid_json, 'r')
     jdata = json.load(fp)
     fp.close()
-    # record_file = out_dir + record_name
     record_file = os.path.join(out_dir, record_name)
     checkpoint = get_checkpoint(record_file)
     max_tasks = 10
@@ -21,7 +20,7 @@ def main(out_dir, mol_dir, rid_json, machine_json, cv_file, init_model, record_n
 
     if sum(checkpoint) < 0:
         print("prepare gen_rid")
-        gen_rid.gen_rid (out_dir, mol_dir, rid_json)
+        gen_rid (out_dir, mol_dir, rid_json)
     
     for iter_idx in range(iter_numb):
         if iter_idx > 0 :

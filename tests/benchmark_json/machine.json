@@ -1,0 +1,89 @@
+{
+    "_comment": "system resources",
+    
+
+    "enhcMD": {
+        "machine":{
+            "batch_type": "Slurm",
+            "context_type": "LazyLocalContext",
+            "local_root": "./",
+            "remote_root": "./"
+        },
+        "resources":{
+            "queue_name": "GPU_2080Ti",
+            "number_node": 1,
+            "cpu_per_node": 8,
+            "gpu_per_node": 1,
+            "group_size": 1,
+            "if_cuda_multi_devices": false
+        }
+    },
+
+    "post_enhc": {
+        "machine":{
+            "batch_type": "Slurm",
+            "context_type": "LazyLocalContext",
+            "local_root": "./",
+            "remote_root": "./"
+        },
+        "resources":{
+            "queue_name": "GPU_2080Ti",
+            "number_node": 1,
+            "cpu_per_node": 4,
+            "gpu_per_node": 0,
+            "group_size": 1,
+            "if_cuda_multi_devices": false
+        }
+    },
+
+    "resMD": {
+        "machine":{
+            "batch_type": "Slurm",
+            "context_type": "LazyLocalContext",
+            "local_root": "./",
+            "remote_root": "./"
+        },
+        "resources":{
+            "queue_name": "GPU_2080Ti",
+            "number_node": 1,
+            "cpu_per_node": 8,
+            "gpu_per_node": 1,
+            "group_size": 10,
+            "if_cuda_multi_devices": false
+        }
+    },
+
+    "cmpf": {
+        "machine":{
+            "batch_type": "Shell",
+            "context_type": "LazyLocalContext",
+            "local_root": "./",
+            "remote_root": "./"
+        },
+        "resources":{
+            "queue_name": "queue",
+            "number_node": 0,
+            "cpu_per_node": 0,
+            "gpu_per_node": 0,
+            "group_size": 1000,
+            "if_cuda_multi_devices": false
+        }
+    },
+
+    "train": {
+        "machine":{
+            "batch_type": "Slurm",
+            "context_type": "LazyLocalContext",
+            "local_root": "./",
+            "remote_root": "./"
+        },
+        "resources":{
+            "queue_name": "GPU_2080Ti",
+            "number_node": 1,
+            "cpu_per_node": 8,
+            "gpu_per_node": 1,
+            "group_size": 1,
+            "if_cuda_multi_devices": false
+        }
+    }
+}

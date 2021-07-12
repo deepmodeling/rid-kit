@@ -27,14 +27,13 @@ def main(out_dir, mol_dir, rid_json, machine_json, cv_file, init_model, record_n
             prev_model = glob.glob (out_dir + "/" + make_iter_name(iter_idx-1) + "/02.train/*pb")
         for tag in range(number_tasks):
             if iter_idx * max_tasks + tag <= checkpoint[0] * max_tasks + checkpoint[1]:
-                # print(iter_idx, tag, 'pass')
                 continue
             elif tag == 0:
                 print("prepare gen_enhc")
                 enhcMD.make_enhc(iter_idx, rid_json, prev_model, mol_dir, cv_file ,base_dir=out_dir)
                 record_iter(record_file, iter_idx, tag)
             elif tag == 1:
-                print("prepare run enhc")
+                print("run enhanced MD")
                 enhcMD.run_enhc(iter_idx, rid_json, machine_json, base_dir=out_dir)
                 record_iter(record_file, iter_idx, tag)
             elif tag == 2:

@@ -91,9 +91,9 @@ def make_res_plumed(nconf, jdata, res_path, walker_idx, sel_idx, res_angles, con
         os.chdir(cwd)
 
 
-def make_threshold(walker_idx, walker_path, base_path, sel_angles, cluster_threshold, init_numb_cluster, cv_dih_dim):
+def make_threshold(walker_idx, walker_path, base_path, sel_angles, cluster_threshold, init_numb_cluster, cv_dih_dim, weight):
     if walker_idx == 0:
-        cls_sel = sel_from_cluster(sel_angles, cluster_threshold, cv_dih_dim)
+        cls_sel = sel_from_cluster(sel_angles, cluster_threshold, cv_dih_dim, weight)
         test_numb_cluster = len(set(cls_sel))
         print('test number of clusters', test_numb_cluster)
         for test_iter in range(500):
@@ -101,14 +101,14 @@ def make_threshold(walker_idx, walker_path, base_path, sel_angles, cluster_thres
             if test_numb_cluster < init_numb_cluster[0]:
                 cluster_threshold = cluster_threshold * 0.95
                 cls_sel = sel_from_cluster(
-                    sel_angles, cluster_threshold, cv_dih_dim)
+                    sel_angles, cluster_threshold, cv_dih_dim, weight)
                 test_numb_cluster = len(set(cls_sel))
                 print('cluster threshold', cluster_threshold)
                 print('test number clusters', test_numb_cluster)
             elif test_numb_cluster > init_numb_cluster[1]:
                 cluster_threshold = cluster_threshold * 1.05
                 cls_sel = sel_from_cluster(
-                    sel_angles, cluster_threshold, cv_dih_dim)
+                    sel_angles, cluster_threshold, cv_dih_dim, weight)
                 test_numb_cluster = len(set(cls_sel))
                 print('cluster threshold', cluster_threshold)
                 print('test number clusters', test_numb_cluster)
@@ -178,6 +178,14 @@ def make_res(iter_index,
     cv_dih_dim = cv_dim_list[0]
     ret_list = [True for ii in range(numb_walkers)]
 
+    weight = jdata["cv_weight_for_cluster"]
+    if type(weight) == list:
+        assert len(weight) == cv_dim, "Number of values in the weight list is not equal to the number of CVs."
+    elif type(weight) == float or type(weight) == int:
+        assert weight != 0
+    else:
+        raise TypeError("Invalid type of weight of CVs for clustering. Please use int or list instead.")
+
     # check if we have graph in enhc
     for walker_idx in range(numb_walkers):
         cls_sel = None
@@ -214,17 +222,17 @@ def make_res(iter_index,
             np.savetxt(walker_path + 'sel.out', sel_idx, fmt='%d')
             np.savetxt(walker_path + 'sel.angle.out', sel_angles, fmt='%.6f')
             cls_sel, cluster_threshold = make_threshold(
-                walker_idx, walker_path, base_dir, sel_angles, cluster_threshold, init_numb_cluster, cv_dih_dim)
+                walker_idx, walker_path, base_dir, sel_angles, cluster_threshold, init_numb_cluster, cv_dih_dim, weight)
         if cls_sel is None:
             print(sel_angles, cluster_threshold, cv_dih_dim)
             cls_sel = sel_from_cluster(
-                sel_angles, cluster_threshold, cv_dih_dim)
+                sel_angles, cluster_threshold, cv_dih_dim, weight)
 
         conf_start = 0
         conf_every = 1
 
         sel_idx = np.array(sel_idx, dtype=np.int)
-        assert (len(sel_idx) == sel_angles.shape[0])
+        assert (len(sel_idx) == sel_angles.shape[0]), "{} selected indexes don't match {} selected angles.".format(len(sel_idx), sel_angles.shape[0])
         sel_idx = config_cls(sel_idx, cls_sel, max_sel,
                              walker_path, cluster_threshold, sel_angles)
 
@@ -252,7 +260,7 @@ def make_res(iter_index,
                   jdata, mol_path, conf_start=0, conf_every=1)
         make_res_plumed(nconf, jdata, res_path, walker_idx, sel_idx,
                         res_angles, _conf_file, cv_file, conf_start=0, conf_every=1)
-    print("Restrained MD has prepared.")
+    print("Restrained MD has been prepared.")
 
 
 def run_res(iter_index,

@@ -59,68 +59,97 @@ def make_wholemolecules(atom_index):
             "\n")
 
 
+def user_plumed(cv_file):
+    ret = ""
+    cv_names = []
+    print_content = None
+    with open(cv_file, 'r') as fp:
+        for line in fp.readlines():
+            if ("PRINT" in line) and ("#" not in line):
+                print_content = line + "\n"
+                break
+            ret += line + "\n"
+            if (":" in line) and ("#" not in line):
+                cv_names.append(("{}".format(line.split(":")[0])).strip())
+            elif ("LABEL" in line) and ("#" not in line):
+                cv_names.append(("{}".format(line.split("LABEL=")[1])).strip())
+    if ret == "" or cv_names == "":
+        raise RuntimeError("Invalid customed plumed files.")
+    if print_content is not None:
+        assert len(print_content.split(",")) == len(cv_names), "There are {} CVs defined in the plumed file, while {} CVs are printed.".format(len(cv_names), len(print_content.split(",")) )
+        print_content_list = print_content.split()
+        print_content_list[-1] = "FILE=plm.out"
+        print_content = " ".join(print_content_list)
+    return ret, cv_names, print_content
+
+
 def general_plumed(TASK,
                    CONF,
-                   JSON,
+                   CV_FILE,
                    kappa=500.0,
                    temp=3000.0,
                    tau=10.0,
                    gamma=0.1,
                    pstride=5,
                    pfile="plm.out"):
-    residues, residue_atoms = make_ndx(CONF)
-    protein_atom_idxes = make_protein_atom_index(CONF)
-    fp = open(JSON, 'r')
-    jdata = json.load(fp)
-    fp.close()
-    dih_angles = jdata["dih_angles"]
-    fmt_alpha = jdata["alpha_idx_fmt"]
-    fmt_angle = jdata["angle_idx_fmt"]
-    hp_residues = []
-    dist_atom = []
-    dist_excl = 10000
-    if "hp_residues" in jdata:
-        hp_residues = jdata["hp_residues"]
-    if "dist_atom" in jdata:
-        dist_atom = jdata["dist_atom"]
-    if "dist_excl" in jdata:
-        dist_excl = jdata["dist_excl"]
+    if CV_FILE.split(".")[-1] == "json":
+        with open(CV_FILE, 'r') as fp:
+            jdata = json.load(fp)
+        residues, residue_atoms = make_ndx(CONF)
+        protein_atom_idxes = make_protein_atom_index(CONF)
+        dih_angles = jdata["dih_angles"]
+        fmt_alpha = jdata["alpha_idx_fmt"]
+        fmt_angle = jdata["angle_idx_fmt"]
+        hp_residues = []
+        dist_atom = []
+        dist_excl = 10000
+        if "hp_residues" in jdata:
+            hp_residues = jdata["hp_residues"]
+        if "dist_atom" in jdata:
+            dist_atom = jdata["dist_atom"]
+        if "dist_excl" in jdata:
+            dist_excl = jdata["dist_excl"]
 
-    angle_names, angle_atom_idxes = make_general_angle_def(
-        residue_atoms, dih_angles, fmt_alpha, fmt_angle)
+        angle_names, angle_atom_idxes = make_general_angle_def(
+            residue_atoms, dih_angles, fmt_alpha, fmt_angle)
 
-    dist_names, dist_atom_idxes = make_general_dist_def(
-        residues, residue_atoms, hp_residues, dist_atom, fmt_alpha, dist_excl)
+        dist_names, dist_atom_idxes = make_general_dist_def(
+            residues, residue_atoms, hp_residues, dist_atom, fmt_alpha, dist_excl)
 
-    if "selected_index" in jdata:
-        selected_index = jdata["selected_index"]
-        selected_angle_index = []
-        for ssi in selected_index:
-            if ssi == 0:
-                selected_angle_index.append(0)
-            elif ssi != 0:
-                selected_angle_index.append(ssi*2-1)
-                selected_angle_index.append(ssi*2)
+        if "selected_index" in jdata:
+            selected_index = jdata["selected_index"]
+            selected_angle_index = []
+            for ssi in selected_index:
+                if ssi == 0:
+                    selected_angle_index.append(0)
+                elif ssi != 0:
+                    selected_angle_index.append(ssi*2-1)
+                    selected_angle_index.append(ssi*2)
 
-        newselected_angle_index = [
-            i for i in selected_angle_index if i < len(angle_names)]
-        new_angle_names = [angle_names[i] for i in newselected_angle_index]
-        new_angle_atom_idxes = [angle_atom_idxes[i]
-                                for i in newselected_angle_index]
-    else:
-        new_angle_names = angle_names
-        new_angle_atom_idxes = angle_atom_idxes
+            newselected_angle_index = [
+                i for i in selected_angle_index if i < len(angle_names)]
+            new_angle_names = [angle_names[i] for i in newselected_angle_index]
+            new_angle_atom_idxes = [angle_atom_idxes[i]
+                                    for i in newselected_angle_index]
+        else:
+            new_angle_names = angle_names
+            new_angle_atom_idxes = angle_atom_idxes
 
-    ret = ""
+        ret = ""
 
-    if len(dist_names) > 0:
-        ret += make_wholemolecules(protein_atom_idxes)
+        if len(dist_names) > 0:
+            ret += make_wholemolecules(protein_atom_idxes)
+            ret += "\n"
+        ret += (make_angle_def(new_angle_names, new_angle_atom_idxes))
+        ret += (make_dist_def(dist_names, dist_atom_idxes))
         ret += "\n"
-    ret += (make_angle_def(new_angle_names, new_angle_atom_idxes))
-    ret += (make_dist_def(dist_names, dist_atom_idxes))
-    ret += "\n"
 
-    cv_names = new_angle_names + dist_names
+        cv_names = new_angle_names + dist_names
+        print_content = None
+
+    else:
+        ret, cv_names, print_content = user_plumed(CV_FILE)
+
     if TASK == "res":
         ptr, ptr_names = make_restraint(cv_names, kappa, 0.0)
         ret += (ptr)
@@ -132,22 +161,26 @@ def general_plumed(TASK,
         None
     else:
         raise RuntimeError("unknow task: " + TASK)
-    ret += (make_print(cv_names, pstride, pfile))
-    ret += "\n"
+    
+    if print_content is None:
+        ret += (make_print(cv_names, pstride, pfile))
+        ret += "\n"
+    else:
+        ret += print_content
     return ret
 
 
 def make_plumed(OUT,
                 TASK,
                 CONF,
-                JSON,
+                CV_FILE,
                 kappa=500.0,
                 temp=3000.0,
                 tau=10.0,
                 gamma=0.1,
                 pstride=5,
                 pfile="plm.out"):
-    ret = general_plumed(TASK, CONF, JSON, kappa=kappa, temp=temp,
+    ret = general_plumed(TASK, CONF, CV_FILE, kappa=kappa, temp=temp,
                          tau=tau, gamma=gamma, pstride=pstride, pfile=pfile)
     if os.path.basename(OUT) == '':
         if TASK == "dpbias":
@@ -195,7 +228,7 @@ def _main():
                         help="the type of task, either res, afed or dpbias")
     parser.add_argument("CONF", type=str,
                         help="the conf file")
-    parser.add_argument("JSON", type=str,
+    parser.add_argument("CVFILE", type=str,
                         help="the json file defining the dih angles")
     parser.add_argument("-k", "--kappa", default=500, type=float,
                         help="the spring constant")
@@ -211,7 +244,7 @@ def _main():
                         help="the printing file")
     args = parser.parse_args()
 
-    ret = general_plumed(args.TASK, args.CONF, args.JSON, args.kappa,
+    ret = general_plumed(args.TASK, args.CONF, args.CVFILE, args.kappa,
                          args.temp, args.tau, args.gamma, args.stride, args.print_file)
 
     print(ret)
@@ -220,7 +253,7 @@ def _main():
 if __name__ == '__main__':
     # _main()
     CONF = "/home/dongdong/wyz/rid-kit/tests/benchmark_mol/conf.gro"
-    JSON = "/home/dongdong/wyz/rid-kit/tests/benchmark_json/cv.json"
+    CV_FILE = "/home/dongdong/wyz/rid-kit/tests/benchmark_json/cv.json"
     TASK = "dpbias"
-    general_plumed(TASK, CONF, JSON, kappa=500.0, temp=3000.0,
+    general_plumed(TASK, CONF, CV_FILE, kappa=500.0, temp=3000.0,
                    tau=10.0, gamma=0.1, pstride=5, pfile="plm.out")

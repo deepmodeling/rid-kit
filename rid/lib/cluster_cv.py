@@ -3,7 +3,7 @@ import glob
 import shutil
 import argparse
 import numpy as np
-import sklearn.cluster as cluster
+import sklearn.cluster as skcluster
 
 
 def parse_cmd():
@@ -49,16 +49,16 @@ def mk_dist(cv, cv_dih_dim):
 
 
 def mk_cluster(dist, distance_threshold):
-    cls = cluster.AgglomerativeClustering(n_clusters=None,
+    cluster = skcluster.AgglomerativeClustering(n_clusters=None,
                                           linkage='average',
                                           affinity='precomputed',
                                           distance_threshold=distance_threshold)
-    cls.fit(dist)
-    return cls.labels_
+    cluster.fit(dist)
+    return cluster.labels_
 
 
-def sel_from_cluster(angles, distance_threshold, cv_dih_dim):
-    dist = mk_dist(angles, cv_dih_dim)
+def sel_from_cluster(angles, distance_threshold, cv_dih_dim, weight=1):
+    dist = mk_dist(angles * weight, cv_dih_dim)
     labels = mk_cluster(dist, distance_threshold)
     # make cluster map
     cls_map = []

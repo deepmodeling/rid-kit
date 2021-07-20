@@ -33,6 +33,7 @@
   "res_cmpf_error": false,
   "sel_threshold": 2,
   "cluster_threshold": 1.5,
+  "cv_weight_for_cluster": 1,
   "max_sel": 30,
   "init_numb_cluster_upper": 26,
   "init_numb_cluster_lower": 16,

@@ -36,6 +36,7 @@
   "res_cmpf_error": false,
   "init_numb_cluster_upper": 26,
   "init_numb_cluster_lower": 16,
+  "cv_weight_for_cluster": 1,
   "_comment": "for md without bias",
   "conf_start": 0,
   "conf_every": 1,

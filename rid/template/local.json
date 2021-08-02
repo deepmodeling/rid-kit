@@ -4,55 +4,52 @@
 
     "enhcMD": {
         "machine":{
-            "batch_type": "Slurm",
+            "batch_type": "Shell",
             "context_type": "LazyLocalContext",
             "local_root": "./",
             "remote_root": "./"
         },
         "resources":{
-            "queue_name": "GPU_2080Ti",
-            "number_node": 1,
-            "cpu_per_node": 8,
+            "queue_name": "shell",
+            "number_node": 0,
+            "cpu_per_node": 0,
             "gpu_per_node": 1,
             "group_size": 1,
-            "custom_flags": [],
-            "if_cuda_multi_devices": false
+            "if_cuda_multi_devices": true
         }
     },
 
     "post_enhc": {
         "machine":{
-            "batch_type": "Slurm",
+            "batch_type": "Shell",
             "context_type": "LazyLocalContext",
             "local_root": "./",
             "remote_root": "./"
         },
         "resources":{
-            "queue_name": "GPU_2080Ti",
-            "number_node": 1,
-            "cpu_per_node": 4,
+            "queue_name": "shell",
+            "number_node": 0,
+            "cpu_per_node": 0,
             "gpu_per_node": 0,
             "group_size": 1,
-            "custom_flags": [],
-            "if_cuda_multi_devices": false
+            "if_cuda_multi_devices": true
         }
     },
 
     "resMD": {
         "machine":{
-            "batch_type": "Slurm",
+            "batch_type": "Shell",
             "context_type": "LazyLocalContext",
             "local_root": "./",
             "remote_root": "./"
         },
         "resources":{
-            "queue_name": "GPU_2080Ti",
-            "number_node": 1,
-            "cpu_per_node": 8,
+            "queue_name": "shell",
+            "number_node": 0,
+            "cpu_per_node": 0,
             "gpu_per_node": 1,
             "group_size": 10,
-            "custom_flags": [],
-            "if_cuda_multi_devices": false
+            "if_cuda_multi_devices": true
         }
     },
 
@@ -65,30 +62,28 @@
         },
         "resources":{
             "queue_name": "shell",
-            "number_node": 1,
-            "cpu_per_node": 1,
+            "number_node": 0,
+            "cpu_per_node": 0,
             "gpu_per_node": 0,
             "group_size": 1000,
-            "custom_flags": [],
-            "if_cuda_multi_devices": false
+            "if_cuda_multi_devices": true
         }
     },
 
     "train": {
         "machine":{
-            "batch_type": "Slurm",
+            "batch_type": "Shell",
             "context_type": "LazyLocalContext",
             "local_root": "./",
             "remote_root": "./"
         },
         "resources":{
-            "queue_name": "GPU_2080Ti",
-            "number_node": 1,
-            "cpu_per_node": 8,
+            "queue_name": "shell",
+            "number_node": 0,
+            "cpu_per_node": 0,
             "gpu_per_node": 1,
             "group_size": 1,
-            "custom_flags": [],
-            "if_cuda_multi_devices": false
+            "if_cuda_multi_devices": true
         }
     }
 }

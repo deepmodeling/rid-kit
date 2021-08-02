@@ -59,7 +59,7 @@ def make_wholemolecules(atom_index):
             "\n")
 
 
-def user_plumed(cv_file):
+def user_plumed(cv_file, pstride, pfile):
     ret = ""
     cv_names = []
     print_content = None
@@ -78,7 +78,8 @@ def user_plumed(cv_file):
     if print_content is not None:
         assert len(print_content.split(",")) == len(cv_names), "There are {} CVs defined in the plumed file, while {} CVs are printed.".format(len(cv_names), len(print_content.split(",")) )
         print_content_list = print_content.split()
-        print_content_list[-1] = "FILE=plm.out"
+        print_content_list[-1] = "FILE={}".format(pfile)
+        print_content_list[1] = "STRIDE={}".format(str(pstride))
         print_content = " ".join(print_content_list)
     return ret, cv_names, print_content
 
@@ -148,7 +149,7 @@ def general_plumed(TASK,
         print_content = None
 
     else:
-        ret, cv_names, print_content = user_plumed(CV_FILE)
+        ret, cv_names, print_content = user_plumed(CV_FILE, pstride, pfile)
 
     if TASK == "res":
         ptr, ptr_names = make_restraint(cv_names, kappa, 0.0)

@@ -41,7 +41,7 @@ def make_sel_list(nconf, sel_idx):
     return sel_list
 
 
-def make_conf(nconf, res_path, walker_idx, walker_path, sel_idx, jdata, mol_path, conf_start=0, conf_every=1):
+def make_conf(nconf, res_path, walker_idx, walker_path, sel_idx, jdata, mol_path, conf_start=0, conf_every=1, custom_mdp=None):
     mol_path = os.path.abspath(mol_path) + "/"
     mol_files = ["topol.top"]
     nsteps = jdata["res_nsteps"]
@@ -53,7 +53,7 @@ def make_conf(nconf, res_path, walker_idx, walker_path, sel_idx, jdata, mol_path
                                 (walker_idx, sel_idx[ii])) + "/"
         os.makedirs(work_path)
         make_grompp(work_path + "grompp.mdp", "res", nsteps,
-                    frame_freq, temperature=temperature, dt=dt, define="")
+                    frame_freq, temperature=temperature, dt=dt, define="", custom_mdp=custom_mdp)
         for jj in mol_files:
             checkfile(work_path + jj)
             shutil.copy(mol_path + jj, work_path)
@@ -145,7 +145,8 @@ def make_res(iter_index,
              json_file,
              cv_file,
              mol_path,
-             base_dir="./"):
+             base_dir="./",
+             custom_mdp=None):
 
     json_file = os.path.abspath(json_file)
     fp = open(json_file, 'r')
@@ -257,7 +258,7 @@ def make_res(iter_index,
         sel_list = make_sel_list(nconf, sel_idx)
         log_task("selected %d confs, indexes: %s" % (nconf, sel_list))
         make_conf(nconf, res_path, walker_idx, walker_path, sel_idx,
-                  jdata, mol_path, conf_start=0, conf_every=1)
+                  jdata, mol_path, conf_start=0, conf_every=1, custom_mdp=custom_mdp)
         make_res_plumed(nconf, jdata, res_path, walker_idx, sel_idx,
                         res_angles, _conf_file, cv_file, conf_start=0, conf_every=1)
     print("Restrained MD has been prepared.")

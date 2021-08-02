@@ -77,7 +77,8 @@ def make_enhc(iter_index,
               graph_files,
               mol_dir,
               cv_file,
-              base_dir='./'):
+              base_dir='./',
+              custom_mdp=None):
     base_dir = os.path.abspath(base_dir) + "/"
     json_file = os.path.abspath(json_file)
     cv_file = os.path.abspath(cv_file)
@@ -111,7 +112,7 @@ def make_enhc(iter_index,
         create_path(walker_path)
 
         make_grompp(walker_path + "grompp.mdp", "bias", nsteps,
-                    frame_freq, temperature=temperature, dt=dt, define='')
+                    frame_freq, temperature=temperature, dt=dt, define='', custom_mdp=custom_mdp)
         # make_grompp(walker_path + "grompp_restraint.mdp", "res", nsteps, frame_freq, temperature=temperature, dt=dt, define='-DPOSRE')
 
         for ii in mol_files:

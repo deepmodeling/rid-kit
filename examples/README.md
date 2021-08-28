@@ -5,16 +5,16 @@ In this tutorial, we will go over how RiD runs iteratively. Every procedure of r
 ## Preparation
 
 To begin with, we need to prepare the following things:
-> 1. Initial conformation files in the PDB format.
+> 1. Initial conformation files in the GRO format and topology files containing information about force field.
 > 2. A RiD configuration file, offering parameters used in the whole procedure.
-> 3. A `cv.json` file containing the Collective Variables (CVs) selected.
+> 3. A `cv.json` file containing the Collective Variables (CVs) selected. Or a standard plumed file `cv.dat` defining CV in plumed format.
 > 4. A machine configuration file, setting the localhost or dispatching systems.
 
 ### Global Setting in RiD
 
 RiD needs to update its NN iteratively, thus, we need to set the number of iteration in `rid.json` by adjusting the key `numb_iter`.
 
-When first sampling (e.g. module enhcMD), several independent and individual trajectories will go from the same or different initial conformations. These initial conformation files in PDB format should be put into a directory (e.g. `rid-kit/examples/mol` where we offer 3 same ala2 conformation files as instances). To specify the number of individual trajectories which we call as a 'walker', we can modify the key `numb_walkers` in `rid.json: "00.bias"`. NOTE: the number of initial conformation files should not be less than `numb_walkers`. If these walkers start from the same origin conformation, just make enough copies of the initial conformation file. Then, set the number of neural networks by `"numb_model"`, and set number of nodes of each layer by `"neurons"` like `"neurons": [ 200, 200, 200, 200 ]`. Other parameters are also available in `rid.json`.
+When sampling (e.g. module enhcMD), several independent  trajectories will go from the same or different initial conformations. These initial conformation files in PDB format should be put into a directory (e.g. `rid-kit/examples/mol` where we offer 3 same ala2 conformation files as instances). To specify the number of individual trajectories which we call as a 'walker', we can modify the key `numb_walkers` in `rid.json: "00.bias"`. NOTE: the number of initial conformation files should not be less than `numb_walkers`. If these walkers start from the same origin conformation, just make enough copies (or soft links) of the initial conformation file. Then, set the number of neural networks by `"numb_model"`, and set number of nodes of each layer by `"neurons"` like `"neurons": [ 200, 200, 200, 200 ]`. Other parameters are also available in `rid.json`.
 
 ### Machine Setting
 
@@ -45,7 +45,7 @@ RiD will distribute jobs by the package `dpdispatching`. In each task (e.g. `enh
 
 ### Selecting Collective Variables (CVs)
 
-In this version, the users can choose the dihedral angles as CVs.  In the CV file(`cv.json`), the users can write the indexes of the selected residues, the two dihedral angles ($\psi$ and $\phi$) will be chosen as the CVs. 
+Users can choose the dihedral angles as CVs directly in a JSON format.  In the CV file(`cv.json`), the users can write the indexes of the selected residues, the two dihedral angles ($\psi$ and $\phi$) will be chosen as the CVs. 
 
 Let's begin with a simple example, ala2, which has a sequence (1ACE, 2ALA, 3NME). The `cv.json` file can be set as:
 ```JSON
@@ -68,6 +68,13 @@ Let's begin with a simple example, ala2, which has a sequence (1ACE, 2ALA, 3NME)
 `"dih_angles"` is our definition of dihedral angles($\phi$, $\psi$) by default. Users can write the list of `"selected_index"` as their wish. Rid-kit will remove the non-existed dihedral angles of the terminal residues automatically. In this example, `"selected_index":  [0, 1, 2]` means we select dihedral angles of the 1st, 2nd and 3rd residues as our CVs. However, the terminal residues (or caps) have only either $\phi$ or $\psi$, or none of them (e.g. 1ACE and 3NME have no dihedral angles, 2ALA has $\phi$ and $\psi$), so even if we have selected the indexes of 1ACE and 3NME, the total dimension of CVs is **2**, which comes from the two dihedral angles of 2ALA.  
 
 > ***Note***: The indexes in `cv.json` start from **0**, while the indexes of residues in `.gro` file start from **1**.
+
+If users want to define CVs by themselves, they can use the standard plumed fomrat, for example:
+~~~
+CV1: DISTANCE ATOMS=1,2
+CV2: TORSION ATOMS=3,4,5,6
+~~~
+
 
 ## Get Started
 We need to import all the main blocks we will need. If you have installed successfully, the following imports should never fail. 
@@ -111,7 +118,7 @@ from rid import enhcMD, resMD, train, gen_rid
 ```
 `enhcMD` is the module of enhanced sampling; `resMD` is the module of calculating the free energy; `train` is the module of training the neural networks. `gen_rid` is to generate the working folder.
 
-As a examples, we set our variables as:
+As an example, we set our variables as:
 ```python
 out_dir    # the output path.
 mol_dir    # the folder containing initial conformation files.
@@ -143,7 +150,6 @@ for iter_idx in range(iter_numb):
     if iter_idx > 0 :
         prev_model = glob.glob(out_dir + "/" + make_iter_name(iter_idx-1) + "/02.train/*pb")
     
-    # We just 
     for tag in range(number_tasks):
         if iter_idx * max_tasks + tag <= checkpoint[0] * max_tasks + checkpoint[1]:
             continue  # if true, this task has finished.
@@ -172,13 +178,13 @@ elif tag == 2:  # post process
     enhcMD.post_enhc(iter_idx, rid_json, machine_json, base_dir=out_dir)
     record_iter(record_file, iter_idx, tag)
 ```
-This part (3 steps) help us sample(sampling with brute force in the 1st iteration and enhanced sampling after the 1st sampling) and split the trajectory into separated .gro files. The sub working folder is named as `00.enhcMD` under the main working folder and there will be folder named from `000` representing each walker under the sub-folder. `"bias_nsteps"` and `"bias_frame_freq"` help us set the total steps and the output frequency in the bias MD.
+This part (3 steps) helps us sample(sampling with brute force in the 1st iteration and enhanced sampling after the 1st sampling) and split the trajectory into separated .gro files. The sub working folder is named as `00.enhcMD` under the main working folder and there will be folder named from `000` representing each walker under the sub-folder. `"bias_nsteps"` and `"bias_frame_freq"` help us set the total steps and the output frequency in the bias MD.
 
-Several files will be generated. Let's see files under `(output)/00.enhcMD/000/` for example. You can find a folder named `confs` easily which contains all the separated .gro file for each frame in the trajectory. `.log` file record all the output of Gromacs. `plm.out` is the output of Plumed and we will use this file as our training data.
+Several files will be generated. Let's check files under `(output)/00.enhcMD/000/` for example. You can find a folder named `confs` easily which contains all the separated .gro file for each frame in the trajectory. `.log` file record all the output of Gromacs. `plm.out` is the output of Plumed and we will use this file as our training data.
 
 If you run this part in the second iteration, you could see `.pb` files (soft-link) under the path like `graph.000.pb`. That means we have used the neural networks that we have tarined in the previous iterations, so the process would be enhanced. Remember that we have a variable defined as `prev_model = glob.glob (out_dir + "/" + make_iter_name(iter_idx-1) + "/02.train/*pb")`, and this could help us find the graph files we need.
 
-We follow the steps of adpative RiD, so the trust level are adjusted adaptively. `"bias_trust_lvl_1"` and `"bias_trust_lvl_2"` are the initial guesses of trust level. After every sampling, we will cluster the conformations we have selected. If the cluster number is less than a thrashold(`"num_of_cluster_threshold"` in `rid.json`), the trust level will be adjusted. We will use agglomerative clustering algorithm to cluster, which will be introduced in the next section. Fianlly, the trust level that has been adjusted will be recorded in the file `trust_lvl1.dat`.
+We follow the steps of adpative RiD, so the trust levels are adjusted adaptively. `"bias_trust_lvl_1"` and `"bias_trust_lvl_2"` are the initial guesses of trust level. After every sampling, we will cluster the conformations we have selected. If the cluster number is less than a thrashold(`"num_of_cluster_threshold"` in `rid.json`), the trust level will be adjusted. We will use agglomerative clustering algorithm to cluster, which will be introduced in the next section. Fianlly, the trust level that has been adjusted will be recorded in the file `trust_lvl1.dat`.
 
 
 ### resMD

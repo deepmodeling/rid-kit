@@ -58,23 +58,26 @@ def mk_cluster(dist, distance_threshold):
 
 
 def sel_from_cluster(angles, distance_threshold, cv_dih_dim, weight=1):
-    dist = mk_dist(angles * weight, cv_dih_dim)
-    labels = mk_cluster(dist, distance_threshold)
-    # make cluster map
-    cls_map = []
-    for ii in range(len(set(labels))):
-        cls_map.append([])
-    for ii in range(len(labels)):
-        cls_idx = labels[ii]
-        cls_map[cls_idx].append(ii)
-    # randomly select from cluster
-    cls_sel = []
-    np.random.seed(seed=None)
-    for ii in cls_map:
-        _ret = np.random.choice(ii, 1)
-        cls_sel.append(_ret[0])
-    cls_sel.sort()
-    return cls_sel
+    if len(angles) <= 1:
+        return angles
+    else:
+        dist = mk_dist(angles * weight, cv_dih_dim)
+        labels = mk_cluster(dist, distance_threshold)
+        # make cluster map
+        cls_map = []
+        for ii in range(len(set(labels))):
+            cls_map.append([])
+        for ii in range(len(labels)):
+            cls_idx = labels[ii]
+            cls_map[cls_idx].append(ii)
+        # randomly select from cluster
+        cls_sel = []
+        np.random.seed(seed=None)
+        for ii in cls_map:
+            _ret = np.random.choice(ii, 1)
+            cls_sel.append(_ret[0])
+        cls_sel.sort()
+        return cls_sel
 
 
 def _main():

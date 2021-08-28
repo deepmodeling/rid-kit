@@ -23,7 +23,7 @@ class TestMakeNdx(unittest.TestCase):
         self.cv_file = "benchmark_json/cv.json"
  
     def test_general_plumed(self):
-        ret = gen_plumed.general_plumed (TASK='dpbias',CONF=self.conf,JSON=self.cv_file,kappa = 500.0,temp = 3000.0, tau = 10.0, gamma = 0.1, pstride = 5, pfile = "plm.out")
+        ret = gen_plumed.general_plumed (TASK='dpbias',CONF=self.conf,CV_FILE=self.cv_file,kappa = 500.0,temp = 3000.0, tau = 10.0, gamma = 0.1, pstride = 5, pfile = "plm.out")
         ret = "".join([kk for kk in ret.strip().split() if kk != ""])
         benchmark = [kk for kk in benchmark_general_plumed.strip().split() if kk != ""]
         for part in benchmark:

@@ -15,6 +15,7 @@
             "cpu_per_node": 8,
             "gpu_per_node": 1,
             "group_size": 1,
+            "custom_flags": [],
             "if_cuda_multi_devices": false
         }
     },
@@ -32,6 +33,7 @@
             "cpu_per_node": 4,
             "gpu_per_node": 0,
             "group_size": 1,
+            "custom_flags": [],
             "if_cuda_multi_devices": false
         }
     },
@@ -49,6 +51,7 @@
             "cpu_per_node": 8,
             "gpu_per_node": 1,
             "group_size": 10,
+            "custom_flags": [],
             "if_cuda_multi_devices": false
         }
     },
@@ -61,11 +64,12 @@
             "remote_root": "./"
         },
         "resources":{
-            "queue_name": null,
-            "number_node": null,
-            "cpu_per_node": null,
+            "queue_name": "shell",
+            "number_node": 1,
+            "cpu_per_node": 1,
             "gpu_per_node": 0,
             "group_size": 1000,
+            "custom_flags": [],
             "if_cuda_multi_devices": false
         }
     },
@@ -83,6 +87,7 @@
             "cpu_per_node": 8,
             "gpu_per_node": 1,
             "group_size": 1,
+            "custom_flags": [],
             "if_cuda_multi_devices": false
         }
     }

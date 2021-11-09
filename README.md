@@ -48,7 +48,9 @@ You need to copy compiled `DeePFE.cpp` to the plumed directory. This file locate
 tar -xvzf plumed-2.5.2.tgz
 cp DeePFE.cpp plumed-2.5.2/src/bias
 tf_path=$tensorflow_root
-CXXFLAGS="-std=gnu++11 -I $tf_path/include/" LDFLAGS=" -L$tf_path/lib -ltensorflow_framework -ltensorflow_cc -Wl,-rpath,$tf_path/lib/" ./configure --prefix=/software/plumed252 CC=mpicc CXX=mpicxx
+./configure --prefix=/software/plumed252 CC=mpicc CXX=mpicxx CXXFLAGS="-std=gnu++11 -I $tf_path/include/" LDFLAGS=" -L$tf_path/lib -ltensorflow_framework -ltensorflow_cc -Wl,-rpath,$tf_path/lib/"  # mpich need here, if not, you can use default value for CC and CXX
+make -j 4 # in a machine having 4 cores.
+make install
 ```
 Set the bashrc
 ```bash
@@ -67,10 +69,10 @@ export PLUMED_KERNEL=/home/dongdong/software/plumed252/lib/libplumedKernel.so
 ```bash
 tar -xzvf gromacs-2019.2.tar.gz
 cd gromacs-2019.2
-plumed patch -p
+plumed patch -p  # make sure you use the correct plumed version
 mkdir build
 cd build
-/software/cmake312/bin/cmake .. -DCMAKE_INSTALL_PREFIX=/software/GMX20192plumed -DGMX_BUILD_OWN_FFTW=ON -DGMX_GPU=on -DGMX_SIMD=avx_256 -DGMX_PREFER_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DGMX_EXTERNAL_BLAS=off
+cmake .. -DCMAKE_INSTALL_PREFIX=/software/GMX20192plumed -DGMX_BUILD_OWN_FFTW=ON -DGMX_GPU=on -DGMX_SIMD=avx_256 -DGMX_PREFER_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DGMX_EXTERNAL_BLAS=off  # You can also specify your fftw path.
 make -j 4
 make install
 ```

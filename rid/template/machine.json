@@ -61,9 +61,9 @@
             "remote_root": "./"
         },
         "resources":{
-            "queue_name": null,
-            "number_node": null,
-            "cpu_per_node": null,
+            "queue_name": "shell",
+            "number_node": 1,
+            "cpu_per_node": 1,
             "gpu_per_node": 0,
             "group_size": 1000,
             "if_cuda_multi_devices": false

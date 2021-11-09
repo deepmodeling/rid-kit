@@ -3,7 +3,7 @@ from rid.lib.make_ndx import make_ndx
 from rid.lib.make_def import make_general_angle_def, make_general_dist_def
 
 
-def cal_cv_dim(conf_file, cv_file):
+def cal_cv_dim_json(conf_file, cv_file):
     cfile = conf_file
     jfile = cv_file
     residues, residue_atoms = make_ndx(cfile)
@@ -46,3 +46,27 @@ def cal_cv_dim(conf_file, cv_file):
         new_angle_atom_idxes = angle_atom_idxes
 
     return [len(new_angle_names), len(dist_names)]
+
+def cal_cv_dim_user(conf_file, cv_file):
+    dih_angle_counts = 0
+    non_angle_counts = 0
+    with open(cv_file, 'r') as fp:
+        for line in fp.readlines():
+            if ("PRINT" in line) and ("#" not in line):
+                print_content = line + "\n"
+                break
+            if (":" in line) and ("#" not in line):
+                if line.split()[1] == "TORSION":
+                    dih_angle_counts += 1
+                else:
+                    non_angle_counts += 1
+            elif ("LABEL" in line) and ("#" not in line):
+                non_angle_counts += 1
+    return [int(dih_angle_counts), int(non_angle_counts)]
+
+
+def cal_cv_dim(conf_file, cv_file):
+    if cv_file.split(".")[-1] == "json":
+        return cal_cv_dim_json(conf_file, cv_file)
+    else:
+        return cal_cv_dim_user(conf_file, cv_file)

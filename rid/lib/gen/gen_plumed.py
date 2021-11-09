@@ -59,20 +59,37 @@ def make_wholemolecules(atom_index):
             "\n")
 
 
-def general_plumed(TASK,
-                   CONF,
-                   JSON,
-                   kappa=500.0,
-                   temp=3000.0,
-                   tau=10.0,
-                   gamma=0.1,
-                   pstride=5,
-                   pfile="plm.out"):
+def user_plumed(cv_file, pstride, pfile):
+    ret = ""
+    cv_names = []
+    print_content = None
+    with open(cv_file, 'r') as fp:
+        for line in fp.readlines():
+            if ("PRINT" in line) and ("#" not in line):
+                print_content = line + "\n"
+                break
+            ret += line + "\n"
+            if (":" in line) and ("#" not in line):
+                cv_names.append(("{}".format(line.split(":")[0])).strip())
+            elif ("LABEL" in line) and ("#" not in line):
+                cv_names.append(("{}".format(line.split("LABEL=")[1])).strip())
+    if ret == "" or cv_names == "":
+        raise RuntimeError("Invalid customed plumed files.")
+    if print_content is not None:
+        assert len(print_content.split(",")) == len(cv_names), "There are {} CVs defined in the plumed file, while {} CVs are printed.".format(len(cv_names), len(print_content.split(",")) )
+        print_content_list = print_content.split()
+        print_content_list[-1] = "FILE={}".format(pfile)
+        print_content_list[1] = "STRIDE={}".format(str(pstride))
+        print_content = " ".join(print_content_list)
+    return ret, cv_names, print_content
+
+
+def json2plumed(CONF, CV_FILE):
+    
     residues, residue_atoms = make_ndx(CONF)
     protein_atom_idxes = make_protein_atom_index(CONF)
-    fp = open(JSON, 'r')
-    jdata = json.load(fp)
-    fp.close()
+    with open(CV_FILE, 'r') as fp:
+        jdata = json.load(fp)
     dih_angles = jdata["dih_angles"]
     fmt_alpha = jdata["alpha_idx_fmt"]
     fmt_angle = jdata["angle_idx_fmt"]
@@ -121,6 +138,25 @@ def general_plumed(TASK,
     ret += "\n"
 
     cv_names = new_angle_names + dist_names
+    print_content = None
+    return ret, cv_names, print_content
+
+
+def general_plumed(TASK,
+                   CONF,
+                   CV_FILE,
+                   kappa=500.0,
+                   temp=3000.0,
+                   tau=10.0,
+                   gamma=0.1,
+                   pstride=5,
+                   pfile="plm.out"):
+                   
+    if CV_FILE.split(".")[-1] == "json":
+        ret, cv_names, print_content = json2plumed(CONF, CV_FILE)
+    else:
+        ret, cv_names, print_content = user_plumed(CV_FILE, pstride, pfile)
+
     if TASK == "res":
         ptr, ptr_names = make_restraint(cv_names, kappa, 0.0)
         ret += (ptr)
@@ -132,22 +168,26 @@ def general_plumed(TASK,
         None
     else:
         raise RuntimeError("unknow task: " + TASK)
-    ret += (make_print(cv_names, pstride, pfile))
-    ret += "\n"
+    
+    if print_content is None:
+        ret += (make_print(cv_names, pstride, pfile))
+        ret += "\n"
+    else:
+        ret += print_content
     return ret
 
 
 def make_plumed(OUT,
                 TASK,
                 CONF,
-                JSON,
+                CV_FILE,
                 kappa=500.0,
                 temp=3000.0,
                 tau=10.0,
                 gamma=0.1,
                 pstride=5,
                 pfile="plm.out"):
-    ret = general_plumed(TASK, CONF, JSON, kappa=kappa, temp=temp,
+    ret = general_plumed(TASK, CONF, CV_FILE, kappa=kappa, temp=temp,
                          tau=tau, gamma=gamma, pstride=pstride, pfile=pfile)
     if os.path.basename(OUT) == '':
         if TASK == "dpbias":
@@ -195,7 +235,7 @@ def _main():
                         help="the type of task, either res, afed or dpbias")
     parser.add_argument("CONF", type=str,
                         help="the conf file")
-    parser.add_argument("JSON", type=str,
+    parser.add_argument("CVFILE", type=str,
                         help="the json file defining the dih angles")
     parser.add_argument("-k", "--kappa", default=500, type=float,
                         help="the spring constant")
@@ -211,7 +251,7 @@ def _main():
                         help="the printing file")
     args = parser.parse_args()
 
-    ret = general_plumed(args.TASK, args.CONF, args.JSON, args.kappa,
+    ret = general_plumed(args.TASK, args.CONF, args.CVFILE, args.kappa,
                          args.temp, args.tau, args.gamma, args.stride, args.print_file)
 
     print(ret)
@@ -220,7 +260,7 @@ def _main():
 if __name__ == '__main__':
     # _main()
     CONF = "/home/dongdong/wyz/rid-kit/tests/benchmark_mol/conf.gro"
-    JSON = "/home/dongdong/wyz/rid-kit/tests/benchmark_json/cv.json"
+    CV_FILE = "/home/dongdong/wyz/rid-kit/tests/benchmark_json/cv.json"
     TASK = "dpbias"
-    general_plumed(TASK, CONF, JSON, kappa=500.0, temp=3000.0,
+    general_plumed(TASK, CONF, CV_FILE, kappa=500.0, temp=3000.0,
                    tau=10.0, gamma=0.1, pstride=5, pfile="plm.out")

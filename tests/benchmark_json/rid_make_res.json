@@ -20,6 +20,7 @@
   "res_ang_stride":	5,
   "res_prt_file":	"plm.res.out",
   "res_cmpf_error": false,
+  "cv_weight_for_cluster": 1,
   "init_numb_cluster_upper": 26,
   "init_numb_cluster_lower": 2,
   "_comment": "for md without bias",

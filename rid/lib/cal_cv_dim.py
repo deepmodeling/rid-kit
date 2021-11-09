@@ -66,7 +66,7 @@ def cal_cv_dim_user(conf_file, cv_file):
 
 
 def cal_cv_dim(conf_file, cv_file):
-    if cv_file.split(".")[-1] == "josn":
+    if cv_file.split(".")[-1] == "json":
         return cal_cv_dim_json(conf_file, cv_file)
     else:
         return cal_cv_dim_user(conf_file, cv_file)

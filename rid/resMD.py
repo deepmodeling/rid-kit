@@ -48,6 +48,7 @@ def make_conf(nconf, res_path, walker_idx, walker_path, sel_idx, jdata, mol_path
     frame_freq = jdata["res_frame_freq"]
     dt = jdata["res_dt"]
     temperature = jdata["res_temperature"]
+    itp_files = glob.glob(mol_path + "*.itp")
     for ii in range(conf_start, nconf, conf_every):
         work_path = res_path + ((walker_format + ".%06d") %
                                 (walker_idx, sel_idx[ii])) + "/"
@@ -57,6 +58,8 @@ def make_conf(nconf, res_path, walker_idx, walker_path, sel_idx, jdata, mol_path
         for jj in mol_files:
             checkfile(work_path + jj)
             shutil.copy(mol_path + jj, work_path)
+        for itp_ in itp_files:
+                shutil.copy(itp_, work_path)
 
         conf_file = walker_path + enhc_out_conf + \
             ("conf%d.gro" % sel_idx[int(ii)])

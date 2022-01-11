@@ -29,7 +29,6 @@ enhc_out_angle = "angle.rad.out"
 res_name = "01.resMD"
 res_plm = "plumed.res.dat"
 
-
 def adjust_lvl(prev_enhc_path, num_of_cluster_threshold, jdata):
     # adaptive trust level
     num_of_cluster = np.loadtxt(prev_enhc_path+'num_of_cluster.dat')
@@ -125,6 +124,13 @@ def make_enhc(iter_index,
         shutil.copy(conf_file, walker_path + "conf.gro")
         checkfile(walker_path + "conf_init.gro")
         shutil.copy(conf_file, walker_path + "conf_init.gro")
+        
+        itp_files = glob.glob(os.path.join(mol_path, "*.itp"))
+        for itp_ in itp_files:
+            itp_name = os.path.basename(itp_)
+            if os.path.exists(walker_path + itp_name):
+                os.remove(walker_path + itp_name)
+            shutil.copy(itp_, walker_path)
 
         # if have prev confout.gro, use as init conf
         if iter_index > 0:

@@ -1,6 +1,24 @@
 import json
-from typing import Dict
+import pickle
+from typing import Dict, List
+import numpy as np
 
+
+def read_txt(
+        fname: str
+    ) -> str:
+    with open(fname, "r") as fn:
+        fcont = fn.read()
+    return fcont
+
+
+def read_binary(
+        fname: str
+    ) -> str:
+    with open(fname, "rb") as fn:
+        fcont = fn.read()
+    return fcont
+    
 
 def write_txt(
         fname: str, 
@@ -8,6 +26,22 @@ def write_txt(
     ):
     with open(fname, "w") as fn:
         fn.write(fcont)
+
+
+def write_binary(
+        fname: str, 
+        fcont: str
+    ):
+    with open(fname, "wb") as fn:
+        fn.write(fcont)
+
+
+def load_txt(
+        fname: str,
+        comments: List[str] = ["#"]
+    ):
+    data = np.loadtxt(fname, comments=comments)
+    return data
 
 
 def load_json(
@@ -25,3 +59,19 @@ def dump_json(
     ):
     with open(fname, "w") as fn:
         json.dump(fcont, fn, indent=indent)
+
+
+def load_pkl(
+        fname: str
+    ):
+    with open(fname, "rb") as ff:
+        data = pickle.load(ff) 
+    return data
+
+
+def save_pkl(
+        fname,
+        obj
+    ):
+    with open(fname, "wb") as ff:
+        pickle.dump(obj, fname)

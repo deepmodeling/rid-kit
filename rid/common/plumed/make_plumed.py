@@ -147,10 +147,10 @@ def make_torsion_list(
 
 def make_torsion_list_from_file(
         file_path: str,
-        selected_id: List[int]
+        selected_resid: List[int]
     ) -> Tuple[List, List]:
     return make_torsion_list(
-        get_dihedral_from_resid( file_path, selected_id
+        get_dihedral_from_resid( file_path, selected_resid
     ))
 
 
@@ -190,18 +190,18 @@ def make_restraint_plumed(
 def make_deepfe_plumed(
         conf: Optional[str] = None,
         cv_file: Optional[str] = None,
-        selected_id: Optional[List[int]] = None,
+        selected_resid: Optional[List[int]] = None,
         trust_lvl_1: float = 1.0,
         trust_lvl_2: float = 2.0,
         model_list: List[str] = ["graph.pb"],
         stride: int = 100,
         output: str = "plm.out",
-        mode: str = "torsion"    
+        mode: str = "torsion"
     ):
     content_list = []
     if mode == "torsion":
         cv_content_list, cv_name_list = \
-            make_torsion_list_from_file(conf, selected_id)
+            make_torsion_list_from_file(conf, selected_resid)
         content_list += cv_content_list
     elif mode == "custom":
         ret, cv_name_list, _ = user_plumed_def(cv_file, stride, output)
@@ -210,5 +210,5 @@ def make_deepfe_plumed(
         raise RuntimeError("Unknown mode for making plumed files.")
     deepfe_string = make_deepfe_bias(cv_name_list, trust_lvl_1, trust_lvl_2, model_list)
     content_list.append(deepfe_string)
-    content_list.append( make_print(cv_name_list, stride, output) )
+    content_list.append(make_print(cv_name_list, stride, output))
     return list_to_string(content_list, split_sign="\n")

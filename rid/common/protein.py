@@ -27,12 +27,12 @@ def get_dihedral_info(file_path: str):
     return dihedral_angle
 
 
-def get_dihedral_from_resid(file_path: str, selected_id: List[int]):
-    if len(selected_id) == 0:
+def get_dihedral_from_resid(file_path: str, selected_resid: List[int]):
+    if len(selected_resid) == 0:
         return []
     u = mda.Universe(file_path)
     selected_dihedral_angle = {}
-    for sid in selected_id:
+    for sid in selected_resid:
         residue = u.residues[sid - 1]
         selected_dihedral_angle[sid] = {}
         if residue.phi_selection() is not None:

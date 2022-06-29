@@ -105,3 +105,6 @@ mdp_parameters = {
         "rvdw": "1.0"
     }
 }
+
+gmx_prep_cmd = "gmx grompp"
+gmx_run_cmd = "gmx mdrun"

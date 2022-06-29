@@ -8,9 +8,16 @@ from dflow.python import (
 import json, shutil
 from typing import Tuple, List, Optional, Dict
 from pathlib import Path
-from rid.constants import expore_task_pattern, md_mdp_name, plumed_input_name
-from rid.common.gromacs import make_md_mdp_from_config
-from rid.utils import write_txt
+from rid.constants import (
+        explore_task_pattern, 
+        gmx_conf_name,
+        gmx_top_name,
+        gmx_mdp_name, 
+        plumed_input_name,
+        plumed_output_name
+    )
+from rid.task.builder import MDTaskBuilder
+from rid.utils import save_pkl
 
 
 class PrepExplore(OP):
@@ -19,12 +26,14 @@ class PrepExplore(OP):
     def get_input_sign(cls):
         return OPIOSign(
             {
-                "models": Optional[Artifact(List[Path])],
-                "trust_level_0": float,
-                "trust_level_1": float,
+                "models": Artifact(List[Path]),
                 "topology": Artifact(Path),
-                "conformations": Artifact(List[Path]),
-                "md_parameters": Dict,
+                "conf": Artifact(Path),
+                "trust_lvl_1": float,
+                "trust_lvl_2": float,
+                "gmx_config": Dict,
+                "cv_config": Dict,
+                "task_id": int
             }
         )
 
@@ -32,8 +41,7 @@ class PrepExplore(OP):
     def get_output_sign(cls):
         return OPIOSign(
             {
-                "msg": str,
-                "task_list": Artifact(List[Path]),
+                "task_path": Artifact(Path),
             }
         )
 
@@ -42,26 +50,33 @@ class PrepExplore(OP):
         self,
         op_in: OPIO,
     ) -> OPIO:
-        assert op_in["topology"].exists()
-        for idx, conf in enumerate(op_in["conformations"]):
-            assert conf.exists()
-            sub_task_path = Path(expore_task_pattern.format(idx))
-            sub_task_path.mkdir(exist_ok=True, parents=True)
-            shutil.copy(conf, sub_task_path.joinpath(conf.name))
-            shutil.copy(op_in["topology"], sub_task_path.joinpath(op_in["topology"].name))
-            sub_task_path.joinpath(md_mdp_name).write_text(
-                make_md_mdp_from_config(op_in["md_parameters"])
-            )
-            sub_task_path.joinpath(md_mdp_name).write_text(
-                make_md_mdp_from_config(op_in["md_parameters"])
-            )
-
-
-        out_msg = op_in["msg"]
+        if op_in["cv_config"]["mode"] == "torsion":
+            cv_file = None,
+            selected_resid = op_in["cv_config"]["selected_resid"]
+        elif op_in["cv_config"]["mode"] == "custom":
+            cv_file = op_in["cv_config"]["cv_file"],
+            selected_resid = None
+        gmx_task_builder = MDTaskBuilder(
+            conf = op_in["conf"],
+            topology = op_in["topology"],
+            gmx_config = op_in["gmx_config"],
+            cv_file = cv_file,
+            selected_resid = selected_resid,
+            trust_lvl_1 = op_in["trust_lvl_1"],
+            trust_lvl_2 = op_in["trust_lvl_2"],
+            model_list = op_in["models"],
+            plumed_output = plumed_output_name,
+            cv_mode = op_in["cv_config"]["mode"]
+        )
+        gmx_task = gmx_task_builder.build()
+        task_path = Path(explore_task_pattern.format(op_in["task_id"]))
+        task_path.mkdir(exist_ok=True, parents=True)
+        for fname, fconts in gmx_task.files.items():
+            with open(task_path.joinpath(fname), fconts[1]) as ff:
+                ff.write(fconts[0])
         op_out = OPIO(
             {
-                "msg": out_msg,
-                "out_art": Path("bar.txt"),
+                "task_path": task_path
             }
         )
         return op_out

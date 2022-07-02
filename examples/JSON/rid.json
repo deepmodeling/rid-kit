@@ -1,0 +1,22 @@
+{
+    "name": "test",
+    "numb_walker": 2,
+    "numb_iter": 2,
+    "trust_lvl_1": 2,
+    "trust_lvl_2": 3,
+    "init_models": [],
+    
+    "CV": {
+        "mode": "torsion",
+        "selected_resid": [],
+        "cv_file":""
+    },
+
+    "ExploreMDConfig": {
+        "nsteps": 1000,
+        "output_freq": 10,
+        "temperature": 300,
+        "dt": 0.002,
+        "output_mode": "both"
+    }
+}

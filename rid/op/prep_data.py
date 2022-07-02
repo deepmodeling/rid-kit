@@ -4,36 +4,27 @@ from dflow.python import (
     OPIOSign,
     Artifact
 )
-
+import os
 import json, shutil
 from typing import Tuple, List, Optional, Dict
 from pathlib import Path
 from rid.constants import (
-        explore_task_pattern, 
-        gmx_conf_name,
-        gmx_top_name,
-        gmx_mdp_name, 
-        plumed_input_name,
-        plumed_output_name
+        data_new,
+        data_raw
     )
 from rid.task.builder import EnhcMDTaskBuilder
-from rid.utils import save_pkl
+from rid.utils import load_txt, save_txt
+import numpy as np
 
 
-class PrepExplore(OP):
+class CollectData(OP):
 
     @classmethod
     def get_input_sign(cls):
         return OPIOSign(
             {
-                "models": Artifact(List[Path]),
-                "topology": Artifact(Path),
-                "conf": Artifact(Path),
-                "trust_lvl_1": float,
-                "trust_lvl_2": float,
-                "gmx_config": Dict,
-                "cv_config": Dict,
-                "task_id": int
+                "forces": Artifact(List[Path]),
+                "centers": Artifact(List[Path])
             }
         )
 
@@ -41,7 +32,7 @@ class PrepExplore(OP):
     def get_output_sign(cls):
         return OPIOSign(
             {
-                "task_path": Artifact(Path),
+                "data_new": Artifact(Path),
             }
         )
 
@@ -49,34 +40,59 @@ class PrepExplore(OP):
     def execute(
         self,
         op_in: OPIO,
-    ) -> OPIO:
-        if op_in["cv_config"]["mode"] == "torsion":
-            cv_file = None,
-            selected_resid = op_in["cv_config"]["selected_resid"]
-        elif op_in["cv_config"]["mode"] == "custom":
-            cv_file = op_in["cv_config"]["cv_file"],
-            selected_resid = None
-        gmx_task_builder = EnhcMDTaskBuilder(
-            conf = op_in["conf"],
-            topology = op_in["topology"],
-            gmx_config = op_in["gmx_config"],
-            cv_file = cv_file,
-            selected_resid = selected_resid,
-            trust_lvl_1 = op_in["trust_lvl_1"],
-            trust_lvl_2 = op_in["trust_lvl_2"],
-            model_list = op_in["models"],
-            plumed_output = plumed_output_name,
-            cv_mode = op_in["cv_config"]["mode"]
-        )
-        gmx_task = gmx_task_builder.build()
-        task_path = Path(explore_task_pattern.format(op_in["task_id"]))
-        task_path.mkdir(exist_ok=True, parents=True)
-        for fname, fconts in gmx_task.files.items():
-            with open(task_path.joinpath(fname), fconts[1]) as ff:
-                ff.write(fconts[0])
+        ) -> OPIO:
+        forces = []
+        centers = []
+        for idx in range(len(op_in["forces"])):
+            force = load_txt(op_in["forces"][idx])
+            center = load_txt(op_in["centers"][idx])
+            forces = np.append(forces, force)
+            centers = np.append(centers, center)
+        forces = np.reshape(forces, [len(op_in["forces"]), -1])
+        centers = np.reshape(centers, [len(op_in["forces"]), -1])
+        data = np.concatenate((centers, forces), axis=1)
+        np.savetxt(data_new, data, fmt="%.6e")
         op_out = OPIO(
             {
-                "task_path": task_path
+                "data_new": data_new
+            }
+        )
+        return op_out
+
+
+class MergeData(OP):
+
+    @classmethod
+    def get_input_sign(cls):
+        return OPIOSign(
+            {
+                "data_old": Artifact(List[Path]),
+                "data_new": Artifact(List[Path])
+            }
+        )
+
+    @classmethod
+    def get_output_sign(cls):
+        return OPIOSign(
+            {
+                "data_raw": Artifact(Path),
+            }
+        )
+
+    @OP.exec_sign_check
+    def execute(
+        self,
+        op_in: OPIO,
+        ) -> OPIO:
+        if os.stat(op_in["data_new"]).st_size == 0:
+            return op_in["data_new"]
+        _data_old = load_txt(op_in["data_old"])
+        _data_new = load_txt(op_in["data_new"])
+        data = np.concatenate((_data_old, _data_new), axis=0)
+        np.savetxt(data_raw, data, fmt="%.6e")
+        op_out = OPIO(
+            {
+                "data_raw": data
             }
         )
         return op_out

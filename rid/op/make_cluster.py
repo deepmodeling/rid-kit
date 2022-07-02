@@ -13,7 +13,6 @@ from rid.constants import culster_selection_data_name, culster_selection_index_n
 import numpy as np
 
 
-
 class PrepSelector(OP):
 
     @classmethod

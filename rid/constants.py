@@ -6,6 +6,9 @@ culster_selection_index_name = "cls_sel.ndx"
 cv_init_label = "cv_init_{idx:d}.out"
 label_task_pattern = "{:03d}"
 force_out = "forces.out"
+data_new = "data.new"
+data_old = "data.old"
+data_raw = "data.raw"
 
 # PLUMED2 file names
 plumed_input_name = "plumed.dat"
@@ -27,9 +30,12 @@ sel_gro_name = "conf_{idx:d}.gro"
 
 
 # Tensorflow files
-tf_graph_name = "graph_{idx:03d}.pb"
+tf_model_name = "model_{idx:03d}.pb"
+N_grid = 100
+
 
 # Units
 kbT = (8.617343E-5) * 300
 beta = 1.0 / kbT
 f_cvt = 96.485
+inverse_f_cvt = 1 / f_cvt

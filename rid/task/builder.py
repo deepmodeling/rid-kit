@@ -6,8 +6,7 @@ from rid.constants import (
         gmx_top_name,
         gmx_mdp_name, 
         plumed_input_name,
-        plumed_output_name,
-        tf_graph_name
+        plumed_output_name
     )
 from rid.utils import read_binary, write_binary, read_txt, write_txt
 from rid.common.gromacs import make_md_mdp_from_config
@@ -54,8 +53,6 @@ class EnhcMDTaskBuilder(TaskBuilder):
         task_dict = {}
         task_dict.update(self.build_gmx())
         task_dict.update(self.build_plumed())
-        # for idx, graph in enumerate(self.model_list):
-        #     task_dict[tf_graph_name.format(idx=idx)] = (read_binary(graph), "wb")
         for fname, fconts in task_dict.items():
             self.task.add_file(fname, fconts)
         self.task.add_property({"num_models": len(self.model_list)})

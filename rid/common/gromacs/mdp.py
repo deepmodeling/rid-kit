@@ -56,6 +56,14 @@ def modify_output(
             "nstenergy": freq,
             "nstxtcout": 0
         }
+    elif output_mode == "none":
+        output_json = {
+            "nstxout": 0,
+            "nstvout": 0,
+            "nstfout": 0,
+            "nstenergy": 0,
+            "nstxtcout": 0
+        }
     else:
         raise RuntimeError("Unknown output mode. Please specify one from 'single', 'double' or 'both'.")
     return output_json

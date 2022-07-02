@@ -1,6 +1,6 @@
 import json
 import pickle
-from typing import Dict, List
+from typing import Dict, List, Union
 import numpy as np
 
 
@@ -42,6 +42,13 @@ def load_txt(
     ):
     data = np.loadtxt(fname, comments=comments)
     return data
+
+def save_txt(
+        fname: str,
+        fcont: Union[np.ndarray, List],
+        fmt: None
+    ):
+    np.savetxt(fname, fcont, fmt=fmt)
 
 
 def load_json(

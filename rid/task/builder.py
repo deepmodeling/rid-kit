@@ -1,6 +1,6 @@
 from rid.task.task import Task, TaskGroup
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 from rid.constants import (
         gmx_conf_name,
         gmx_top_name,
@@ -11,19 +11,17 @@ from rid.constants import (
     )
 from rid.utils import read_binary, write_binary, read_txt, write_txt
 from rid.common.gromacs import make_md_mdp_from_config
-from rid.common.plumed import make_deepfe_plumed, check_deepfe_input
+from rid.common.plumed import make_deepfe_plumed, check_deepfe_input, make_restraint_plumed
 
 
 class TaskBuilder(ABC):
-    def __init__():
-        pass
 
     @abstractmethod
     def build(self):
         pass
 
 
-class MDTaskBuilder(TaskBuilder):
+class EnhcMDTaskBuilder(TaskBuilder):
     def __init__(
         self,
         conf: Optional[str],
@@ -37,6 +35,7 @@ class MDTaskBuilder(TaskBuilder):
         plumed_output: str = "plm.out",
         cv_mode: str = "torsion"
     ):
+        super().__init__()
         self.conf = conf
         self.topology = topology
         self.gmx_config = gmx_config
@@ -77,6 +76,54 @@ class MDTaskBuilder(TaskBuilder):
         )
 
 
+class RestrainedMDTaskBuilder(TaskBuilder):
+    def __init__(
+        self,
+        conf: Optional[str],
+        topology: Optional[str],
+        gmx_config: Dict,
+        cv_file: Optional[str] = None,
+        selected_resid: Optional[List[int]] = None,
+        kappa: Union[int, float, List[Union[int, float]]] = 0.5,
+        at: Union[int, float, List[Union[int, float]]] = 1.0,
+        plumed_output: str = "plm.out",
+        cv_mode: str = "torsion"
+    ):
+        super().__init__()
+        self.conf = conf
+        self.topology = topology
+        self.gmx_config = gmx_config
+        self.stride = self.gmx_config["output_freq"]
+        self.cv_file = cv_file
+        self.selected_resid = selected_resid
+        self.plumed_output = plumed_output
+        self.cv_mode = cv_mode
+        self.kappa = kappa
+        self.at = at
+        self.task = Task()
+    
+    def build(self) -> Task:
+        task_dict = {}
+        task_dict.update(self.build_gmx())
+        task_dict.update(self.build_plumed())
+        for fname, fconts in task_dict.items():
+            self.task.add_file(fname, fconts)
+        return self.task
+    
+    def get_task(self):
+        return self.task
+     
+    def build_gmx(self):
+        return build_gmx_dict(self.conf, self.topology, self.gmx_config)
+        
+    def build_plumed(self):
+        return build_plumed_restraint_dict(
+            conf=self.conf, cv_file=self.cv_file, selected_resid=self.selected_resid,
+            kappa=self.kappa, at=self.at,
+            stride=self.stride, output=self.plumed_output, mode=self.cv_mode
+        )
+
+
 def build_gmx_dict(
         conf: str,
         topology: str,
@@ -105,6 +152,25 @@ def build_plumed_dict(
         conf=conf, cv_file=cv_file, selected_resid=selected_resid,
         trust_lvl_1=trust_lvl_1, trust_lvl_2=trust_lvl_2,
         model_list=model_list, stride=stride,
+        output=output, mode=mode
+    )
+    plumed_task_files[plumed_input_name] = (plm_content, "w")
+    return plumed_task_files
+
+def build_plumed_restraint_dict(
+        conf: Optional[str] = None,
+        cv_file: Optional[str] = None,
+        selected_resid: Optional[List[int]] = None,
+        kappa: Union[int, float, List[Union[int, float]]] = 0.5,
+        at: Union[int, float, List[Union[int, float]]] = 1.0,
+        stride: int = 100,
+        output: str = "plm.out",
+        mode: str = "torsion"    
+    ):
+    plumed_task_files = {}
+    plm_content = make_restraint_plumed(
+        conf=conf, cv_file=cv_file, selected_resid=selected_resid,
+        kappa=kappa, at=at, stride=stride,
         output=output, mode=mode
     )
     plumed_task_files[plumed_input_name] = (plm_content, "w")

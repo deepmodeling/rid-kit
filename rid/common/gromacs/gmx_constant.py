@@ -1,4 +1,10 @@
 
+
+# Gromacs command
+gmx_prep_cmd = "gmx grompp"
+gmx_run_cmd = "gmx mdrun"
+
+
 mdp_parameters = {
     "md": {
         "ns-type": "Grid", 
@@ -106,5 +112,3 @@ mdp_parameters = {
     }
 }
 
-gmx_prep_cmd = "gmx grompp"
-gmx_run_cmd = "gmx mdrun"

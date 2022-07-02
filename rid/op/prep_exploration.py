@@ -16,7 +16,7 @@ from rid.constants import (
         plumed_input_name,
         plumed_output_name
     )
-from rid.task.builder import MDTaskBuilder
+from rid.task.builder import EnhcMDTaskBuilder
 from rid.utils import save_pkl
 
 
@@ -56,7 +56,7 @@ class PrepExplore(OP):
         elif op_in["cv_config"]["mode"] == "custom":
             cv_file = op_in["cv_config"]["cv_file"],
             selected_resid = None
-        gmx_task_builder = MDTaskBuilder(
+        gmx_task_builder = EnhcMDTaskBuilder(
             conf = op_in["conf"],
             topology = op_in["topology"],
             gmx_config = op_in["gmx_config"],

@@ -1,6 +1,7 @@
 import os
 import time
 import sys
+import logging
 try:
     import tensorflow.compat.v1 as tf
     tf.disable_v2_behavior()
@@ -12,6 +13,15 @@ from tensorflow.python.training import moving_averages
 from rid.constants import kbT, beta, N_grid, inverse_f_cvt
 
 tf_precision = tf.float32
+
+
+logging.basicConfig(
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    level=os.environ.get("LOGLEVEL", "INFO").upper(),
+    stream=sys.stdout,
+)
+logger = logging.getLogger(__name__)
 
 
 class Reader(object):
@@ -26,12 +36,12 @@ class Reader(object):
         self.batch_size_old = int(
             self.batch_size * self.old_ratio / (1. + self.old_ratio))
         self.batch_size_new = self.batch_size - self.batch_size_old
-        self.cv_dim_list = config.cv_dim_list
-        self.cv_dim = sum(self.cv_dim_list)
+        self.cv_dim = config.cv_dim
         self.drop_out_rate = config.drop_out_rate
+        self.angular_mask = config.angular_mask
 
     def prepare(self):
-        self.n_input = sum(self.cv_dim_list)
+        self.n_input = self.cv_dim
         self.index_count_all = 0
         self.index_count_new = 0
         self.index_count_old = 0
@@ -136,10 +146,12 @@ class Model(object):
         self.restart = config.restart
         self.resnet = config.resnet
         self.graph_file = config.graph_file
-        self.cv_dim_list = config.cv_dim_list
-        self.cv_dim = sum(self.cv_dim_list)
-        self.cv_dih_dim = self.cv_dim_list[0]
-        self.cv_dist_dim = self.cv_dim_list[1]
+        self.cv_dim = int(config.cv_dim)
+        self.angular_mask = np.array(config.angular_mask)
+        self.angular_dim = np.sum(self.angular_mask, dtype=int)
+        self.non_angular_dim = self.cv_dim - self.angular_dim
+        self.angular_mask_boolean = (self.angular_mask == 1)
+        self.non_angular_mask_boolean = (self.angular_mask == 0)
         if self.graph_file is not None:
             self.graph = self.load_graph(self.graph_file, 'load')
         else:
@@ -247,10 +259,10 @@ class Model(object):
         current_lr = self.sess.run(tf.to_double(self.learning_rate))
         if self.display_in_training:
             if reader.use_mix:
-                print("epoch: %3u, ab_err_n: %.4e, rel_err_n: %.4e, ab_err_o: %.4e, rel_err_o: %.4e, lr: %.4e"
+                logger.info("epoch: %3u, ab_err_n: %.4e, rel_err_n: %.4e, ab_err_o: %.4e, rel_err_o: %.4e, lr: %.4e"
                       % (epoch_used, error, error2, error_old, error_old2, current_lr))
             else:
-                print("epoch: %3u, ab_err: %.4e, rel_err: %.4e, lr: %.4e" %
+                logger.info("epoch: %3u, ab_err: %.4e, rel_err: %.4e, lr: %.4e" %
                       (epoch_used, error, error2, current_lr))
 
         while epoch_used < reader.num_epoch:
@@ -276,18 +288,14 @@ class Model(object):
                         tf.to_double(self.learning_rate))
                     if self.display_in_training:
                         if reader.use_mix:
-                            print("epoch: %3u, ab_err_n: %.4e, rel_err_n: %.4e, ab_err_o: %.4e, rel_err_o: %.4e, lr: %.4e"
+                            logger.info("epoch: %3u, ab_err_n: %.4e, rel_err_n: %.4e, ab_err_o: %.4e, rel_err_o: %.4e, lr: %.4e"
                                   % (epoch_used, error, error2, error_old, error_old2, current_lr))
                         else:
-                            print("epoch: %3u, ab_err: %.4e, rel_err: %.4e, lr: %.4e" % (
+                            logger.info("epoch: %3u, ab_err: %.4e, rel_err: %.4e, lr: %.4e" % (
                                 epoch_used, error, error2, current_lr))
                         sys.stdout.flush()
-        # np.savetxt('errors.dat', np.sqrt(self.sess.run(self.rel_error_k,
-        #                         feed_dict={self.inputs_train: reader.inputs_train,
-        #                         self.is_training: False})))
-
         end_time = time.time()
-        print("running time: %.3f s" % (end_time-start_time))
+        logger.info("running time: %.3f s" % (end_time-start_time))
 
     def compute_statistic(self,
                           reader):
@@ -298,13 +306,18 @@ class Model(object):
             dold = reader.get_data()
         da = np.average(dold[:, 0:self.cv_dim], axis=0)
         ds = np.std(dold[:, 0:self.cv_dim], axis=0)
-        da[:self.cv_dih_dim] = 0.0
+        # da[:self.cv_dih_dim] = 0.0
+        da[self.angular_mask_boolean] = 0.0
         if all(ds != 0):
             ds = 1./(ds)
-        ds[:self.cv_dih_dim] = 1.0
-        for ii in range(self.cv_dih_dim, self.cv_dim):
-            if ds[ii] > max_scale:
-                ds[ii] = max_scale
+        # ds[:self.cv_dih_dim] = 1.0
+        ds[self.angular_mask_boolean] = 1.0
+        non_angular_cv = ds[self.non_angular_mask_boolean]
+        non_angular_cv[non_angular_cv>max_scale] = max_scale
+        ds[self.non_angular_mask_boolean] = non_angular_cv
+        # for ii in range(self.cv_dih_dim, self.cv_dim):
+        #     if ds[ii] > max_scale:
+        #         ds[ii] = max_scale
         return da, ds
 
     def build_force(self,
@@ -330,11 +343,17 @@ class Model(object):
             # t_shift = tf.constant(shift, name='input_shift')
             # t_scale = tf.constant(scale, name='input_scale')
             cvs = (cvs - t_shift) * t_scale
-        angles = tf.slice(cvs, [0, 0], [-1, self.cv_dih_dim], name='angles')
-        dists = tf.slice(cvs, [0, self.cv_dih_dim],
-                         [-1, self.cv_dist_dim], name='dists')
-        # print(angles.get_shape().as_list(), cv_dim)
-        # print(dists.get_shape().as_list(), cv_dim)
+        # angles = tf.slice(cvs, [0, 0], [-1, self.cv_dih_dim], name='angles')
+        angles = tf.boolean_mask(
+                cvs, self.angular_mask_boolean, axis=1, name='angles'
+                )
+        angles = tf.reshape(angles, [-1, self.angular_dim])
+        dists = tf.boolean_mask(
+                cvs, self.non_angular_mask_boolean, axis=1, name='dists'
+                )
+        dists = tf.reshape(dists, [-1, self.non_angular_dim])
+        # dists = tf.slice(cvs, [0, self.cv_dih_dim],
+        #                  [-1, self.cv_dist_dim], name='dists')
         forces_hat = tf.slice(
             inputs, [0, self.cv_dim], [-1, self.cv_dim], name='forces')
         inputs = tf.concat([tf.cos(angles), tf.sin(angles), dists], 1)
@@ -424,6 +443,7 @@ class Model(object):
                    with_timestep=False):
         with tf.variable_scope(name, reuse=reuse):
             shape = inputs.get_shape().as_list()
+            
             if init is not None:
                 a_i_w = init[0]
                 a_i_b = init[1]

@@ -2,7 +2,11 @@ import os
 import argparse
 import sys
 import logging
-import tensorflow as tf
+try:
+    import tensorflow.compat.v1 as tf
+    tf.disable_v2_behavior()
+except ImportError:
+    import tensorflow as tf
 from tensorflow.python.framework import graph_util
 from tensorflow.python.framework import ops
 

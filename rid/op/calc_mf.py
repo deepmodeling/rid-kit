@@ -23,7 +23,7 @@ class CalcMF(OP):
         return OPIOSign(
             {
                 "plm_out": Artifact(Path),
-                "kappa": List[float],
+                "kappas": List[float],
                 "at": Artifact(Path),
                 "tail": float,
                 "angular_mask": Optional[Union[np.ndarray, List]],
@@ -67,7 +67,7 @@ class CalcMF(OP):
         angular_diff[angular_diff < -np.pi] += 2 * np.pi
         angular_diff[angular_diff >  np.pi] -= 2 * np.pi
         diff[angular_boolean] = angular_diff
-        ff = np.multiply(op_in["kappa"], diff)
+        ff = np.multiply(op_in["kappas"], diff)
         np.savetxt(force_out,  np.reshape(ff, [1, -1]), fmt='%.10e')
         op_out = OPIO(
             {

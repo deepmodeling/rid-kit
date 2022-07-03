@@ -9,7 +9,7 @@ def run_command(
 
     stdout = subprocess.PIPE
     stderr = subprocess.PIPE
-
+    
     with subprocess.Popen(
         args=cmd,
         stdin=subprocess.PIPE,
@@ -18,11 +18,6 @@ def run_command(
         encoding="utf-8",
         shell=shell
     ) as subp:
-        if stdin is not None:
-            subp.stdin.write(stdin)
-            subp.stdin.close()
-        subp.wait()
-        out, err = subp.communicate()
+        out, err = subp.communicate(input=stdin)
         return_code = subp.poll()
     return return_code, out, err
-

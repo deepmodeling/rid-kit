@@ -54,7 +54,7 @@ class CollectData(OP):
         np.savetxt(data_new, data, fmt="%.6e")
         op_out = OPIO(
             {
-                "data_new": data_new
+                "data_new": Path(data_new)
             }
         )
         return op_out
@@ -66,8 +66,8 @@ class MergeData(OP):
     def get_input_sign(cls):
         return OPIOSign(
             {
-                "data_old": Artifact(List[Path]),
-                "data_new": Artifact(List[Path])
+                "data_old": Artifact(Path),
+                "data_new": Artifact(Path)
             }
         )
 
@@ -92,7 +92,7 @@ class MergeData(OP):
         np.savetxt(data_raw, data, fmt="%.6e")
         op_out = OPIO(
             {
-                "data_raw": data
+                "data_raw": Path(data_raw)
             }
         )
         return op_out

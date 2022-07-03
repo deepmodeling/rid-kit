@@ -3,7 +3,9 @@ explore_task_pattern = "{:03d}"
 explore_task_file = "explore_{walker:03d}.pkl"
 culster_selection_data_name = "cls_sel.out"
 culster_selection_index_name = "cls_sel.ndx"
+sel_ndx_name = "sel.ndx"
 cv_init_label = "cv_init_{idx:d}.out"
+model_devi_name = "model_devi.txt"
 label_task_pattern = "{:03d}"
 force_out = "forces.out"
 data_new = "data.new"
@@ -27,6 +29,7 @@ restraint_md_mdp_name = "grompp_restraint.mdp"
 trr_name = "traj.trr"
 xtc_name = "traj_comp.xtc"
 sel_gro_name = "conf_{idx:d}.gro"
+sel_gro_name_gmx = "conf_.gro"
 
 
 # Tensorflow files
@@ -43,3 +46,4 @@ inverse_f_cvt = 1 / f_cvt
 # precision
 cls_ndx_precision = "%d"
 cls_sel_precision = "%.6e"
+model_devi_precision = "%.6e"

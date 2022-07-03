@@ -3,7 +3,7 @@
 # Gromacs command
 gmx_prep_cmd = "gmx grompp"
 gmx_run_cmd = "gmx mdrun"
-
+gmx_trjconv_cmd = "gmx trjconv"
 
 mdp_parameters = {
     "md": {

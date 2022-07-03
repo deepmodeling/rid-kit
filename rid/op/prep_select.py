@@ -18,7 +18,7 @@ from rid.constants import (
 import numpy as np
 
 
-class PrepSelector(OP):
+class PrepSelect(OP):
 
     @classmethod
     def get_input_sign(cls):

@@ -20,7 +20,7 @@ from rid.task.builder import RestrainedMDTaskBuilder
 from rid.utils import load_txt
 
 
-class PrepExplore(OP):
+class PrepLabel(OP):
 
     @classmethod
     def get_input_sign(cls):
@@ -32,7 +32,7 @@ class PrepExplore(OP):
                 "cv_config": Dict,
                 "task_id": int,
                 "kappas": List[float],
-                "at": Artifact(List[Path()])
+                "at": Artifact(Path)
             }
         )
 
@@ -62,7 +62,7 @@ class PrepExplore(OP):
             gmx_config = op_in["gmx_config"],
             cv_file = cv_file,
             selected_resid = selected_resid,
-            kappa = op_in["kappa"],
+            kappa = op_in["kappas"],
             at = at,
             plumed_output = plumed_output_name,
             cv_mode = op_in["cv_config"]["mode"]

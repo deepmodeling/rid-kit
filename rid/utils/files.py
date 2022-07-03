@@ -38,9 +38,10 @@ def write_binary(
 
 def load_txt(
         fname: str,
+        dtype = float,
         comments: List[str] = ["#"]
     ):
-    data = np.loadtxt(fname, comments=comments)
+    data = np.loadtxt(fname, comments=comments, dtype=dtype)
     return data
 
 def save_txt(

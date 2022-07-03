@@ -1,6 +1,7 @@
 from rid.task.task import Task
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Sequence
+import numpy as np
 from rid.constants import (
         gmx_conf_name,
         gmx_top_name,
@@ -165,8 +166,8 @@ def build_plumed_restraint_dict(
         conf: Optional[str] = None,
         cv_file: Optional[str] = None,
         selected_resid: Optional[List[int]] = None,
-        kappa: Union[int, float, List[Union[int, float]]] = 0.5,
-        at: Union[int, float, List[Union[int, float]]] = 1.0,
+        kappa: Union[int, float, Sequence, np.ndarray] = 0.5,
+        at: Union[int, float, Sequence, np.ndarray] = 1.0,
         stride: int = 100,
         output: str = "plm.out",
         mode: str = "torsion"    

@@ -42,7 +42,6 @@ class RunExplore(OP):
         return OPIOSign(
             {
                 "task_path": Artifact(Path),
-                "max_warning": Parameter(int, default=0),
                 "md_config": Dict
             }
         )
@@ -73,7 +72,7 @@ class RunExplore(OP):
         gmx_run_cmd = get_mdrun_cmd(
             tpr=gmx_tpr_name,
             plumed=plumed_input_name,
-            max_warning=op_in["max_warning"],
+            max_warning=op_in["md_config"]["max_warning"],
             nt=op_in["md_config"]["nt"],
             ntmpi=op_in["md_config"]["ntmpi"]
         )

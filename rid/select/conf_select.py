@@ -32,20 +32,10 @@ class ConfSelector:
         stds = make_std(data, models=self.model_list)
         # selected_idx, selected_data = select_from_devi(data, stds, self.threshold)
         # return selected_idx, selected_data
-    
-
-def slice_xtc(
-        xtc: str,
-        top: str,
-        selected_idx: Sequence
-    ):
-    traj = md.load_xtc(xtc, top=top)
-    for sel in selected_idx:
-        frame = traj[sel]
-        frame.save_gro(sel_gro_name.format(idx=sel))
 
 
 def select_from_devi(model_devi, threshold):
+    logger.info("select conformations by model deviations.")
     selected_idx = []
     for idx, _std in enumerate(model_devi):
         if _std > threshold:
@@ -56,32 +46,3 @@ def select_from_devi(model_devi, threshold):
     message += "number of angles than %f is %d" % (threshold, len(selected_idx))
     logger.info(message)
     return selected_idx
-
-
-def adjust_trust_lvl(lvl1, lvl2, origin_lvl1, origin_lvl2, numb_cluster, threshold):
-    # adaptive trust level
-    if numb_cluster < threshold:
-        enhc_trust_lvl_1 = lvl1 * 1.5
-        enhc_trust_lvl_2 = lvl2 * 1.5
-        # enhc_trust_lvl_2 = enhc_trust_lvl_1 + 1 
-        # TODO: would it be OK to use 1?
-    else:
-        enhc_trust_lvl_1 = origin_lvl1
-        enhc_trust_lvl_2 = origin_lvl2
-    if enhc_trust_lvl_1 > origin_lvl1 * 8:
-        enhc_trust_lvl_1 = origin_lvl1
-        enhc_trust_lvl_2 = origin_lvl2
-    return enhc_trust_lvl_1, enhc_trust_lvl_2
-
-# def adjust_trust_lvl_mode(numb_cluster, threshold):
-#     # adaptive trust level
-#     mode = None
-#     if numb_cluster < threshold:
-#         return "increase"
-#     else:
-#         enhc_trust_lvl_1 = origin_lvl1
-#         enhc_trust_lvl_2 = origin_lvl2
-#     if enhc_trust_lvl_1 > origin_lvl1 * 8:
-#         enhc_trust_lvl_1 = origin_lvl1
-#         enhc_trust_lvl_2 = origin_lvl2
-#     return enhc_trust_lvl_1, enhc_trust_lvl_2

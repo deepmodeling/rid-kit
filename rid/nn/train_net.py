@@ -1,3 +1,5 @@
+import os, sys
+import logging
 import argparse
 try:
     import tensorflow.compat.v1 as tf
@@ -6,6 +8,15 @@ except ImportError:
     import tensorflow as tf
 import numpy as np
 from rid.nn.model import Reader, Model
+
+
+logging.basicConfig(
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    level=os.environ.get("LOGLEVEL", "INFO").upper(),
+    stream=sys.stdout,
+)
+logger = logging.getLogger(__name__)
 
 
 class Config(object):
@@ -22,13 +33,14 @@ class Config(object):
         self.decay_steps = 10
         self.decay_steps_inner = 0
         self.decay_rate = 0.96
-        self.data_path = './data/'
+        self.data_path = './'
         self.restart = False
         self.resnet = False
         self.graph_file = None
         self.cv_dim = cv_dim
         self.display_in_training = True
         self.drop_out_rate = 0.5
+        self.angular_mask = None
 
 
 def reset_batch_size(config):
@@ -39,23 +51,24 @@ def reset_batch_size(config):
 
 
 def print_conf(config, nthreads):
-    print("# restart           " + str(config.restart))
-    print("# num_threads       %d" % nthreads)
-    print("# neurons           " + str(config.n_neuron))
-    print("# batch size        " + str(config.batch_size))
-    print("# num_epoch         " + str(config.num_epoch))
-    print("# use_mix           " + str(config.use_mix))
-    print("# old_ratio         " + str(config.old_ratio))
-    print("# lr_0              " + str(config.starter_learning_rate))
-    print("# drop out rate     " + str(config.drop_out_rate))
-    print("# decay_steps       " + str(config.decay_steps))
-    print("# decay_steps_inner " + str(config.decay_steps_inner))
-    print("# decay_rate        " + str(config.decay_rate))
-    print("# resnet            " + str(config.resnet))
-    print("# graph_file        " + str(config.graph_file))
+    logger.info("# restart           " + str(config.restart))
+    logger.info("# num_threads       %d" % nthreads)
+    logger.info("# neurons           " + str(config.n_neuron))
+    logger.info("# batch size        " + str(config.batch_size))
+    logger.info("# num_epoch         " + str(config.num_epoch))
+    logger.info("# use_mix           " + str(config.use_mix))
+    logger.info("# old_ratio         " + str(config.old_ratio))
+    logger.info("# lr_0              " + str(config.starter_learning_rate))
+    logger.info("# drop out rate     " + str(config.drop_out_rate))
+    logger.info("# decay_steps       " + str(config.decay_steps))
+    logger.info("# decay_steps_inner " + str(config.decay_steps_inner))
+    logger.info("# decay_rate        " + str(config.decay_rate))
+    logger.info("# resnet            " + str(config.resnet))
+    logger.info("# graph_file        " + str(config.graph_file))
 
 
 def set_conf(cv_dim,
+             angular_mask,
              neurons=[240, 120, 60, 30],
              numb_threads=8,
              resnet=True,
@@ -82,11 +95,13 @@ def set_conf(cv_dim,
     config.restart = restart
     config.resnet = resnet
     config.drop_out_rate = drop_out_rate
+    config.angular_mask = angular_mask
     return config
 
 
 def train(
         cv_dim,
+        angular_mask,
         neurons=[240, 120, 60, 30],
         numb_threads=8,
         resnet=True,
@@ -103,6 +118,7 @@ def train(
         drop_out_rate=0.5
     ):
     config = set_conf(cv_dim,
+                      angular_mask=angular_mask,
                       neurons=neurons,
                       numb_threads=numb_threads,
                       resnet=resnet,

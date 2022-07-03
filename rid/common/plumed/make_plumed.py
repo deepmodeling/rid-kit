@@ -3,9 +3,9 @@ import os
 import sys
 import logging
 import numpy as np
-from typing import List, Union, Tuple, Dict, Optional
+from typing import List, Union, Tuple, Dict, Optional, Sequence
 from rid.utils import list_to_string
-from rid.common.protein import get_dihedral_from_resid
+from rid.common.mol import get_dihedral_from_resid
 from rid.common.plumed.plumed_constant import (
     dihedral_name,
     dihedral_def_from_atoms,
@@ -49,6 +49,7 @@ def make_restraint_list(
         kappa: List[Union[int, float, str]],
         at: List[Union[int, float, str]]
     ) -> Tuple[List, List]:
+    print(at)
     res_names = []
     res_list = []
     assert len(cv_list) == len(kappa), "Make sure `kappa` and `cv_names` have the same length."
@@ -171,9 +172,9 @@ def make_torsion_list_from_file(
 def make_restraint_plumed(
         conf: Optional[str] = None,
         cv_file: Optional[str] = None,
-        selected_id: Optional[List[int]] = None,
-        kappa: Union[int, float, List[Union[int, float]]] = 0.5,
-        at: Union[int, float, List[Union[int, float]]] = 1.0,
+        selected_resid: Optional[List[int]] = None,
+        kappa: Union[int, float, Sequence, np.ndarray] = 0.5,
+        at: Union[int, float, Sequence, np.ndarray] = 1.0,
         stride: int = 100,
         output: str = "plm.out",
         mode: str = "torsion"    
@@ -181,7 +182,7 @@ def make_restraint_plumed(
     content_list = []
     if mode == "torsion":
         cv_content_list, cv_name_list = \
-            make_torsion_list_from_file(conf, selected_id)
+            make_torsion_list_from_file(conf, selected_resid)
         content_list += cv_content_list
     elif mode == "custom":
         ret, cv_name_list, _ = user_plumed_def(cv_file, stride, output)
@@ -189,9 +190,9 @@ def make_restraint_plumed(
     else:
         raise RuntimeError("Unknown mode for making plumed files.")
 
-    if not isinstance(kappa, List):
+    if isinstance(kappa, int) or isinstance(kappa, float):
         kappa = [kappa for _ in range(len(cv_name_list))]
-    if not isinstance(at, List):
+    if isinstance(at, int) or isinstance(at, float):
         at = [at for _ in range(len(cv_name_list))]
     res_list, _ = make_restraint_list(
         cv_name_list, kappa, at

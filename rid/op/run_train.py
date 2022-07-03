@@ -14,7 +14,7 @@ from rid.nn.train_net import train
 from rid.nn.freeze import freeze_model
 
 
-class RunExplore(OP):
+class TrainModel(OP):
 
     @classmethod
     def get_input_sign(cls):
@@ -22,6 +22,8 @@ class RunExplore(OP):
             {
                 "task_id": int,
                 "cv_dim": int,
+                "angular_mask": List,
+                "data": Artifact(Path),
                 "neurons": List,
                 "numb_threads": Parameter(int, default=8),
                 "resnet": Parameter(bool, default=True),
@@ -55,6 +57,7 @@ class RunExplore(OP):
         train(
             cv_dim=op_in["cv_dim"],
             neurons=op_in["neurons"],
+            angular_mask=op_in["angular_mask"],
             numb_threads=op_in["numb_threads"],
             resnet=op_in["resnet"],
             use_mix=op_in["use_mix"],
@@ -75,7 +78,7 @@ class RunExplore(OP):
         )
         op_out = OPIO(
             {
-                "model": out_put_name
+                "model": Path(out_put_name)
             }
         )
         return op_out

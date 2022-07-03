@@ -1,9 +1,11 @@
 import os
 import sys
-from typing import List, Dict
+from typing import List, Dict, Sequence
 import logging
 import MDAnalysis as mda
-
+import mdtraj as md
+from rid.constants import sel_gro_name_gmx, sel_gro_name
+from rid.common.gromacs.trjconv import slice_trjconv
 
 logging.basicConfig(
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
@@ -12,6 +14,7 @@ logging.basicConfig(
     stream=sys.stdout,
 )
 logger = logging.getLogger(__name__)
+
 
 def get_all_dihedral_index(file_path: str):
     u = mda.Universe(file_path)
@@ -55,4 +58,39 @@ def get_dihedral_from_resid(file_path: str, selected_resid: List[int]) -> Dict:
     return selected_dihedral_angle
 
 
+def slice_xtc_mdtraj(
+        xtc: str,
+        top: str,
+        selected_idx: Sequence,
+        output_format: str
+    ):
+    logger.info("slicing trajectories ...")
+    traj = md.load_xtc(xtc, top=top)
+    for sel in selected_idx:
+        frame = traj[sel]
+        frame.save_gro(output_format.format(idx=sel))
 
+
+def slice_xtc(
+        xtc: str,
+        top: str,
+        selected_idx: Sequence,
+        output: str,
+        style: str =  "gmx"
+    ):
+    if style == "gmx":
+        slice_trjconv(
+            xtc = xtc,
+            top = top,
+            selected_time = selected_idx,
+            output = output
+        )
+    elif style == "mdtraj":
+        slice_xtc_mdtraj(
+            xtc = xtc,
+            top = top,
+            selected_idx = selected_idx,
+            output_format=output
+        )
+    else:
+        raise RuntimeError("Unknown Style for Slicing Trajectory.")

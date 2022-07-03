@@ -46,7 +46,7 @@ def load_txt(
 def save_txt(
         fname: str,
         fcont: Union[np.ndarray, List],
-        fmt: None
+        fmt: str = "%.6e"
     ):
     np.savetxt(fname, fcont, fmt=fmt)
 

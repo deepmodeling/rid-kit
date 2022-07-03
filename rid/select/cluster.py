@@ -1,3 +1,4 @@
+import os, sys
 from typing import Union, List, Optional
 import logging
 import numpy as np
@@ -37,10 +38,14 @@ class Cluster:
         self.cls_sel = None
         self.max_selection = max_selection
     
-    def make_threshold(self, numb_cluster_upper, numb_cluster_lower):
+    def make_threshold(self, numb_cluster_lower, numb_cluster_upper):
         current_iter = 0
+        logger.info(f"set numb_cluster_upper to {numb_cluster_upper}")
+        logger.info(f"set numb_cluster_lower to {numb_cluster_lower}")
+        assert numb_cluster_lower < numb_cluster_upper, f"expect numb_cluster_upper > numb_cluster_lower, "
+        "got {numb_cluster_upper} < {numb_cluster_lower}"
         while current_iter < self.max_search_step:
-            logger.debug(f"making threshold attempt {current_iter}")
+            logger.info(f"making threshold attempt {current_iter}")
             cls_sel = sel_from_cluster(
                 self.cvs, self.threshold, angular_mask=self.angular_mask, 
                 weights=self.weights, max_selection=self.max_selection)
@@ -51,7 +56,8 @@ class Cluster:
                 self.threshold = self.threshold * self.enlarge_coeff
             else:
                 break
-            logger.debug(f"set threshold to {self.threshold}, get {test_numb_cluster} clusters.")
+            logger.info(f"set threshold to {self.threshold}, get {test_numb_cluster} clusters.")
+            current_iter += 1
         self.cls_sel = cls_sel
         return self.threshold
     
@@ -63,27 +69,28 @@ class Cluster:
         return self.cls_sel
         
 
-def cv_dist(cv1, cv2, angular_mask):
+def cv_dist(cv1, cv2, angular_mask, weights):
     diff = cv1 - cv2
     angular_boolean = (angular_mask == 1)
     angular_diff = diff[angular_boolean]
     angular_diff[angular_diff < -np.pi] += 2 * np.pi
     angular_diff[angular_diff >  np.pi] -= 2 * np.pi
     diff[angular_boolean] = angular_diff
-    return np.linalg.norm(diff)
+    return np.linalg.norm(diff * weights)
 
 
-def mk_dist(cv, angular_mask):
+def mk_dist(cv, angular_mask, weights):
     nframe = cv.shape[0]
     dist = np.zeros([nframe, nframe])
     for ii in range(nframe):
         for jj in range(ii+1, nframe):
-            dist[ii][jj] = cv_dist(cv[ii], cv[jj], angular_mask)
+            dist[ii][jj] = cv_dist(cv[ii], cv[jj], angular_mask, weights)
             dist[jj][ii] = dist[ii][jj]
     return dist
 
 
 def mk_cluster(dist, distance_threshold):
+    logger.info("clustering ...")
     cluster = skcluster.AgglomerativeClustering(n_clusters=None,
                                           linkage='average',
                                           affinity='precomputed',
@@ -96,8 +103,7 @@ def sel_from_cluster(cvs, threshold, angular_mask=None, weights=None, max_select
     if len(cvs) <= 1:
         return cvs
     weights = np.array(weights)
-    pair_weights = weights * weights.T
-    dist = mk_dist(cvs, angular_mask) * pair_weights
+    dist = mk_dist(cvs, angular_mask, weights) 
     labels = mk_cluster(dist, threshold)
     # make cluster map
     _cls_map = []
@@ -117,4 +123,5 @@ def sel_from_cluster(cvs, threshold, angular_mask=None, weights=None, max_select
         cls_sel.append(_ret[0])
     if len(cls_sel) > max_selection:
         cls_sel = cls_sel[:max_selection]
+        logger.info("selection number is beyond max selection, adjust to the max number.")
     return np.array(cls_sel, dtype=int)

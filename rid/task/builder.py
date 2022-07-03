@@ -1,4 +1,4 @@
-from rid.task.task import Task, TaskGroup
+from rid.task.task import Task
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional, Union
 from rid.constants import (
@@ -9,7 +9,7 @@ from rid.constants import (
         plumed_output_name
     )
 from rid.utils import read_binary, write_binary, read_txt, write_txt
-from rid.common.gromacs import make_md_mdp_from_config
+from rid.common.gromacs import make_md_mdp_from_config, make_md_mdp_string
 from rid.common.plumed import make_deepfe_plumed, check_deepfe_input, make_restraint_plumed
 
 
@@ -129,7 +129,14 @@ def build_gmx_dict(
     gmx_task_files = {}
     gmx_task_files[gmx_conf_name] = (read_txt(conf), "w")
     gmx_task_files[gmx_top_name]  = (read_txt(topology), "w")
-    gmx_task_files[gmx_mdp_name]  = (make_md_mdp_from_config(gmx_config), "w")
+    mdp_string = make_md_mdp_string(
+        nsteps = gmx_config["nsteps"], 
+        output_freq = gmx_config["output_freq"], 
+        temperature = gmx_config["temperature"], 
+        dt = gmx_config["dt"], 
+        output_mode = gmx_config["output_mode"]
+    )
+    gmx_task_files[gmx_mdp_name]  = (mdp_string, "w")
     return gmx_task_files
     
 

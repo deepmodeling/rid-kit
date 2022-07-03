@@ -7,7 +7,8 @@ from typing import (
     Tuple,
     Dict,
     Optional,
-    Any
+    Any,
+    Union
 )
 
 class Task():
@@ -34,7 +35,7 @@ class Task():
     def add_file(
             self,
             fname : str,
-            fcont : Tuple[Optional[str, bytes], str],
+            fcont : Tuple[Optional[Union[str, bytes]], str],
     ):
         """Add file to the task
         
@@ -58,47 +59,3 @@ class Task():
             The dict storing all files for the task. The file name is a key of the dict, and the file content is the corresponding value.
         """
         return self._files
-
-
-class TaskGroup(Sequence):
-    """A group of exploration tasks. Implemented as a `list` of `MDTask`.
-    """
-    def __init__(self):
-        super().__init__()
-        self.clear()
-
-    def __getitem__(self, ii:int) -> Task:
-        """Get the `ii`th task"""
-        return self.task_list[ii]
-
-    def __len__(self) -> int:
-        """Get the number of tasks in the group"""
-        return len(self.task_list)
-
-    def clear(self)->None:
-        self._task_list = []
-
-    @property
-    def task_list(self) -> List[Task]:
-        """Get the `list` of `MDTask`""" 
-        return self._task_list
-
-    def add_task(self, task: MDTask):
-        """Add one task to the group."""
-        self.task_list.append(task)
-        return self
-
-    def add_group(
-            self,
-            group : 'MDTaskGroup',
-    ):
-        """Add another group to the group."""
-        self._task_list = self._task_list + group._task_list
-        return self
-
-    def __add__(
-            self,
-            group : 'MDTaskGroup',
-    ):        
-        """Add another group to the group."""
-        return self.add_group(group)

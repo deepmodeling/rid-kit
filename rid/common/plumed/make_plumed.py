@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import logging
 import numpy as np
 from typing import List, Union, Tuple, Dict, Optional
 from rid.utils import list_to_string
@@ -14,10 +15,21 @@ from rid.common.plumed.plumed_constant import (
     restraint_prefix
 )
 
+
+logging.basicConfig(
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    level=os.environ.get("LOGLEVEL", "INFO").upper(),
+    stream=sys.stdout,
+)
+logger = logging.getLogger(__name__)
+
+
 angle_id = {
     "phi": 0,
     "psi": 1
 }
+
 
 def make_restraint(
         name: str,
@@ -86,6 +98,7 @@ def make_wholemolecules(atom_index):
 
 
 def user_plumed_def(cv_file, pstride, pfile):
+    logger.info("Custom CVs are created from plumed files.")
     ret = ""
     cv_names = []
     print_content = None
@@ -149,9 +162,10 @@ def make_torsion_list_from_file(
         file_path: str,
         selected_resid: List[int]
     ) -> Tuple[List, List]:
-    return make_torsion_list(
-        get_dihedral_from_resid( file_path, selected_resid
-    ))
+    cv_info = get_dihedral_from_resid( file_path, selected_resid)
+    logger.info("Create CVs (torsion) from selected residue ids.")
+    assert len(cv_info.keys()) > 0, "No valid CVs created."
+    return make_torsion_list(cv_info)
 
 
 def make_restraint_plumed(

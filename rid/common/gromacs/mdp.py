@@ -15,6 +15,7 @@ def make_mdp_from_json(
     content_list = []
     for key, value in mdp_json.items():
         content_list.append( make_mdp_line(key, value) )
+    content_list.sort()
     mdp_content = "\n".join(content_list)
     return mdp_content
 
@@ -123,10 +124,3 @@ def check_basic_argument(md_parameters_dict: Dict):
     assert "nsteps" in md_parameters_dict.keys()
     assert "output_freq" in md_parameters_dict.keys()
     assert "temperature" in md_parameters_dict.keys()
-
-
-
-if __name__ == "__main__":
-    new = make_md_mdp_string(2000, 20)
-    print(new)
-

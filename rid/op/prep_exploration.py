@@ -5,7 +5,6 @@ from dflow.python import (
     Artifact
 )
 
-import json, shutil
 from typing import Tuple, List, Optional, Dict
 from pathlib import Path
 from rid.constants import (
@@ -17,7 +16,6 @@ from rid.constants import (
         plumed_output_name
     )
 from rid.task.builder import EnhcMDTaskBuilder
-from rid.utils import save_pkl
 
 
 class PrepExplore(OP):
@@ -64,7 +62,7 @@ class PrepExplore(OP):
             selected_resid = selected_resid,
             trust_lvl_1 = op_in["trust_lvl_1"],
             trust_lvl_2 = op_in["trust_lvl_2"],
-            model_list = op_in["models"],
+            model_list = [str(model) for model in op_in["models"]],
             plumed_output = plumed_output_name,
             cv_mode = op_in["cv_config"]["mode"]
         )

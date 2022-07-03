@@ -23,7 +23,7 @@ def get_grompp_cmd(
     if index is not None:
         cmd_list += ["-n", index]
     if max_warning is not None:
-        cmd_list += ["-maxwarn", f"{max_warning}:d"]
+        cmd_list += ["-maxwarn", f"{max_warning:d}"]
     if output is not None:
         cmd_list += ["-o", output]
     if extra_parameters is not None:
@@ -42,7 +42,8 @@ def get_mdrun_cmd(
         cpi: Optional[str] = None,
         ntmpi: Optional[int] = None,
         nt: Optional[int] = None,
-        extra_parameters: Optional[Union[List, str]] = None
+        extra_parameters: Optional[Union[List, str]] = None,
+        max_warning: Optional[int] = None
     ):
     run_cmd = gmx_run_cmd.split()
     if tpr is not None:
@@ -50,11 +51,11 @@ def get_mdrun_cmd(
     if cpi is not None:
         run_cmd += ["-cpi", cpi]
     if plumed is not None:
-        run_cmd += ["-p", plumed]
+        run_cmd += ["-plumed", plumed]
     if ntmpi is not None:
-        run_cmd += ["-ntmpi", f"{ntmpi}:d"]
+        run_cmd += ["-ntmpi", f"{ntmpi:d}"]
     if nt is not None:
-        run_cmd += ["-nt", f"{nt}:d"]
+        run_cmd += ["-nt", f"{nt:d}"]
     if extra_parameters is not None:
         if isinstance(extra_parameters, List):
             run_cmd += extra_parameters

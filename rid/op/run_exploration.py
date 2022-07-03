@@ -2,9 +2,11 @@ from dflow.python import (
     OP,
     OPIO,
     OPIOSign,
-    Artifact
+    Artifact,
+    Parameter
 )
-
+import os, sys
+import logging
 import json, shutil
 from typing import Tuple, List, Optional, Dict
 from pathlib import Path
@@ -18,11 +20,19 @@ from rid.constants import (
         plumed_output_name,
         gmx_grompp_log,
         gmx_mdrun_log,
-        trr_name,
         xtc_name
     )
-from rid.utils import run_command, set_directory
+from rid.utils import run_command, set_directory, list_to_string
 from rid.common.gromacs.command import get_grompp_cmd, get_mdrun_cmd
+
+
+logging.basicConfig(
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    level=os.environ.get("LOGLEVEL", "INFO").upper(),
+    stream=sys.stdout,
+)
+logger = logging.getLogger(__name__)
 
 
 class RunExplore(OP):
@@ -31,7 +41,9 @@ class RunExplore(OP):
     def get_input_sign(cls):
         return OPIOSign(
             {
-                "task_path", Artifact(Path)
+                "task_path": Artifact(Path),
+                "max_warning": Parameter(int, default=0),
+                "md_config": Dict
             }
         )
 
@@ -55,15 +67,25 @@ class RunExplore(OP):
             mdp = gmx_mdp_name,
             conf = gmx_conf_name,
             topology = gmx_top_name,
-            output = gmx_tpr_name
+            output = gmx_tpr_name,
+            max_warning=op_in["max_warning"]
         )
         gmx_run_cmd = get_mdrun_cmd(
             tpr=gmx_tpr_name,
-            plumed=plumed_input_name
+            plumed=plumed_input_name,
+            max_warning=op_in["max_warning"],
+            nt=op_in["md_config"]["nt"],
+            ntmpi=op_in["md_config"]["ntmpi"]
         )
         with set_directory(op_in["task_path"]):
-            run_command(gmx_grompp_cmd)
-            run_command(gmx_run_cmd)
+            logger.info(list_to_string(gmx_grompp_cmd, " "))
+            return_code, out, err = run_command(gmx_grompp_cmd)
+            assert return_code == 0, err
+            logger.info(err)
+            logger.info(list_to_string(gmx_run_cmd, " "))
+            return_code, out, err = run_command(gmx_run_cmd)
+            assert return_code == 0, err
+            logger.info(err)
         
         op_out = OPIO(
             {

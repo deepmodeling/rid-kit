@@ -40,6 +40,7 @@ class PrepExplore(OP):
         return OPIOSign(
             {
                 "task_path": Artifact(Path),
+                "cv_dim": int
             }
         )
 
@@ -67,6 +68,7 @@ class PrepExplore(OP):
             cv_mode = op_in["cv_config"]["mode"]
         )
         gmx_task = gmx_task_builder.build()
+        cv_dim = gmx_task.get_cv_dim()
         task_path = Path(explore_task_pattern.format(op_in["task_id"]))
         task_path.mkdir(exist_ok=True, parents=True)
         for fname, fconts in gmx_task.files.items():
@@ -74,7 +76,8 @@ class PrepExplore(OP):
                 ff.write(fconts[0])
         op_out = OPIO(
             {
-                "task_path": task_path
+                "task_path": task_path,
+                "cv_dim": int(cv_dim)
             }
         )
         return op_out

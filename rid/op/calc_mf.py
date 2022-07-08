@@ -2,7 +2,8 @@ from dflow.python import (
     OP,
     OPIO,
     OPIOSign,
-    Artifact
+    Artifact,
+    Parameter
 )
 
 import json, shutil
@@ -25,7 +26,7 @@ class CalcMF(OP):
                 "plm_out": Artifact(Path),
                 "kappas": List[float],
                 "at": Artifact(Path),
-                "tail": float,
+                "tail": Parameter(float, default=0.9),
                 "angular_mask": Optional[Union[np.ndarray, List]],
             }
         )

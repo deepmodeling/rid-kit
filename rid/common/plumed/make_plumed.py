@@ -227,3 +227,21 @@ def make_deepfe_plumed(
     content_list.append(deepfe_string)
     content_list.append(make_print(cv_name_list, stride, output))
     return list_to_string(content_list, split_sign="\n")
+
+
+def get_cv_name(
+        conf: Optional[str] = None,
+        cv_file: Optional[str] = None,
+        selected_resid: Optional[List[int]] = None,
+        mode: str = "torsion"
+    ):
+    if mode == "torsion":
+        _, cv_name_list = \
+            make_torsion_list_from_file(conf, selected_resid)
+        content_list += cv_content_list
+    elif mode == "custom":
+        _, cv_name_list, _ = user_plumed_def(cv_file, stride, "test.out")
+        content_list.append(ret)
+    else:
+        raise RuntimeError("Unknown mode for making plumed files.")
+    return cv_name_list

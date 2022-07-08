@@ -42,7 +42,6 @@ class RunSelect(OP):
             {
                 "selected_confs": Artifact(List[Path]),
                 "selected_cv_init": Artifact(List[Path]),
-                "number_of_cluster": int,
                 "model_devi": Artifact(Path),
                 "selected_indices": Artifact(Path)
             }
@@ -78,13 +77,11 @@ class RunSelect(OP):
             gro_list.append(Path(sel_gro_name.format(idx=sel)))
             save_txt(cv_init_label.format(idx=sel), sel_data[ii])
             cv_init_list.append(Path(cv_init_label.format(idx=sel)))
-        numb_cluster = len(cls_sel_idx)
             
         op_out = OPIO(
             {
                "selected_confs": gro_list,
                "selected_cv_init": cv_init_list,
-               "number_of_cluster": numb_cluster,
                "model_devi": Path(model_devi_name),
                "selected_indices": Path(sel_ndx_name)
             }

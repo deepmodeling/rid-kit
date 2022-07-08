@@ -42,7 +42,7 @@ class RunExplore(OP):
         return OPIOSign(
             {
                 "task_path": Artifact(Path),
-                "md_config": Dict
+                "gmx_config": Dict
             }
         )
 
@@ -72,9 +72,9 @@ class RunExplore(OP):
         gmx_run_cmd = get_mdrun_cmd(
             tpr=gmx_tpr_name,
             plumed=plumed_input_name,
-            max_warning=op_in["md_config"]["max_warning"],
-            nt=op_in["md_config"]["nt"],
-            ntmpi=op_in["md_config"]["ntmpi"]
+            max_warning=op_in["gmx_config"]["max_warning"],
+            nt=op_in["gmx_config"]["nt"],
+            ntmpi=op_in["gmx_config"]["ntmpi"]
         )
         with set_directory(op_in["task_path"]):
             logger.info(list_to_string(gmx_grompp_cmd, " "))

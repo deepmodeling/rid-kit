@@ -11,7 +11,7 @@ from rid.constants import (
     )
 from rid.utils import read_binary, write_binary, read_txt, write_txt
 from rid.common.gromacs import make_md_mdp_from_config, make_md_mdp_string
-from rid.common.plumed import make_deepfe_plumed, check_deepfe_input, make_restraint_plumed
+from rid.common.plumed import make_deepfe_plumed, check_deepfe_input, make_restraint_plumed, get_cv_name
 
 
 class TaskBuilder(ABC):
@@ -49,6 +49,11 @@ class EnhcMDTaskBuilder(TaskBuilder):
         self.plumed_output = plumed_output
         self.cv_mode = cv_mode
         self.task = Task()
+        self.cv_names = get_cv_name(
+            conf=self.conf, cv_file=self.cv_file, 
+            selected_resid=self.selected_resid,
+            mode=self.cv_mode
+        )
     
     def build(self) -> Task:
         task_dict = {}
@@ -72,6 +77,9 @@ class EnhcMDTaskBuilder(TaskBuilder):
             model_list=self.model_list, stride=self.stride, output=self.plumed_output,
             mode=self.cv_mode
         )
+    
+    def get_cv_dim(self):
+        return len(self.cv_names)
 
 
 class RestrainedMDTaskBuilder(TaskBuilder):

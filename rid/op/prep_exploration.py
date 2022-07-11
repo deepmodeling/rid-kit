@@ -2,7 +2,8 @@ from dflow.python import (
     OP,
     OPIO,
     OPIOSign,
-    Artifact
+    Artifact,
+    Parameter
 )
 
 from typing import Tuple, List, Optional, Dict
@@ -31,7 +32,8 @@ class PrepExplore(OP):
                 "trust_lvl_2": float,
                 "gmx_config": Dict,
                 "cv_config": Dict,
-                "task_id": int
+                "task_name": str,
+                # "task_id": int
             }
         )
 
@@ -40,7 +42,7 @@ class PrepExplore(OP):
         return OPIOSign(
             {
                 "task_path": Artifact(Path),
-                "cv_dim": int
+                "cv_dim": Parameter(type=int)
             }
         )
 
@@ -68,8 +70,9 @@ class PrepExplore(OP):
             cv_mode = op_in["cv_config"]["mode"]
         )
         gmx_task = gmx_task_builder.build()
-        cv_dim = gmx_task.get_cv_dim()
-        task_path = Path(explore_task_pattern.format(op_in["task_id"]))
+        cv_dim = gmx_task_builder.get_cv_dim()
+        # task_path = Path(explore_task_pattern.format(op_in["task_id"]))
+        task_path = Path(op_in["task_name"])
         task_path.mkdir(exist_ok=True, parents=True)
         for fname, fconts in gmx_task.files.items():
             with open(task_path.joinpath(fname), fconts[1]) as ff:

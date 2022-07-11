@@ -67,12 +67,11 @@ class RunExplore(OP):
             conf = gmx_conf_name,
             topology = gmx_top_name,
             output = gmx_tpr_name,
-            max_warning=op_in["max_warning"]
+            max_warning=op_in["gmx_config"]["max_warning"]
         )
         gmx_run_cmd = get_mdrun_cmd(
             tpr=gmx_tpr_name,
             plumed=plumed_input_name,
-            max_warning=op_in["gmx_config"]["max_warning"],
             nt=op_in["gmx_config"]["nt"],
             ntmpi=op_in["gmx_config"]["ntmpi"]
         )

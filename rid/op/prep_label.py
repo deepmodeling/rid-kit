@@ -30,6 +30,7 @@ class PrepLabel(OP):
                 "conf": Artifact(Path),
                 "gmx_config": Dict,
                 "cv_config": Dict,
+                # "task_name": str,
                 "task_id": int,
                 "kappas": List[float],
                 "at": Artifact(Path)
@@ -69,6 +70,7 @@ class PrepLabel(OP):
         )
         gmx_task = gmx_task_builder.build()
         task_path = Path(explore_task_pattern.format(op_in["task_id"]))
+        # task_path = Path(op_in["task_name"])
         task_path.mkdir(exist_ok=True, parents=True)
         for fname, fconts in gmx_task.files.items():
             with open(task_path.joinpath(fname), fconts[1]) as ff:

@@ -8,7 +8,10 @@ from dflow import (
     Outputs,
     OutputArtifact,
     Step,
-    Steps
+    Steps,
+    argo_range,
+    argo_len,
+    argo_sequence
 )
 from dflow.python import(
     PythonOPTemplate,
@@ -36,6 +39,7 @@ class Exploration(Steps):
             "trust_lvl_2": InputParameter(type=float, value=3.0),
             "gmx_config" : InputParameter(type=Dict),
             "cv_config" : InputParameter(type=Dict),
+            "task_names" : InputParameter(type=str)
         }        
         self._input_artifacts = {
             "models" : InputArtifact(optional=True),
@@ -108,13 +112,14 @@ def _exploration(
     run_template_config = run_config.pop('template_config')
     prep_executor = init_executor(prep_config.pop('executor'))
     run_executor = init_executor(run_config.pop('executor'))
-    
     prep_exploration = Step(
         'prep-exploration',
         template=PythonOPTemplate(
             prep_exploration_op,
             python_packages = upload_python_package,
-            slices=Slices(sub_path=True,
+            slices=Slices(
+                # sub_path=True,
+                input_parameter=["task_names"],
                 input_artifact=["conf"],
                 output_artifact=["task_path"]),
             **prep_template_config,
@@ -124,7 +129,7 @@ def _exploration(
             "trust_lvl_2": exploration_steps.inputs.parameters['trust_lvl_2'],
             "gmx_config" : exploration_steps.inputs.parameters['gmx_config'],
             "cv_config" : exploration_steps.inputs.parameters['cv_config'],
-            "task_id": "{{item}}"
+            "task_name": exploration_steps.inputs.parameters['task_names']
         },
         artifacts={
             "models" : exploration_steps.inputs.artifacts['models'],
@@ -132,6 +137,7 @@ def _exploration(
             "conf" : exploration_steps.inputs.artifacts['confs']
         },
         key = 'prep-exploration',
+        with_param=argo_range(argo_len(exploration_steps.inputs.parameters['task_names'])),
         executor = prep_executor,
         **prep_config,
     )
@@ -142,10 +148,10 @@ def _exploration(
         template=PythonOPTemplate(
             run_exploration_op,
             python_packages = upload_python_package,
-             slices=Slices(sub_path=True,
+             slices=Slices(
+                # sub_path=True,
                 input_artifact=["task_path"],
                 output_artifact=["plm_out", "trajectory"]),
-            **prep_template_config,
             **run_template_config,
         ),
         parameters={
@@ -156,11 +162,12 @@ def _exploration(
         },
         key = "run-exploration",
         executor = run_executor,
+        with_param=argo_range(argo_len(exploration_steps.inputs.parameters['task_names'])),
         **run_config,
     )
     exploration_steps.add(run_exploration)
 
-    exploration_steps.outputs.parameters["cv_dim"]._from = prep_exploration.outputs.parameters["cv_dim"]
+    exploration_steps.outputs.parameters["cv_dim"].value_from_parameter = prep_exploration.outputs.parameters["cv_dim"]
     exploration_steps.outputs.artifacts["plm_out"]._from = run_exploration.outputs.artifacts["plm_out"]
     exploration_steps.outputs.artifacts["gmx_grompp_log"]._from = run_exploration.outputs.artifacts["gmx_grompp_log"]
     exploration_steps.outputs.artifacts["gmx_mdrun_log"]._from = run_exploration.outputs.artifacts["gmx_mdrun_log"]

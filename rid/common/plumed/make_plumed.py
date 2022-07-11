@@ -238,10 +238,8 @@ def get_cv_name(
     if mode == "torsion":
         _, cv_name_list = \
             make_torsion_list_from_file(conf, selected_resid)
-        content_list += cv_content_list
     elif mode == "custom":
         _, cv_name_list, _ = user_plumed_def(cv_file, stride, "test.out")
-        content_list.append(ret)
     else:
         raise RuntimeError("Unknown mode for making plumed files.")
     return cv_name_list

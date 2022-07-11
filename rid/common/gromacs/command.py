@@ -42,8 +42,7 @@ def get_mdrun_cmd(
         cpi: Optional[str] = None,
         ntmpi: Optional[int] = None,
         nt: Optional[int] = None,
-        extra_parameters: Optional[Union[List, str]] = None,
-        max_warning: Optional[int] = None
+        extra_parameters: Optional[Union[List, str]] = None
     ):
     run_cmd = gmx_run_cmd.split()
     if tpr is not None:

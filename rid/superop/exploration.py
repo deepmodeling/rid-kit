@@ -51,8 +51,7 @@ class Exploration(Steps):
         }
         self._output_artifacts = {
             "plm_out": OutputArtifact(),
-            "gmx_grompp_log": OutputArtifact(),
-            "gmx_mdrun_log": OutputArtifact(),
+            "md_log": OutputArtifact(),
             "trajectory": OutputArtifact()
         }
 
@@ -118,8 +117,7 @@ def _exploration(
             prep_exploration_op,
             python_packages = upload_python_package,
             slices=Slices(
-                # sub_path=True,
-                input_parameter=["task_names"],
+                input_parameter=["task_name"],
                 input_artifact=["conf"],
                 output_artifact=["task_path"]),
             **prep_template_config,
@@ -149,9 +147,8 @@ def _exploration(
             run_exploration_op,
             python_packages = upload_python_package,
              slices=Slices(
-                # sub_path=True,
                 input_artifact=["task_path"],
-                output_artifact=["plm_out", "trajectory"]),
+                output_artifact=["plm_out", "trajectory", "md_log"]),
             **run_template_config,
         ),
         parameters={
@@ -159,6 +156,7 @@ def _exploration(
         },
         artifacts={
             "task_path" : prep_exploration.outputs.artifacts["task_path"],
+            "models" : exploration_steps.inputs.artifacts['models']
         },
         key = "run-exploration",
         executor = run_executor,
@@ -169,8 +167,7 @@ def _exploration(
 
     exploration_steps.outputs.parameters["cv_dim"].value_from_parameter = prep_exploration.outputs.parameters["cv_dim"]
     exploration_steps.outputs.artifacts["plm_out"]._from = run_exploration.outputs.artifacts["plm_out"]
-    exploration_steps.outputs.artifacts["gmx_grompp_log"]._from = run_exploration.outputs.artifacts["gmx_grompp_log"]
-    exploration_steps.outputs.artifacts["gmx_mdrun_log"]._from = run_exploration.outputs.artifacts["gmx_mdrun_log"]
+    exploration_steps.outputs.artifacts["md_log"]._from = run_exploration.outputs.artifacts["md_log"]
     exploration_steps.outputs.artifacts["trajectory"]._from = run_exploration.outputs.artifacts["trajectory"]
     
     return exploration_steps

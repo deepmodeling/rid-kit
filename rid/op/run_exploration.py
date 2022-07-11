@@ -42,7 +42,8 @@ class RunExplore(OP):
         return OPIOSign(
             {
                 "task_path": Artifact(Path),
-                "gmx_config": Dict
+                "gmx_config": Dict,
+                "models": Artifact(List[Path])
             }
         )
 
@@ -51,8 +52,7 @@ class RunExplore(OP):
         return OPIOSign(
             {
                 "plm_out": Artifact(Path),
-                "gmx_grompp_log": Artifact(Path),
-                "gmx_mdrun_log": Artifact(Path),
+                "md_log": Artifact(Path),
                 "trajectory": Artifact(Path)
             }
         )
@@ -88,8 +88,7 @@ class RunExplore(OP):
         op_out = OPIO(
             {
                 "plm_out": op_in["task_path"].joinpath(plumed_output_name),
-                "gmx_grompp_log": op_in["task_path"].joinpath(gmx_grompp_log),
-                "gmx_mdrun_log": op_in["task_path"].joinpath(gmx_mdrun_log),
+                "md_log": op_in["task_path"].joinpath(gmx_mdrun_log),
                 "trajectory": op_in["task_path"].joinpath(xtc_name)
             }
         )

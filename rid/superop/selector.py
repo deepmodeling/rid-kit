@@ -39,7 +39,7 @@ class Selector(Steps):
         self._input_parameters = {
             "trust_lvl_1" : InputParameter(type=float, value=2.0),
             "trust_lvl_2": InputParameter(type=float, value=3.0),
-            "cluster_threshold": InputParameter(type=float, value=1.0),,
+            "cluster_threshold": InputParameter(type=float, value=1.0),
             "angular_mask": InputParameter(type=Optional[Union[np.ndarray, List]]),
             "weights": InputParameter(type=Optional[Union[np.ndarray, List]]),
             "numb_cluster_upper": InputParameter(type=float),

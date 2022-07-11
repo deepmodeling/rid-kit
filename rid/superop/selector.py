@@ -1,5 +1,6 @@
-from typing import Dict, List
+from typing import Dict, List, Optional, Union
 from copy import deepcopy
+import numpy as np
 from dflow import (
     InputParameter,
     OutputParameter,
@@ -14,7 +15,7 @@ from dflow import (
     download_artifact,
     argo_range,
     argo_len,
-    argo_sequence,
+    argo_sequence
 )
 from dflow.python import(
     PythonOPTemplate,
@@ -22,7 +23,7 @@ from dflow.python import(
     OPIO,
     OPIOSign,
     Artifact,
-    Slices,
+    Slices
 )
 from rid.utils import init_executor
 
@@ -34,7 +35,8 @@ class Selector(Steps):
         prep_op: OP,
         run_op: OP,
         prep_config: Dict,
-        run_config: Dict
+        run_config: Dict,
+        upload_python_package = None
     ):
         self._input_parameters = {
             "trust_lvl_1" : InputParameter(type=float, value=2.0),
@@ -112,7 +114,6 @@ class Selector(Steps):
 
 def _select(
         select_steps,
-        step_keys,
         prep_select_op : OP,
         run_select_op : OP,
         prep_config : Dict,
@@ -131,9 +132,11 @@ def _select(
         template=PythonOPTemplate(
             prep_select_op,
             python_packages = upload_python_package,
-            slices=Slices(sub_path=True,
+            slices=Slices(
+                input_parameter=["cluster_threshold"],
                 input_artifact=["plm_out"],
                 output_artifact=["culster_selection_index", "culster_selection_data"]),
+                output_parameter=["cluster_threshold"],
             **prep_template_config,
         ),
         parameters={
@@ -150,6 +153,7 @@ def _select(
         },
         key = 'prep-select',
         executor = prep_executor,
+        with_param=argo_range(argo_len(select_steps.inputs.parameters['cluster_threshold'])),
         **prep_config,
     )
     select_steps.add(prep_select)
@@ -159,7 +163,7 @@ def _select(
         template=PythonOPTemplate(
             run_select_op,
             python_packages = upload_python_package,
-             slices=Slices(sub_path=True,
+             slices=Slices(
                 input_artifact=["culster_selection_index", "culster_selection_data", "xtc_traj"],
                 output_artifact=["selected_confs", "selected_cv_init", "model_devi", "selected_indices"]),
             **run_template_config,
@@ -180,12 +184,13 @@ def _select(
         },
         key = "run-select",
         executor = run_executor,
+        with_param=argo_range(argo_len(prep_select.outputs.parameters["cluster_threshold"])),
         **run_config,
     )
     select_steps.add(run_select)
 
-    select_steps.outputs.parameters["cluster_threshold"]._from = prep_select.outputs.parameters["cluster_threshold"]
-    select_steps.outputs.parameters["number_of_cluster"]._from = prep_select.outputs.parameters["number_of_cluster"]
+    select_steps.outputs.parameters["cluster_threshold"].value_from_parameter = prep_select.outputs.parameters["cluster_threshold"]
+    select_steps.outputs.parameters["number_of_cluster"].value_from_parameter = prep_select.outputs.parameters["number_of_cluster"]
     select_steps.outputs.artifacts["culster_selection_index"]._from = prep_select.outputs.artifacts["culster_selection_index"]
     select_steps.outputs.artifacts["selected_confs"]._from = run_select.outputs.artifacts["selected_confs"]
     select_steps.outputs.artifacts["selected_cv_init"]._from = run_select.outputs.artifacts["selected_cv_init"]

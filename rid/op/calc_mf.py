@@ -13,7 +13,7 @@ import numpy as np
 from rid.constants import (
         force_out
     )
-from rid.utils import load_txt, save_txt
+from rid.utils import load_txt, save_txt, set_directory
 from rid.common.gromacs.command import get_grompp_cmd, get_mdrun_cmd
 
 
@@ -23,6 +23,7 @@ class CalcMF(OP):
     def get_input_sign(cls):
         return OPIOSign(
             {
+                "task_name": str,
                 "plm_out": Artifact(Path),
                 "kappas": List[float],
                 "at": Artifact(Path),
@@ -62,17 +63,19 @@ class CalcMF(OP):
         start_f = int(nframes * (1-op_in["tail"]))
         avgins = np.average(data[start_f:, :], axis=0)
 
-        # diff = np.zeros(avgins.shape)
         diff = avgins - centers
         angular_diff = diff[angular_boolean]
         angular_diff[angular_diff < -np.pi] += 2 * np.pi
         angular_diff[angular_diff >  np.pi] -= 2 * np.pi
         diff[angular_boolean] = angular_diff
         ff = np.multiply(op_in["kappas"], diff)
-        np.savetxt(force_out,  np.reshape(ff, [1, -1]), fmt='%.10e')
+        
+        task_path = Path(op_in["task_name"])
+        task_path.mkdir(exist_ok=True, parents=True)
+        np.savetxt(task_path.joinpath(force_out),  np.reshape(ff, [1, -1]), fmt='%.10e')
         op_out = OPIO(
             {
-                "forces": Path(force_out)
+                "forces": task_path.joinpath(force_out)
             }
         )
         return op_out

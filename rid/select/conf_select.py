@@ -41,8 +41,7 @@ def select_from_devi(model_devi, threshold):
         if _std > threshold:
             selected_idx.append(idx)
     selected_idx = np.array(selected_idx, dtype=int)
-    message = "max std: %f, min std: %f, avg std %f \n" % (
-        np.max(model_devi), np.min(model_devi), np.average(model_devi))
-    message += "number of angles than %f is %d" % (threshold, len(selected_idx))
-    logger.info(message)
+    logger.info("max std: %f, min std: %f, avg std %f \n" % (
+        np.max(model_devi), np.min(model_devi), np.average(model_devi)))
+    logger.info("number of angles than %f is %d" % (threshold, len(selected_idx)))
     return selected_idx

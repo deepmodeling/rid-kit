@@ -51,6 +51,7 @@ class Selector(Steps):
             "dt": InputParameter(type=float, value=0.02),
             "slice_mode": InputParameter(type=str, value="gmx"),
             "if_make_threshold": InputParameter(type=bool, value=False),
+            "task_names" : InputParameter(type=str)
         }        
         self._input_artifacts = {
             "model_list" : InputArtifact(),
@@ -133,7 +134,7 @@ def _select(
             prep_select_op,
             python_packages = upload_python_package,
             slices=Slices(
-                input_parameter=["cluster_threshold"],
+                input_parameter=["cluster_threshold", "task_name"],
                 input_artifact=["plm_out"],
                 output_artifact=["culster_selection_index", "culster_selection_data"]),
                 output_parameter=["cluster_threshold"],
@@ -146,14 +147,15 @@ def _select(
             "numb_cluster_upper": select_steps.inputs.parameters['numb_cluster_upper'],
             "numb_cluster_lower": select_steps.inputs.parameters['numb_cluster_lower'],
             "max_selection": select_steps.inputs.parameters['max_selection'],
-            "if_make_threshold": select_steps.inputs.parameters['if_make_threshold']
+            "if_make_threshold": select_steps.inputs.parameters['if_make_threshold'],
+            "task_name": select_steps.inputs.parameters['task_names']
         },
         artifacts={
             "plm_out": select_steps.inputs.artifacts['plm_out']
         },
         key = 'prep-select',
         executor = prep_executor,
-        with_param=argo_range(argo_len(select_steps.inputs.parameters['cluster_threshold'])),
+        with_param=argo_range(argo_len(select_steps.inputs.parameters['task_names'])),
         **prep_config,
     )
     select_steps.add(prep_select)
@@ -164,6 +166,7 @@ def _select(
             run_select_op,
             python_packages = upload_python_package,
              slices=Slices(
+                input_parameter=["task_name"],
                 input_artifact=["culster_selection_index", "culster_selection_data", "xtc_traj"],
                 output_artifact=["selected_confs", "selected_cv_init", "model_devi", "selected_indices"]),
             **run_template_config,
@@ -173,7 +176,8 @@ def _select(
             "trust_lvl_2": select_steps.inputs.parameters["trust_lvl_2"],
             "numb_cluster_threshold": select_steps.inputs.parameters["numb_cluster_threshold"],
             "dt": select_steps.inputs.parameters["dt"],
-            "slice_mode": select_steps.inputs.parameters["slice_mode"]
+            "slice_mode": select_steps.inputs.parameters["slice_mode"],
+            "task_name": select_steps.inputs.parameters['task_names']
         },
         artifacts={
             "culster_selection_index": prep_select.outputs.artifacts["culster_selection_index"],
@@ -184,7 +188,7 @@ def _select(
         },
         key = "run-select",
         executor = run_executor,
-        with_param=argo_range(argo_len(prep_select.outputs.parameters["cluster_threshold"])),
+        with_param=argo_range(argo_len(select_steps.inputs.parameters["task_names"])),
         **run_config,
     )
     select_steps.add(run_select)

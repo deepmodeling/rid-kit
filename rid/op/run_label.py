@@ -17,7 +17,6 @@ from rid.constants import (
         gmx_tpr_name,
         plumed_input_name,
         plumed_output_name,
-        gmx_grompp_log,
         gmx_mdrun_log,
         trr_name,
         xtc_name
@@ -41,7 +40,7 @@ class RunLabel(OP):
         return OPIOSign(
             {
                 "task_path": Artifact(Path),
-                "md_config": Dict
+                "gmx_config": Dict
             }
         )
 
@@ -50,8 +49,7 @@ class RunLabel(OP):
         return OPIOSign(
             {
                 "plm_out": Artifact(Path),
-                "gmx_grompp_log": Artifact(Path),
-                "gmx_mdrun_log": Artifact(Path)
+                "md_log": Artifact(Path)
             }
         )
 
@@ -65,14 +63,13 @@ class RunLabel(OP):
             conf = gmx_conf_name,
             topology = gmx_top_name,
             output = gmx_tpr_name,
-            max_warning=op_in["md_config"]["max_warning"]
+            max_warning=op_in["gmx_config"]["max_warning"]
         )
         gmx_run_cmd = get_mdrun_cmd(
             tpr=gmx_tpr_name,
             plumed=plumed_input_name,
-            max_warning=op_in["md_config"]["max_warning"],
-            nt=op_in["md_config"]["nt"],
-            ntmpi=op_in["md_config"]["ntmpi"]
+            nt=op_in["gmx_config"]["nt"],
+            ntmpi=op_in["gmx_config"]["ntmpi"]
         )
         with set_directory(op_in["task_path"]):
             logger.info(list_to_string(gmx_grompp_cmd, " "))
@@ -88,8 +85,7 @@ class RunLabel(OP):
         op_out = OPIO(
             {
                 "plm_out": op_in["task_path"].joinpath(plumed_output_name),
-                "gmx_grompp_log": op_in["task_path"].joinpath(gmx_grompp_log),
-                "gmx_mdrun_log": op_in["task_path"].joinpath(gmx_mdrun_log)
+                "md_log": op_in["task_path"].joinpath(gmx_mdrun_log)
             }
         )
         return op_out

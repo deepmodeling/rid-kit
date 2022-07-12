@@ -35,7 +35,8 @@ class Label(Steps):
         run_op: OP,
         post_op: OP,
         prep_config: Dict,
-        run_config: Dict
+        run_config: Dict,
+        upload_python_package = None
     ):
 
         self._input_parameters = {
@@ -44,6 +45,7 @@ class Label(Steps):
             "kappas": InputParameter(type=List[float]),
             "angular_mask": InputParameter(type=List),
             "tail": InputParameter(type=float, value=0.9),
+            "task_names": InputParameter(type=str),
         }        
         self._input_artifacts = {
             "topology": InputArtifact(),
@@ -53,8 +55,7 @@ class Label(Steps):
         self._output_parameters = {
         }
         self._output_artifacts = {
-            "gmx_grompp_log": OutputArtifact(),
-            "gmx_mdrun_log": OutputArtifact(),
+            "md_log": OutputArtifact(),
             "forces": OutputArtifact()
         }
 
@@ -77,7 +78,7 @@ class Label(Steps):
             post_op,
             prep_config = prep_config,
             run_config = run_config,
-            post_config = post_config,
+            post_config = prep_config,
             upload_python_package = upload_python_package,
         )            
     
@@ -104,7 +105,6 @@ class Label(Steps):
 
 def _label(
         label_steps,
-        step_keys,
         prep_label_op : OP,
         run_label_op : OP,
         post_label_op : OP,
@@ -128,15 +128,16 @@ def _label(
         template=PythonOPTemplate(
             prep_label_op,
             python_packages = upload_python_package,
-            slices=Slices(sub_path=True,
-                input_artifact=["conf"],
-                output_artifact=["task_path"])
+            slices=Slices(
+                input_parameter=["task_name"],
+                input_artifact=["conf", "at"],
+                output_artifact=["task_path"]),
             **prep_template_config,
         ),
         parameters={
             "gmx_config": label_steps.inputs.parameters['gmx_config'],
             "cv_config": label_steps.inputs.parameters['cv_config'],
-            "task_id": "{{item}}",
+            "task_name": label_steps.inputs.parameters['task_names'],
             "kappas": label_steps.inputs.parameters['kappas']
         },
         artifacts={
@@ -146,6 +147,7 @@ def _label(
         },
         key = 'prep-label',
         executor = prep_executor,
+        with_param=argo_range(argo_len(label_steps.inputs.parameters['task_names'])),
         **prep_config,
     )
     label_steps.add(prep_label)
@@ -155,19 +157,20 @@ def _label(
         template=PythonOPTemplate(
             run_label_op,
             python_packages = upload_python_package,
-            slices=Slices(sub_path=True,
+            slices=Slices(
                 input_artifact=["task_path"],
-                output_artifact=["plm_out"]),
+                output_artifact=["plm_out", "md_log"]),
             **run_template_config,
         ),
         parameters={
-            "md_config": label_steps.inputs.parameters["md_config"]
+            "gmx_config": label_steps.inputs.parameters["gmx_config"]
         },
         artifacts={
             "task_path": prep_label.outputs.artifacts["task_path"]
         },
         key = "run-label",
         executor = run_executor,
+        with_param=argo_range(argo_len(label_steps.inputs.parameters['task_names'])),
         **run_config,
     )
     label_steps.add(run_label)
@@ -177,12 +180,14 @@ def _label(
         template=PythonOPTemplate(
             post_label_op,
             python_packages = upload_python_package,
-            slices=Slices(sub_path=True,
+            slices=Slices(
+                input_parameter=["task_name"],
                 input_artifact=["plm_out", "at"],
                 output_artifact=["forces"]),
             **run_template_config,
         ),
         parameters={
+            "task_name": label_steps.inputs.parameters['task_names'],
             "kappas": label_steps.inputs.parameters['kappas'],
             "tail": label_steps.inputs.parameters['tail'],
             "angular_mask": label_steps.inputs.parameters['angular_mask']
@@ -191,14 +196,14 @@ def _label(
             "plm_out": run_label.outputs.artifacts["plm_out"],
             "at": label_steps.inputs.artifacts['at']
         },
-        key = "run-label",
+        key = "cpmf",
         executor = run_executor,
+        with_param=argo_range(argo_len(label_steps.inputs.parameters['task_names'])),
         **run_config,
     )
     label_steps.add(post_label)
 
     label_steps.outputs.artifacts["forces"]._from = post_label.outputs.artifacts["forces"]
-    label_steps.outputs.artifacts["gmx_grompp_log"]._from = run_label.outputs.artifacts["gmx_grompp_log"]
-    label_steps.outputs.artifacts["gmx_mdrun_log"]._from = run_label.outputs.artifacts["gmx_mdrun_log"]
+    label_steps.outputs.artifacts["md_log"]._from = run_label.outputs.artifacts["md_log"]
     
     return label_steps

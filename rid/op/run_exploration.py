@@ -80,6 +80,7 @@ class RunExplore(OP):
             return_code, out, err = run_command(gmx_grompp_cmd)
             assert return_code == 0, err
             logger.info(err)
+            
             logger.info(list_to_string(gmx_run_cmd, " "))
             return_code, out, err = run_command(gmx_run_cmd)
             assert return_code == 0, err

@@ -9,7 +9,7 @@ from dflow.python import (
 from typing import Tuple, List, Optional, Dict, Union
 from pathlib import Path
 from rid.select.cluster import Cluster
-from rid.utils import save_txt
+from rid.utils import save_txt, set_directory
 from rid.constants import (
     culster_selection_data_name, 
     culster_selection_index_name, 
@@ -25,6 +25,7 @@ class PrepSelect(OP):
     def get_input_sign(cls):
         return OPIOSign(
             {
+                "task_name": str,
                 "plm_out": Artifact(Path),
                 "cluster_threshold": float,
                 "angular_mask": Optional[Union[np.ndarray, List]],
@@ -62,15 +63,20 @@ class PrepSelect(OP):
         else:
             threshold = op_in["cluster_threshold"]
         cls_sel_idx = cv_cluster.get_cluster_selection()
-        save_txt(culster_selection_index_name, cls_sel_idx, fmt=cls_ndx_precision)
         selected_data = data[cls_sel_idx]
-        save_txt(culster_selection_data_name, selected_data, fmt=cls_sel_precision)
         numb_cluster = len(cls_sel_idx)
+
+        task_path = Path(op_in["task_name"])
+        task_path.mkdir(exist_ok=True, parents=True)
+        with set_directory(task_path):
+            save_txt(culster_selection_index_name, cls_sel_idx, fmt=cls_ndx_precision)
+            save_txt(culster_selection_data_name, selected_data, fmt=cls_sel_precision)
+        
         op_out = OPIO({
                 "cluster_threshold": threshold,
                 "number_of_cluster": numb_cluster,
-                "culster_selection_index": Path(culster_selection_index_name),
-                "culster_selection_data": Path(culster_selection_data_name)
+                "culster_selection_index": task_path.joinpath(culster_selection_index_name),
+                "culster_selection_data": task_path.joinpath(culster_selection_data_name)
             })
         return op_out
 

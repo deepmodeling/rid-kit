@@ -33,7 +33,6 @@ class PrepExplore(OP):
                 "gmx_config": Dict,
                 "cv_config": Dict,
                 "task_name": str,
-                # "task_id": int
             }
         )
 
@@ -71,7 +70,6 @@ class PrepExplore(OP):
         )
         gmx_task = gmx_task_builder.build()
         cv_dim = gmx_task_builder.get_cv_dim()
-        # task_path = Path(explore_task_pattern.format(op_in["task_id"]))
         task_path = Path(op_in["task_name"])
         task_path.mkdir(exist_ok=True, parents=True)
         for fname, fconts in gmx_task.files.items():

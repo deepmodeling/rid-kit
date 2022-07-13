@@ -39,19 +39,18 @@ class Selector(Steps):
         upload_python_package = None
     ):
         self._input_parameters = {
-            "trust_lvl_1" : InputParameter(type=float, value=2.0),
-            "trust_lvl_2": InputParameter(type=float, value=3.0),
-            "cluster_threshold": InputParameter(type=float, value=1.0),
+            "trust_lvl_1" : InputParameter(type=List[float], value=2.0),
+            "trust_lvl_2": InputParameter(type=List[float], value=3.0),
+            "cluster_threshold": InputParameter(type=List[float], value=1.0),
             "angular_mask": InputParameter(type=Optional[Union[np.ndarray, List]]),
             "weights": InputParameter(type=Optional[Union[np.ndarray, List]]),
-            "numb_cluster_upper": InputParameter(type=float),
-            "numb_cluster_lower": InputParameter(type=float),
+            "numb_cluster_upper": InputParameter(type=Optional[float], value=None),
+            "numb_cluster_lower": InputParameter(type=Optional[float], value=None),
             "max_selection": InputParameter(type=int),
-            "numb_cluster_threshold": InputParameter(type=float, value=30),
             "dt": InputParameter(type=float, value=0.02),
             "slice_mode": InputParameter(type=str, value="gmx"),
             "if_make_threshold": InputParameter(type=bool, value=False),
-            "task_names" : InputParameter(type=str),
+            "task_names" : InputParameter(type=List[str]),
             "block_tag" : InputParameter(type=str, value="")
         }        
         self._input_artifacts = {
@@ -61,8 +60,8 @@ class Selector(Steps):
             "topology": InputArtifact()
         }
         self._output_parameters = {
-            "cluster_threshold": OutputParameter(type=int),
-            "number_of_cluster": OutputParameter(type=int)
+            "cluster_threshold": OutputParameter(type=List[int]),
+            "numb_cluster": OutputParameter(type=List[int])
         }
         self._output_artifacts = {
             "culster_selection_index": OutputArtifact(),
@@ -143,10 +142,13 @@ def _select(
             prep_select_op,
             python_packages = upload_python_package,
             slices=Slices(
+                "{{item}}",
                 input_parameter=["cluster_threshold", "task_name"],
                 input_artifact=["plm_out"],
-                output_artifact=["culster_selection_index", "culster_selection_data"]),
-                output_parameter=["cluster_threshold"],
+                output_artifact=["culster_selection_index", "culster_selection_data"],
+                output_parameter=["cluster_threshold", "numb_cluster"]
+                ),
+                
             **prep_template_config,
         ),
         parameters={
@@ -174,16 +176,17 @@ def _select(
         template=PythonOPTemplate(
             run_select_op,
             python_packages = upload_python_package,
-             slices=Slices(
-                input_parameter=["task_name"],
+            slices=Slices(
+                "int({{item}})",
+                input_parameter=["task_name", "trust_lvl_1", "trust_lvl_2"],
                 input_artifact=["culster_selection_index", "culster_selection_data", "xtc_traj", "topology"],
-                output_artifact=["selected_confs", "selected_cv_init", "model_devi", "selected_indices"]),
+                output_artifact=["selected_confs", "selected_cv_init", "model_devi", "selected_indices"]
+            ),
             **run_template_config,
         ),
         parameters={
             "trust_lvl_1": select_steps.inputs.parameters["trust_lvl_1"],
             "trust_lvl_2": select_steps.inputs.parameters["trust_lvl_2"],
-            "numb_cluster_threshold": select_steps.inputs.parameters["numb_cluster_threshold"],
             "dt": select_steps.inputs.parameters["dt"],
             "slice_mode": select_steps.inputs.parameters["slice_mode"],
             "task_name": select_steps.inputs.parameters['task_names']
@@ -203,7 +206,8 @@ def _select(
     select_steps.add(run_select)
 
     select_steps.outputs.parameters["cluster_threshold"].value_from_parameter = prep_select.outputs.parameters["cluster_threshold"]
-    select_steps.outputs.parameters["number_of_cluster"].value_from_parameter = prep_select.outputs.parameters["number_of_cluster"]
+    select_steps.outputs.parameters["numb_cluster"].value_from_parameter = prep_select.outputs.parameters["numb_cluster"]
+
     select_steps.outputs.artifacts["culster_selection_index"]._from = prep_select.outputs.artifacts["culster_selection_index"]
     select_steps.outputs.artifacts["selected_confs"]._from = run_select.outputs.artifacts["selected_confs"]
     select_steps.outputs.artifacts["selected_cv_init"]._from = run_select.outputs.artifacts["selected_cv_init"]

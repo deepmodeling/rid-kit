@@ -30,7 +30,6 @@ class RunSelect(OP):
                 "models": Artifact(List[Path], optional=True),
                 "trust_lvl_1": float,
                 "trust_lvl_2": float,
-                "numb_cluster_threshold": float,
                 "xtc_traj": Artifact(Path),
                 "topology": Artifact(Path),
                 "dt": Parameter(Optional[float], default=None),
@@ -87,7 +86,7 @@ class RunSelect(OP):
             for ii, sel in enumerate(sel_idx):
                 gro_list.append(task_path.joinpath(sel_gro_name.format(idx=sel)))
                 save_txt(cv_init_label.format(idx=sel), sel_data[ii])
-            cv_init_list.append(task_path.joinpath(cv_init_label.format(idx=sel)))
+                cv_init_list.append(task_path.joinpath(cv_init_label.format(idx=sel)))
             
         op_out = OPIO(
             {

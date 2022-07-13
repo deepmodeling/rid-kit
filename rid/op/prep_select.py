@@ -30,8 +30,8 @@ class PrepSelect(OP):
                 "cluster_threshold": float,
                 "angular_mask": Optional[Union[np.ndarray, List]],
                 "weights": Optional[Union[np.ndarray, List]],
-                "numb_cluster_upper": float,
-                "numb_cluster_lower": float,
+                "numb_cluster_upper": Parameter(Optional[float], default=None),
+                "numb_cluster_lower": Parameter(Optional[float], default=None),
                 "max_selection": int,
                 "if_make_threshold": Parameter(bool, default=False)
             }
@@ -41,7 +41,7 @@ class PrepSelect(OP):
     def get_output_sign(cls):
         return OPIOSign(
             {
-                "number_of_cluster": int,
+                "numb_cluster": int,
                 "cluster_threshold": float,
                 "culster_selection_index": Artifact(Path),
                 "culster_selection_data": Artifact(Path)
@@ -59,6 +59,8 @@ class PrepSelect(OP):
             data, op_in["cluster_threshold"], angular_mask=op_in["angular_mask"], 
             weights=op_in["weights"], max_selection=op_in["max_selection"])
         if op_in["if_make_threshold"]:
+            assert (op_in["numb_cluster_lower"] is not None) and (op_in["numb_cluster_upper"] is not None), \
+                "Please provide a number interval to make cluster thresholds."
             threshold = cv_cluster.make_threshold(op_in["numb_cluster_lower"], op_in["numb_cluster_upper"])
         else:
             threshold = op_in["cluster_threshold"]
@@ -74,7 +76,7 @@ class PrepSelect(OP):
         
         op_out = OPIO({
                 "cluster_threshold": threshold,
-                "number_of_cluster": numb_cluster,
+                "numb_cluster": numb_cluster,
                 "culster_selection_index": task_path.joinpath(culster_selection_index_name),
                 "culster_selection_data": task_path.joinpath(culster_selection_data_name)
             })

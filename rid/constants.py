@@ -1,4 +1,6 @@
 # rid task name format
+walker_tag_fmt = "{idx:03d}"
+init_conf_name = "conf_{idx:03d}.gro"
 explore_task_pattern = "{:03d}"
 explore_task_file = "explore_{walker:03d}.pkl"
 culster_selection_data_name = "cls_sel.out"
@@ -11,6 +13,7 @@ force_out = "forces.out"
 data_new = "data.new"
 data_old = "data.old"
 data_raw = "data.raw"
+block_tag_fmt = "iter-{idx_iter:03d}"
 
 # PLUMED2 file names
 plumed_input_name = "plumed.dat"
@@ -35,6 +38,7 @@ gmx_conf_out = "confout.gro"
 
 # Tensorflow files
 tf_model_name = "model_{tag}.pb"
+model_tag_fmt = "{idx:03d}"
 N_grid = 100
 
 

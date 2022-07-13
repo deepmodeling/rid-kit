@@ -20,6 +20,42 @@ from rid.task.builder import RestrainedMDTaskBuilder
 from rid.utils import load_txt
 
 
+class CheckLabelInputs(OP):
+    @classmethod
+    def get_input_sign(cls):
+        return OPIOSign(
+            {
+                "conf": Artifact(List[Path], optional=True)
+            }
+        )
+
+    @classmethod
+    def get_output_sign(cls):
+        return OPIOSign(
+            {
+                "if_continue": bool,
+            }
+        )
+
+    @OP.exec_sign_check
+    def execute(
+        self,
+        op_in: OPIO,
+    ) -> OPIO:
+
+        if op_in["conf"] is None:
+            if_continue = False
+        else:
+            if_continue = True
+
+        op_out = OPIO(
+            {
+                "if_continue": if_continue
+            }
+        )
+        return op_out
+
+
 class PrepLabel(OP):
 
     @classmethod

@@ -35,11 +35,11 @@ class Exploration(Steps):
         upload_python_package = None
     ):
         self._input_parameters = {
-            "trust_lvl_1" : InputParameter(type=float, value=2.0),
-            "trust_lvl_2": InputParameter(type=float, value=3.0),
+            "trust_lvl_1" : InputParameter(type=List[float], value=2.0),
+            "trust_lvl_2": InputParameter(type=List[float], value=3.0),
             "gmx_config" : InputParameter(type=Dict),
             "cv_config" : InputParameter(type=Dict),
-            "task_names" : InputParameter(type=str),
+            "task_names" : InputParameter(type=List[str]),
             "block_tag" : InputParameter(type=str, value="")
         }        
         self._input_artifacts = {
@@ -48,7 +48,7 @@ class Exploration(Steps):
             "confs" : InputArtifact(),
         }
         self._output_parameters = {
-            "cv_dim": OutputParameter(type=int)
+            "cv_dim": OutputParameter(type=List[int])
         }
         self._output_artifacts = {
             "plm_out": OutputArtifact(),
@@ -126,7 +126,7 @@ def _exploration(
             prep_exploration_op,
             python_packages = upload_python_package,
             slices=Slices(
-                input_parameter=["task_name"],
+                input_parameter=["task_name", "trust_lvl_1", "trust_lvl_2"],
                 input_artifact=["conf"],
                 output_artifact=["task_path"]
             ),
@@ -158,7 +158,8 @@ def _exploration(
             python_packages = upload_python_package,
             slices=Slices(
                 input_artifact=["task_path"],
-                output_artifact=["plm_out", "trajectory", "md_log", "conf_out"]),
+                output_artifact=["plm_out", "trajectory", "md_log", "conf_out"]
+            ),
             **run_template_config,
         ),
         parameters={

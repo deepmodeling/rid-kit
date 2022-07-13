@@ -16,10 +16,10 @@ class AdjustTrustLevel(OP):
                 "trust_lvl_2": float,
                 "init_trust_lvl_1": float,
                 "init_trust_lvl_2": float,
-                "number_of_cluster": int,
-                "number_of_cluster_threshold": int,
-                "amplifier": float,  # 1.5 by default
-                "max_level_multiple": float  # 8 by default
+                "numb_cluster": int,
+                "numb_cluster_threshold": int,
+                "adjust_amplifier": float,  
+                "max_level_multiple": float  
             }
         )
 
@@ -37,9 +37,9 @@ class AdjustTrustLevel(OP):
         self,
         op_in: OPIO,
     ) -> OPIO:
-        if op_in["number_of_cluster"] < op_in["number_of_cluster_threshold"]:
-            adjust_trust_lvl_1 = op_in["trust_lvl_1"] * op_in["amplifier"]
-            adjust_trust_lvl_2 = op_in["trust_lvl_2"] * op_in["amplifier"]
+        if op_in["numb_cluster"] < op_in["numb_cluster_threshold"]:
+            adjust_trust_lvl_1 = op_in["trust_lvl_1"] * op_in["adjust_amplifier"]
+            adjust_trust_lvl_2 = op_in["trust_lvl_2"] * op_in["adjust_amplifier"]
         else:
             adjust_trust_lvl_1 = op_in["init_trust_lvl_1"] 
             adjust_trust_lvl_2 = op_in["init_trust_lvl_2"] 

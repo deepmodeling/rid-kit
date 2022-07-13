@@ -41,7 +41,7 @@ class PrepExplore(OP):
         return OPIOSign(
             {
                 "task_path": Artifact(Path),
-                "cv_dim": Parameter(type=int)
+                "cv_dim": int
             }
         )
 

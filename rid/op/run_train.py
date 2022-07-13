@@ -12,6 +12,7 @@ from pathlib import Path
 from rid.constants import tf_model_name
 from rid.nn.train_net import train
 from rid.nn.freeze import freeze_model
+from rid.utils import load_txt
 
 
 class TrainModel(OP):
@@ -21,7 +22,6 @@ class TrainModel(OP):
         return OPIOSign(
             {
                 "model_tag": str,
-                "cv_dim": int,
                 "angular_mask": List,
                 "data": Artifact(Path),
                 "train_config": Dict
@@ -41,9 +41,11 @@ class TrainModel(OP):
         self,
         op_in: OPIO,
     ) -> OPIO:
+        data_shape = load_txt(op_in["data"]).shape
+        cv_dim = int(data_shape[1] // 2)
         train_config = op_in["train_config"]
         train(
-            cv_dim=op_in["cv_dim"],
+            cv_dim=cv_dim,
             neurons=train_config["neurons"],
             angular_mask=op_in["angular_mask"],
             numb_threads=train_config["numb_threads"],

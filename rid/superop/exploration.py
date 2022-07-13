@@ -128,7 +128,8 @@ def _exploration(
             slices=Slices(
                 input_parameter=["task_name"],
                 input_artifact=["conf"],
-                output_artifact=["task_path"]),
+                output_artifact=["task_path"]
+            ),
             **prep_template_config,
         ),
         parameters={
@@ -155,7 +156,7 @@ def _exploration(
         template=PythonOPTemplate(
             run_exploration_op,
             python_packages = upload_python_package,
-             slices=Slices(
+            slices=Slices(
                 input_artifact=["task_path"],
                 output_artifact=["plm_out", "trajectory", "md_log", "conf_out"]),
             **run_template_config,

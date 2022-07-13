@@ -1,5 +1,6 @@
-from typing import Dict, List
+from typing import Dict, List, Optional, Union
 from copy import deepcopy
+import numpy as np
 from dflow import (
     InputParameter,
     OutputParameter,
@@ -11,7 +12,6 @@ from dflow import (
     Step,
     Steps,
     upload_artifact,
-    download_artifact,
     argo_range,
     argo_len,
     argo_sequence,
@@ -37,15 +37,18 @@ class FirstIterationBlock(Steps):
         data_op: OP,
         train_op: OP,
         train_config: Dict,
-        upload_python_package
+        upload_python_package = None
     ):
 
         self._input_parameters = {
+            "block_tag" : InputParameter(type=str, value=""),
+            "walker_tags": InputParameter(type=List),
+            "model_tags": InputParameter(type=List),
             "trust_lvl_1" : InputParameter(type=float, value=2.0),
             "trust_lvl_2": InputParameter(type=float, value=3.0),
             "exploration_gmx_config" : InputParameter(type=Dict),
             "cv_config" : InputParameter(type=Dict),
-            "cluster_threshold": InputParameter(type=float, value=1.0),,
+            "cluster_threshold": InputParameter(type=float, value=1.0),
             "angular_mask": InputParameter(type=Optional[Union[np.ndarray, List]]),
             "weights": InputParameter(type=Optional[Union[np.ndarray, List]]),
             "numb_cluster_upper": InputParameter(type=float),
@@ -58,9 +61,9 @@ class FirstIterationBlock(Steps):
             "kappas": InputParameter(type=List[float]),
             "angular_mask": InputParameter(type=List),
             "tail": InputParameter(type=float, value=0.9),
-            "if_make_threshold": select_steps.inputs.parameters['if_make_threshold'],
+            "if_make_threshold": InputParameter(type=bool, value=False),
             "numb_models": InputParameter(type=int, value=4),
-            "train_config": InputParameter(type=Dict),
+            "train_config": InputParameter(type=Dict)
         }        
         self._input_artifacts = {
             "models" : InputArtifact(optional=True),
@@ -71,10 +74,12 @@ class FirstIterationBlock(Steps):
             "cluster_threshold": OutputParameter(type=int)
         }
         self._output_artifacts = {
-            "exploration_mdrun_log": OutputArtifact(),
+            "exploration_md_log": OutputArtifact(),
             "exploration_trajectory": OutputArtifact(),
             "selection_index": OutputArtifact(),
-            "models": OutputArtifact()
+            "models": OutputArtifact(),
+            "data": OutputArtifact(),
+            "conf_outs": OutputArtifact()
         }
 
         super().__init__(        
@@ -89,13 +94,7 @@ class FirstIterationBlock(Steps):
                 ),
             )
 
-        self._init_keys = ['scheduler', 'id']
-        self.loop_key = 'loop'
-        self.step_keys = {}
-        for ii in self._init_keys:
-        self.step_keys[ii] = '--'.join(['init', ii])
-
-        self = _rid_iteration(
+        self = _block(
             self, 
             exploration_op,
             select_op,
@@ -137,30 +136,29 @@ def _block(
         train_config : Dict,
         upload_python_package : str = None,
     ):
-    tarin_config = deepcopy(train_config)
-    train_template_config = train_config.pop('template_config')
-    train_executor = init_executor(train_config.pop('executor'))
 
     exploration = Step(
-        'exploration',
+        "Exploration",
         template=exploration_op,
         parameters={
             "trust_lvl_1" : block_steps.inputs.parameters['trust_lvl_1'],
             "trust_lvl_2": block_steps.inputs.parameters['trust_lvl_2'],
             "gmx_config" : block_steps.inputs.parameters['exploration_gmx_config'],
-            "cv_config" : block_steps.inputs.parameters['cv_config']
+            "cv_config" : block_steps.inputs.parameters['cv_config'],
+            "task_names" : block_steps.inputs.parameters['walker_tags'],
+            "block_tag" : block_steps.inputs.parameters['block_tag'],
         },
         artifacts={
             "models" : block_steps.inputs.artifacts['models'],
             "topology" : block_steps.inputs.artifacts['topology'],
             "confs" : block_steps.inputs.artifacts['confs']
         },
-        key = 'exploration',
+        key = '{}_exploration'.format(block_steps.inputs.parameters['block_tag'])
     )
     block_steps.add(exploration)
 
     selection = Step(
-        'selection',
+        "Selection",
         template=select_op,
         parameters={
             "trust_lvl_1" : block_steps.inputs.parameters["trust_lvl_1"],
@@ -175,77 +173,86 @@ def _block(
             "dt": block_steps.inputs.parameters["dt"],
             "slice_mode": block_steps.inputs.parameters["slice_mode"],
             "if_make_threshold": block_steps.inputs.parameters["if_make_threshold"],
+            "task_names" : block_steps.inputs.parameters['walker_tags'],
+            "block_tag" : block_steps.inputs.parameters['block_tag'],
         },
         artifacts={
-            "model_list" : block_steps.inputs.artifacts["model_list"],
+            "models" : block_steps.inputs.artifacts["models"],
             "plm_out": exploration.outputs.artifacts["plm_out"],
-            "xtc_traj": exploration.outputs.artifacts["xtc_traj"],
-            "topology": block_steps.inputs.artifacts["topology"]
+            "xtc_traj": exploration.outputs.artifacts["trajectory"],
+            "topology": block_steps.inputs.artifacts["confs"]
         },
-        key = "selection",
+        key = '{}_selection'.format(block_steps.inputs.parameters['block_tag']),
     )
     block_steps.add(selection)
 
     label = Step(
-        'label',
+        "Label",
         template=label_op,
         parameters={
-            "angular_mask": block_steps.inputs.parameters['angular_mask']
+            "angular_mask": block_steps.inputs.parameters['angular_mask'],
             "gmx_config": block_steps.inputs.parameters['label_gmx_config'],
             "cv_config": block_steps.inputs.parameters['cv_config'],
-            "task_id": block_steps.inputs.parameters['task_id'],
             "kappas": block_steps.inputs.parameters['kappas'],
             "tail": block_steps.inputs.parameters['tail'],
+            "task_names" : block_steps.inputs.parameters['walker_tags'],
+            "block_tag" : block_steps.inputs.parameters['block_tag'],
         },
         artifacts={
-            "topology": exploration.inputs.artifacts["plm_out"],
+            "topology": block_steps.inputs.artifacts["topology"],
             "confs": selection.outputs.artifacts["selected_confs"],
             "at": selection.outputs.artifacts["selected_cv_init"]
         },
-        key = "label",
-        **run_config,
+        key = '{}_label'.format(block_steps.inputs.parameters['block_tag'])
     )
     block_steps.add(label)
 
     gen_data = Step(
-        'gen_data',
+        'GenData',
         template=data_op,
-        parameters={},
+        parameters={"block_tag" : block_steps.inputs.parameters['block_tag']},
         artifacts={
             "forces": label.outputs.artifacts["forces"],
             "centers": selection.outputs.artifacts["selected_cv_init"]
         },
-        key = "gen-data",
-        **run_config,
+        key = '{}_gen_data'.format(block_steps.inputs.parameters['block_tag']),
     )
     block_steps.add(gen_data)
 
+    train_config = deepcopy(train_config)
+    train_template_config = train_config.pop('template_config')
+    train_executor = init_executor(train_config.pop('executor'))
     train = Step(
-        'gen_data',
+        "train",
         template=PythonOPTemplate(
             train_op,
             python_packages = upload_python_package,
-            **run_template_config,
+            slices=Slices(
+                input_parameter=["model_tag"],
+                output_artifact=["model"]),
+            **train_template_config,
         ),
         parameters={
-            "task_id": "{{item}}",
-            "cv_dim": exploration.outputs.parameters["cv_dim"],
+            "model_tag": block_steps.inputs.parameters["model_tags"],
             "angular_mask": block_steps.inputs.parameters["angular_mask"],
             "train_config": block_steps.inputs.parameters["train_config"],
         },
         artifacts={
             "data": gen_data.outputs.artifacts["data"],
         },
-        with_param=argo_range(block_steps.inputs.parameters["numb_models"]),
-        key = "gen-data",
-        **run_config,
+        executor = train_executor,
+        with_param=argo_range(argo_len(block_steps.inputs.parameters["model_tags"])),
+        key = "{}_train".format(block_steps.inputs.parameters["block_tag"]),
+        **train_config,
     )
     block_steps.add(train)
 
-    block_steps.outputs.artifacts["models"]._from = train.outputs.artifacts["models"]
+    block_steps.outputs.artifacts["models"]._from = train.outputs.artifacts["model"]
+    block_steps.outputs.artifacts["data"]._from = gen_data.outputs.artifacts["data"]
+    block_steps.outputs.artifacts["conf_outs"]._from = exploration.outputs.artifacts["conf_outs"]
     block_steps.outputs.artifacts["exploration_trajectory"]._from = exploration.outputs.artifacts["trajectory"]
-    block_steps.outputs.artifacts["exploration_mdrun_log"]._from = exploration.outputs.artifacts["gmx_mdrun_log"]
+    block_steps.outputs.artifacts["exploration_md_log"]._from = exploration.outputs.artifacts["md_log"]
     block_steps.outputs.artifacts["selection_index"]._from = selection.outputs.artifacts["selected_indices"]
-    block_steps.outputs.parameters["cluster_threshold"]._from = selection.outputs.artifacts["cluster_threshold"]
+    block_steps.outputs.parameters["cluster_threshold"].value_from_parameter = selection.outputs.parameters["cluster_threshold"]
     
-    return label_steps
+    return block_steps

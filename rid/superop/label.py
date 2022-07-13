@@ -46,6 +46,7 @@ class Label(Steps):
             "angular_mask": InputParameter(type=List),
             "tail": InputParameter(type=float, value=0.9),
             "task_names": InputParameter(type=str),
+            "block_tag" : InputParameter(type=str, value="")
         }        
         self._input_artifacts = {
             "topology": InputArtifact(),
@@ -70,9 +71,16 @@ class Label(Steps):
                     artifacts=self._output_artifacts
                 ),
             )
+        
+        step_keys = {
+            "prep_label": "{}-prep-label".format(self.inputs.parameters["block_tag"]),
+            "run_label": "{}-run-label".format(self.inputs.parameters["block_tag"]),
+            "post_label": "{}-post-label".format(self.inputs.parameters["block_tag"])
+        }
 
         self = _label(
             self, 
+            step_keys,
             prep_op,
             run_op,
             post_op,
@@ -105,6 +113,7 @@ class Label(Steps):
 
 def _label(
         label_steps,
+        step_keys,
         prep_label_op : OP,
         run_label_op : OP,
         post_label_op : OP,
@@ -145,7 +154,7 @@ def _label(
             "conf": label_steps.inputs.artifacts['confs'],
             "at": label_steps.inputs.artifacts['at']
         },
-        key = 'prep-label',
+        key = step_keys['prep_label'],
         executor = prep_executor,
         with_param=argo_range(argo_len(label_steps.inputs.parameters['task_names'])),
         **prep_config,
@@ -168,7 +177,7 @@ def _label(
         artifacts={
             "task_path": prep_label.outputs.artifacts["task_path"]
         },
-        key = "run-label",
+        key = step_keys['run_label'],
         executor = run_executor,
         with_param=argo_range(argo_len(label_steps.inputs.parameters['task_names'])),
         **run_config,
@@ -176,7 +185,7 @@ def _label(
     label_steps.add(run_label)
 
     post_label = Step(
-        'cpmf',
+        'post-label',
         template=PythonOPTemplate(
             post_label_op,
             python_packages = upload_python_package,
@@ -196,7 +205,7 @@ def _label(
             "plm_out": run_label.outputs.artifacts["plm_out"],
             "at": label_steps.inputs.artifacts['at']
         },
-        key = "cpmf",
+        key = step_keys['post_label'],
         executor = run_executor,
         with_param=argo_range(argo_len(label_steps.inputs.parameters['task_names'])),
         **run_config,

@@ -66,7 +66,7 @@ class MergeData(OP):
     def get_input_sign(cls):
         return OPIOSign(
             {
-                "data_old": Artifact(Path),
+                "data_old": Artifact(Path, optional=True),
                 "data_new": Artifact(Path)
             }
         )
@@ -84,8 +84,10 @@ class MergeData(OP):
         self,
         op_in: OPIO,
         ) -> OPIO:
+        if op_in["data_old"] is None:
+            return OPIO({"data_raw": op_in["data_new"]})
         if os.stat(op_in["data_new"]).st_size == 0:
-            return op_in["data_new"]
+            return OPIO({"data_raw": op_in["data_old"]})
         _data_old = load_txt(op_in["data_old"])
         _data_new = load_txt(op_in["data_new"])
         data = np.concatenate((_data_old, _data_new), axis=0)

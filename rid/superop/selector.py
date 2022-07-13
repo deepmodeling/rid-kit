@@ -51,10 +51,11 @@ class Selector(Steps):
             "dt": InputParameter(type=float, value=0.02),
             "slice_mode": InputParameter(type=str, value="gmx"),
             "if_make_threshold": InputParameter(type=bool, value=False),
-            "task_names" : InputParameter(type=str)
+            "task_names" : InputParameter(type=str),
+            "block_tag" : InputParameter(type=str, value="")
         }        
         self._input_artifacts = {
-            "model_list" : InputArtifact(),
+            "models" : InputArtifact(optional=True),
             "plm_out": InputArtifact(),
             "xtc_traj": InputArtifact(),
             "topology": InputArtifact()
@@ -82,9 +83,16 @@ class Selector(Steps):
                     artifacts=self._output_artifacts
                 ),
             )
+        
+        step_keys = {
+            "prep_select": "{}-prep-select".format(self.inputs.parameters["block_tag"]),
+            "run_select": "{}-run-select".format(self.inputs.parameters["block_tag"]),
+            "post_select": "{}-post-select".format(self.inputs.parameters["block_tag"])
+        }
 
         self = _select(
             self, 
+            step_keys,
             prep_op,
             run_op,
             prep_config = prep_config,
@@ -115,6 +123,7 @@ class Selector(Steps):
 
 def _select(
         select_steps,
+        step_keys,
         prep_select_op : OP,
         run_select_op : OP,
         prep_config : Dict,
@@ -153,7 +162,7 @@ def _select(
         artifacts={
             "plm_out": select_steps.inputs.artifacts['plm_out']
         },
-        key = 'prep-select',
+        key = step_keys["prep_select"],
         executor = prep_executor,
         with_param=argo_range(argo_len(select_steps.inputs.parameters['task_names'])),
         **prep_config,
@@ -167,7 +176,7 @@ def _select(
             python_packages = upload_python_package,
              slices=Slices(
                 input_parameter=["task_name"],
-                input_artifact=["culster_selection_index", "culster_selection_data", "xtc_traj"],
+                input_artifact=["culster_selection_index", "culster_selection_data", "xtc_traj", "topology"],
                 output_artifact=["selected_confs", "selected_cv_init", "model_devi", "selected_indices"]),
             **run_template_config,
         ),
@@ -182,11 +191,11 @@ def _select(
         artifacts={
             "culster_selection_index": prep_select.outputs.artifacts["culster_selection_index"],
             "culster_selection_data": prep_select.outputs.artifacts["culster_selection_data"],
-            "model_list": select_steps.inputs.artifacts["model_list"],
+            "models": select_steps.inputs.artifacts["models"],
             "xtc_traj": select_steps.inputs.artifacts["xtc_traj"],
             "topology": select_steps.inputs.artifacts["topology"]
         },
-        key = "run-select",
+        key = step_keys["run_select"],
         executor = run_executor,
         with_param=argo_range(argo_len(select_steps.inputs.parameters["task_names"])),
         **run_config,

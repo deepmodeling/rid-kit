@@ -39,7 +39,8 @@ class Exploration(Steps):
             "trust_lvl_2": InputParameter(type=float, value=3.0),
             "gmx_config" : InputParameter(type=Dict),
             "cv_config" : InputParameter(type=Dict),
-            "task_names" : InputParameter(type=str)
+            "task_names" : InputParameter(type=str),
+            "block_tag" : InputParameter(type=str, value="")
         }        
         self._input_artifacts = {
             "models" : InputArtifact(optional=True),
@@ -52,7 +53,8 @@ class Exploration(Steps):
         self._output_artifacts = {
             "plm_out": OutputArtifact(),
             "md_log": OutputArtifact(),
-            "trajectory": OutputArtifact()
+            "trajectory": OutputArtifact(),
+            "conf_outs": OutputArtifact()
         }
 
         super().__init__(        
@@ -67,8 +69,14 @@ class Exploration(Steps):
                 ),
             )
 
+        step_keys = {
+            "prep_exploration": "{}-prep-exploration".format(self.inputs.parameters["block_tag"]),
+            "run_exploration": "{}-run-exploration".format(self.inputs.parameters["block_tag"]),
+        }
+
         self = _exploration(
             self, 
+            step_keys,
             prep_op,
             run_op,
             prep_config = prep_config,
@@ -99,6 +107,7 @@ class Exploration(Steps):
 
 def _exploration(
         exploration_steps,
+        step_keys,
         prep_exploration_op : OP,
         run_exploration_op : OP,
         prep_config : Dict,
@@ -134,7 +143,7 @@ def _exploration(
             "topology" :exploration_steps.inputs.artifacts['topology'],
             "conf" : exploration_steps.inputs.artifacts['confs']
         },
-        key = 'prep-exploration',
+        key = step_keys["prep_exploration"],
         with_param=argo_range(argo_len(exploration_steps.inputs.parameters['task_names'])),
         executor = prep_executor,
         **prep_config,
@@ -148,7 +157,7 @@ def _exploration(
             python_packages = upload_python_package,
              slices=Slices(
                 input_artifact=["task_path"],
-                output_artifact=["plm_out", "trajectory", "md_log"]),
+                output_artifact=["plm_out", "trajectory", "md_log", "conf_out"]),
             **run_template_config,
         ),
         parameters={
@@ -158,7 +167,7 @@ def _exploration(
             "task_path" : prep_exploration.outputs.artifacts["task_path"],
             "models" : exploration_steps.inputs.artifacts['models']
         },
-        key = "run-exploration",
+        key = step_keys["run_exploration"],
         executor = run_executor,
         with_param=argo_range(argo_len(exploration_steps.inputs.parameters['task_names'])),
         **run_config,
@@ -169,5 +178,6 @@ def _exploration(
     exploration_steps.outputs.artifacts["plm_out"]._from = run_exploration.outputs.artifacts["plm_out"]
     exploration_steps.outputs.artifacts["md_log"]._from = run_exploration.outputs.artifacts["md_log"]
     exploration_steps.outputs.artifacts["trajectory"]._from = run_exploration.outputs.artifacts["trajectory"]
+    exploration_steps.outputs.artifacts["conf_outs"]._from = run_exploration.outputs.artifacts["conf_out"]
     
     return exploration_steps

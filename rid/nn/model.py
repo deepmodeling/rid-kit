@@ -46,11 +46,11 @@ class Reader(object):
         self.index_count_new = 0
         self.index_count_old = 0
         if self.use_mix:
-            tr_data_new = np.loadtxt(self.data_path+'data.new.raw')
+            tr_data_new = np.loadtxt(self.data_path)
             tr_data_new = np.reshape(tr_data_new, [-1, self.cv_dim * 2])
             tr_data_new[:, self.cv_dim:] *= inverse_f_cvt
             self.inputs_train_new = tr_data_new[:, :]
-            tr_data_old = np.loadtxt(self.data_path+'data.old.raw')
+            tr_data_old = np.loadtxt(self.data_path)
             tr_data_old = np.reshape(tr_data_old, [-1, self.cv_dim * 2])
             tr_data_old[:, self.cv_dim:] *= inverse_f_cvt
             self.inputs_train_old = tr_data_old[:, :]
@@ -64,7 +64,7 @@ class Reader(object):
             print("# batch_size %d mixed by old %d new %d" %
                   (self.batch_size, self.batch_size_old, self.batch_size_new))
         else:
-            tr_data_all = np.loadtxt(self.data_path+'data.raw')
+            tr_data_all = np.loadtxt(self.data_path)
             tr_data_all[:, self.cv_dim:] *= inverse_f_cvt
             self.inputs_train_all = tr_data_all[:, :]
             self.train_size_all = self.inputs_train_all.shape[0]

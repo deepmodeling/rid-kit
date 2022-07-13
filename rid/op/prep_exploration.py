@@ -25,7 +25,7 @@ class PrepExplore(OP):
     def get_input_sign(cls):
         return OPIOSign(
             {
-                "models": Artifact(List[Path]),
+                "models": Artifact(List[Path], optional=True),
                 "topology": Artifact(Path),
                 "conf": Artifact(Path),
                 "trust_lvl_1": float,
@@ -50,12 +50,18 @@ class PrepExplore(OP):
         self,
         op_in: OPIO,
     ) -> OPIO:
+
         if op_in["cv_config"]["mode"] == "torsion":
             cv_file = None,
             selected_resid = op_in["cv_config"]["selected_resid"]
         elif op_in["cv_config"]["mode"] == "custom":
             cv_file = op_in["cv_config"]["cv_file"],
             selected_resid = None
+        if op_in["models"] is None:
+            models = []
+        else:
+            models = [str(model) for model in op_in["models"]]
+
         gmx_task_builder = EnhcMDTaskBuilder(
             conf = op_in["conf"],
             topology = op_in["topology"],
@@ -64,7 +70,7 @@ class PrepExplore(OP):
             selected_resid = selected_resid,
             trust_lvl_1 = op_in["trust_lvl_1"],
             trust_lvl_2 = op_in["trust_lvl_2"],
-            model_list = [str(model) for model in op_in["models"]],
+            model_list = models,
             plumed_output = plumed_output_name,
             cv_mode = op_in["cv_config"]["mode"]
         )

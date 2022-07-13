@@ -31,16 +31,18 @@ class DataGenerator(Steps):
     def __init__(
         self,
         name: str,
-        prep_op: OP,
-        run_op: OP,
-        prep_config: Dict,
-        run_config: Dict
+        collect_op: OP,
+        merge_op: OP,
+        run_config: Dict,
+        upload_python_package = None
     ):
-        self._input_parameters = {}        
+        self._input_parameters = {
+            "block_tag" : InputParameter(type=str, value="")
+        }        
         self._input_artifacts = {
             "forces": InputArtifact(),
             "centers": InputArtifact(),
-            "data_old": InputArtifact(optional=True),
+            "data_old": InputArtifact(optional=True)
         }
         self._output_parameters = {}
         self._output_artifacts = {
@@ -63,7 +65,7 @@ class DataGenerator(Steps):
             self, 
             collect_op,
             merge_op,
-            run_config = prep_config,
+            run_config = run_config,
             upload_python_package = upload_python_package,
         )            
     
@@ -102,7 +104,7 @@ def _gen_data(
     collect_data = Step(
         'collect-data',
         template=PythonOPTemplate(
-            collect_data_op,
+            collect_op,
             python_packages = upload_python_package,
             **run_template_config,
         ),
@@ -111,34 +113,30 @@ def _gen_data(
             "forces": data_steps.inputs.artifacts['forces'],
             "centers": data_steps.inputs.artifacts['centers']
         },
-        key = 'collect-data',
+        key = '{}_collect_data'.format(data_steps.inputs.parameters["block_tag"]),
         executor = run_executor,
         **run_config,
     )
     data_steps.add(collect_data)
     
-    if data_steps.inputs.artifacts["data_old"] is not None:
-        merge_data = Step(
-            'merge_data',
-            template=PythonOPTemplate(
-                merge_op,
-                python_packages = upload_python_package,
-                **run_template_config,
-            ),
-            parameters={},
-            artifacts={
-                "data_old": data_steps.inputs.artifacts["data_old"],
-                "data_new": collect_data.outputs.artifacts["data_new"]
-            },
-            key = "merge_data",
-            executor = run_executor,
-            **run_config,
-        )
-        data_steps.add(merge_data)
+    merge_data = Step(
+        'merge-data',
+        template=PythonOPTemplate(
+            merge_op,
+            python_packages = upload_python_package,
+            **run_template_config,
+        ),
+        parameters={},
+        artifacts={
+            "data_old": data_steps.inputs.artifacts["data_old"],
+            "data_new": collect_data.outputs.artifacts["data_new"]
+        },
+        key = '{}_merge_data'.format(data_steps.inputs.parameters["block_tag"]),
+        executor = run_executor,
+        **run_config,
+    )
+    data_steps.add(merge_data)
 
-        data_steps.outputs.artifacts["data"]._from = merge_data.outputs.artifacts["data_raw"]
-    else:
-        data_steps.outputs.artifacts["data"]._from = collect_data.outputs.artifacts["data_new"]
+    data_steps.outputs.artifacts["data"]._from = merge_data.outputs.artifacts["data_raw"]
    
-    
     return data_steps

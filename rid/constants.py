@@ -30,10 +30,11 @@ trr_name = "traj.trr"
 xtc_name = "traj_comp.xtc"
 sel_gro_name = "conf_{idx:d}.gro"
 sel_gro_name_gmx = "conf_.gro"
+gmx_conf_out = "confout.gro"
 
 
 # Tensorflow files
-tf_model_name = "model_{idx:03d}.pb"
+tf_model_name = "model_{tag}.pb"
 N_grid = 100
 
 

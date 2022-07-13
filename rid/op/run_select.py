@@ -9,6 +9,7 @@ from dflow.python import (
 import json, shutil
 from typing import Tuple, List, Optional, Dict
 from pathlib import Path
+import numpy as np
 from rid.utils import load_txt, save_txt, set_directory
 from rid.constants import sel_gro_name, cv_init_label, model_devi_name, model_devi_precision, sel_ndx_name
 from rid.common.gromacs.command import get_grompp_cmd, get_mdrun_cmd
@@ -26,7 +27,7 @@ class RunSelect(OP):
                 "task_name": str,
                 "culster_selection_index": Artifact(Path),
                 "culster_selection_data": Artifact(Path),
-                "model_list": Artifact(List[Path]),
+                "models": Artifact(List[Path], optional=True),
                 "trust_lvl_1": float,
                 "trust_lvl_2": float,
                 "numb_cluster_threshold": float,
@@ -43,7 +44,7 @@ class RunSelect(OP):
             {
                 "selected_confs": Artifact(List[Path]),
                 "selected_cv_init": Artifact(List[Path]),
-                "model_devi": Artifact(Path),
+                "model_devi": Artifact(Path, optional=True),
                 "selected_indices": Artifact(Path)
             }
         )
@@ -60,9 +61,13 @@ class RunSelect(OP):
         task_path.mkdir(exist_ok=True, parents=True)
 
         with set_directory(task_path):
-            stds = make_std(cls_sel_data, models=op_in["model_list"])
-            save_txt("cls_"+model_devi_name, stds, fmt=model_devi_precision)
-            _selected_idx = select_from_devi(stds, op_in["trust_lvl_1"])
+            if op_in["models"] is None:
+                save_txt("cls_"+model_devi_name, [], fmt=model_devi_precision)
+                _selected_idx = np.array([ii for ii in range(len(cls_sel_idx))], dtype=int)
+            else:
+                stds = make_std(cls_sel_data, models=op_in["models"])
+                save_txt("cls_"+model_devi_name, stds, fmt=model_devi_precision)
+                _selected_idx = select_from_devi(stds, op_in["trust_lvl_1"])
             sel_idx = cls_sel_idx[_selected_idx]
             save_txt(sel_ndx_name, sel_idx, fmt="%d")
             sel_data = cls_sel_data[_selected_idx]

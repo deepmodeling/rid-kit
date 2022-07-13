@@ -20,7 +20,8 @@ from rid.constants import (
         plumed_output_name,
         gmx_grompp_log,
         gmx_mdrun_log,
-        xtc_name
+        xtc_name,
+        gmx_conf_out
     )
 from rid.utils import run_command, set_directory, list_to_string
 from rid.common.gromacs.command import get_grompp_cmd, get_mdrun_cmd
@@ -43,7 +44,7 @@ class RunExplore(OP):
             {
                 "task_path": Artifact(Path),
                 "gmx_config": Dict,
-                "models": Artifact(List[Path])
+                "models": Artifact(List[Path], optional=True)
             }
         )
 
@@ -53,7 +54,8 @@ class RunExplore(OP):
             {
                 "plm_out": Artifact(Path),
                 "md_log": Artifact(Path),
-                "trajectory": Artifact(Path)
+                "trajectory": Artifact(Path),
+                "conf_out": Artifact(Path)
             }
         )
 
@@ -90,7 +92,8 @@ class RunExplore(OP):
             {
                 "plm_out": op_in["task_path"].joinpath(plumed_output_name),
                 "md_log": op_in["task_path"].joinpath(gmx_mdrun_log),
-                "trajectory": op_in["task_path"].joinpath(xtc_name)
+                "trajectory": op_in["task_path"].joinpath(xtc_name),
+                "conf_out": op_in["task_path"].joinpath(gmx_conf_out),
             }
         )
         return op_out

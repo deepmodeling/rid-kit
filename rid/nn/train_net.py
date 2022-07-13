@@ -44,7 +44,7 @@ class Config(object):
 
 
 def reset_batch_size(config):
-    tr_data = np.loadtxt(config.data_path+'data.raw')
+    tr_data = np.loadtxt(config.data_path)
     if tr_data.shape[0] < config.batch_size:
         config.batch_size = tr_data.shape[0]
         print("using new batch_size of %d" % config.batch_size)
@@ -81,7 +81,8 @@ def set_conf(cv_dim,
              decay_rate=0.96,
              old_ratio=7.0,
              decay_steps_inner=0,
-             drop_out_rate=0.5):
+             drop_out_rate=0.5,
+             data_path="./"):
     config = Config(cv_dim)
     config.n_neuron = neurons
     config.batch_size = batch_size
@@ -96,6 +97,7 @@ def set_conf(cv_dim,
     config.resnet = resnet
     config.drop_out_rate = drop_out_rate
     config.angular_mask = angular_mask
+    config.data_path = data_path
     return config
 
 
@@ -115,7 +117,8 @@ def train(
         old_ratio=7.0,
         decay_steps_inner=0,
         init_model=None,
-        drop_out_rate=0.5
+        drop_out_rate=0.5,
+        data_path="./"
     ):
     config = set_conf(cv_dim,
                       angular_mask=angular_mask,
@@ -131,7 +134,8 @@ def train(
                       decay_rate=decay_rate,
                       old_ratio=old_ratio,
                       decay_steps_inner=decay_steps_inner,
-                      drop_out_rate = drop_out_rate)
+                      drop_out_rate = drop_out_rate,
+                      data_path = data_path)
     if init_model is not None:
         if config.restart:
             raise RuntimeError(

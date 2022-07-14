@@ -226,7 +226,7 @@ def _loop (
             "confs": block_step.outputs.artifacts["conf_outs"],
             "data_old": block_step.outputs.artifacts["data"]
         },
-        when = "%s + 1 < %s" % (recorder_step.outputs.parameters['next_iteration'], steps.inputs.parameters["numb_iters"]),
+        when = "%s < %s" % (recorder_step.outputs.parameters['next_iteration'], steps.inputs.parameters["numb_iters"]),
     )
     steps.add(next_step)    
 

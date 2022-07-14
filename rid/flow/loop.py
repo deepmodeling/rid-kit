@@ -25,131 +25,63 @@ from dflow.python import(
     BigParameter,
 )
 import pickle, jsonpickle, os
-from typing import (
-    List
-)
+from typing import List, Optional, Dict, Union
 from pathlib import Path
-from dpgen2.exploration.scheduler import ExplorationScheduler
-from dpgen2.exploration.report import ExplorationReport
-from dpgen2.exploration.task import ExplorationTaskGroup
-from dpgen2.exploration.selector import ConfSelector
-from dpgen2.superop.block import ConcurrentLearningBlock
-from dpgen2.utils import (
-    load_object_from_file,
-    dump_object_to_file,
-)
-from dpgen2.utils.step_config import normalize as normalize_step_dict
-from dpgen2.utils.step_config import init_executor
-
+import numpy as np
+from rid.utils import init_executor
+from rid.op.prep_rid import PrepRiD
+from rid.op.recorder import Recorder
 from copy import deepcopy
 
 
-class SchedulerWrapper(OP):
-
-    @classmethod
-    def get_input_sign(cls):
-        return OPIOSign({
-            "exploration_scheduler" : Artifact(Path),
-            "exploration_report": BigParameter(ExplorationReport),
-            "trajs": Artifact(List[Path]),
-        })
-
-    @classmethod
-    def get_output_sign(cls):
-        return OPIOSign({
-            "exploration_scheduler" : Artifact(Path),
-            "converged" : bool,
-            "lmp_task_grp" : Artifact(Path),
-            "conf_selector" : ConfSelector,
-        })
-
-    @OP.exec_sign_check
-    def execute(
-            self,
-            ip : OPIO,
-    ) -> OPIO:
-        scheduler_in = ip['exploration_scheduler']
-        report = ip['exploration_report']
-        trajs = ip['trajs']
-        lmp_task_grp_file = Path('lmp_task_grp.dat')
-        scheduler_file = Path('scheduler.dat')
-
-        scheduler = load_object_from_file(scheduler_in)
-
-        conv, lmp_task_grp, selector = scheduler.plan_next_iteration(report, trajs)
-
-        dump_object_to_file(lmp_task_grp, lmp_task_grp_file)
-        dump_object_to_file(scheduler, scheduler_file)
-
-        return OPIO({
-            "exploration_scheduler" : scheduler_file,
-            "converged" : conv,
-            "conf_selector" : selector,
-            "lmp_task_grp" : lmp_task_grp_file,
-        })
-
-
-class MakeBlockId(OP):
-    @classmethod
-    def get_input_sign(cls):
-        return OPIOSign({
-            "exploration_scheduler" : Artifact(Path),
-        })
-
-    @classmethod
-    def get_output_sign(cls):
-        return OPIOSign({
-            "block_id" : str,
-        })
-
-    @OP.exec_sign_check
-    def execute(
-            self,
-            ip : OPIO,
-    ) -> OPIO:
-        scheduler_in = ip['exploration_scheduler']        
-        scheduler = load_object_from_file(scheduler_in)
-
-        stage = scheduler.get_stage()
-        iteration = scheduler.get_iteration()
-
-        return OPIO({
-            "block_id" : f'iter-{iteration:06d}',
-        })
-
-
-class ConcurrentLearningLoop(Steps):
+class ReinforcedDynamicsLoop(Steps):
     def __init__(
             self,
             name : str,
             block_op : Steps,
-            step_config : dict = normalize_step_dict({}),
+            step_config : dict,
             upload_python_package : str = None,
     ):
         self._input_parameters={
-            "block_id" : InputParameter(),
-            "type_map" : InputParameter(),
-            "numb_models": InputParameter(type=int),
-            "template_script" : InputParameter(),
-            "train_config" : InputParameter(),
-            "lmp_config" : InputParameter(),
-            "conf_selector" : InputParameter(),
-            "fp_config" : InputParameter(),
+            "numb_iters" : InputParameter(type=int),
+            "last_iteration" : InputParameter(type=int),
+            "block_tag" : InputParameter(type=str, value=""),
+            "walker_tags": InputParameter(type=List),
+            "model_tags": InputParameter(type=List),
+            "trust_lvl_1" : InputParameter(type=List[float]),
+            "trust_lvl_2": InputParameter(type=List[float]),
+            "init_trust_lvl_1" : InputParameter(type=List[float]),
+            "init_trust_lvl_2": InputParameter(type=List[float]),
+            "exploration_gmx_config" : InputParameter(type=Dict),
+            "cv_config" : InputParameter(type=Dict),
+            "cluster_threshold": InputParameter(type=float, value=1.0),
+            "angular_mask": InputParameter(type=Optional[Union[np.ndarray, List]]),
+            "weights": InputParameter(type=Optional[Union[np.ndarray, List]]),
+            "max_selection": InputParameter(type=int),
+            "numb_cluster_threshold": InputParameter(type=float, value=30),
+            "dt": InputParameter(type=float, value=0.02),
+            "slice_mode": InputParameter(type=str, value="gmx"),
+            "label_gmx_config": InputParameter(type=Dict),
+            "kappas": InputParameter(type=List[float]),
+            "angular_mask": InputParameter(type=List),
+            "tail": InputParameter(type=float, value=0.9),
+            "train_config": InputParameter(type=Dict),
+            "adjust_amplifier": InputParameter(type=float, value=1.5),
+            "max_level_multiple": InputParameter(type=float, value=8.0),
         }
         self._input_artifacts={
-            "exploration_scheduler" : InputArtifact(),
-            "init_models" : InputArtifact(optional=True),
-            "init_data" : InputArtifact(),
-            "iter_data" : InputArtifact(),
-            "lmp_task_grp" : InputArtifact(),
-            "fp_inputs" : InputArtifact(),
+            "models" : InputArtifact(optional=True),
+            "topology" : InputArtifact(),
+            "confs" : InputArtifact(),
+            "data_old": InputArtifact(),
         }
         self._output_parameters={
         }
         self._output_artifacts={
-            "exploration_scheduler": OutputArtifact(),
+            "exploration_trajectory": OutputArtifact(),
             "models": OutputArtifact(),
-            "iter_data" : OutputArtifact(),
+            "data": OutputArtifact(),
+            "conf_outs": OutputArtifact()
         }
         
         super().__init__(
@@ -164,20 +96,14 @@ class ConcurrentLearningLoop(Steps):
             ),
         )
 
-        self._my_keys = ['block', 'scheduler', 'id']
-        self._keys = \
-            self._my_keys[:1] + \
-            block_op.keys + \
-            self._my_keys[1:3]
-        self.step_keys = {}
-        for ii in self._my_keys:
-            self.step_keys[ii] = '--'.join(
-                ["%s"%self.inputs.parameters["block_id"], ii]
-            )
+        _step_keys = ['block', 'recorder']
+        step_keys = {}
+        for ii in _step_keys:
+            step_keys[ii] = '-'.join(["%s"%self.inputs.parameters["block_tag"], ii])
         
         self = _loop(
             self,
-            self.step_keys,
+            step_keys,
             name,
             block_op,
             step_config = step_config,
@@ -205,42 +131,157 @@ class ConcurrentLearningLoop(Steps):
         return self._keys
 
 
-class ConcurrentLearning(Steps):
+def _loop (
+        steps, 
+        step_keys,
+        name : str,
+        block_op : OP,
+        step_config : dict,
+        upload_python_package : str = None,
+):    
+    step_config = deepcopy(step_config)
+    step_template_config = step_config.pop('template_config')
+    step_executor = init_executor(step_config.pop('executor'))
+
+    recorder_step = Step(
+        name = name + '-recorder',
+        template=PythonOPTemplate(
+            Recorder,
+            python_packages = upload_python_package,
+            **step_template_config,
+        ),
+        parameters={
+            "iteration": steps.inputs.parameters['last_iteration'],
+        },
+        artifacts={},
+        key = step_keys['recorder'],
+        executor = step_executor,
+        **step_config,
+    )
+    steps.add(recorder_step)
+
+    block_step = Step(
+        name = name + '-block',
+        template = block_op,
+        parameters={
+            "block_tag": recorder_step.outputs.parameters["block_tag"],
+            "walker_tags": steps.inputs.parameters["walker_tags"],
+            "model_tags": steps.inputs.parameters["model_tags"],
+            "exploration_gmx_config": steps.inputs.parameters["exploration_gmx_config"],
+            "cv_config": steps.inputs.parameters["cv_config"],
+            "trust_lvl_1" : steps.inputs.parameters["trust_lvl_1"],
+            "trust_lvl_2": steps.inputs.parameters["trust_lvl_2"],
+            "init_trust_lvl_1": steps.inputs.parameters["init_trust_lvl_1"],
+            "init_trust_lvl_2": steps.inputs.parameters["init_trust_lvl_2"],
+            "cluster_threshold": steps.inputs.parameters["cluster_threshold"],
+            "angular_mask": steps.inputs.parameters["angular_mask"],
+            "weights": steps.inputs.parameters["weights"],
+            "max_selection": steps.inputs.parameters["max_selection"],
+            "numb_cluster_threshold": steps.inputs.parameters["numb_cluster_threshold"],
+            "dt": steps.inputs.parameters["dt"],
+            "slice_mode": steps.inputs.parameters["slice_mode"],
+            "label_gmx_config": steps.inputs.parameters["label_gmx_config"],
+            "kappas": steps.inputs.parameters["kappas"],
+            "train_config": steps.inputs.parameters["train_config"]
+        },
+        artifacts={
+            "models": steps.inputs.artifacts["models"],
+            "topology": steps.inputs.artifacts["topology"],
+            "confs": steps.inputs.artifacts["confs"],
+            "data_old": steps.inputs.artifacts["data_old"]
+        },
+        key = step_keys['block'],
+    )
+    steps.add(block_step)
+
+    next_step = Step(
+        name = name+'-next',
+        template = steps,
+        parameters={
+            "numb_iters": steps.inputs.parameters["numb_iters"],
+            "last_iteration": recorder_step.outputs.parameters["next_iteration"],
+            "block_tag": recorder_step.outputs.parameters["block_tag"],
+            "walker_tags": steps.inputs.parameters["walker_tags"],
+            "model_tags": steps.inputs.parameters["model_tags"],
+            "exploration_gmx_config": steps.inputs.parameters["exploration_gmx_config"],
+            "cv_config": steps.inputs.parameters["cv_config"],
+            "trust_lvl_1": block_step.outputs.parameters["adjust_trust_lvl_1"],
+            "trust_lvl_2": block_step.outputs.parameters["adjust_trust_lvl_2"],
+            "init_trust_lvl_1": steps.inputs.parameters["init_trust_lvl_1"],
+            "init_trust_lvl_2": steps.inputs.parameters["init_trust_lvl_2"],
+            "cluster_threshold":  block_step.outputs.parameters["cluster_threshold"],
+            "angular_mask": steps.inputs.parameters["angular_mask"],
+            "weights": steps.inputs.parameters["weights"],
+            "max_selection": steps.inputs.parameters["max_selection"],
+            "numb_cluster_threshold": steps.inputs.parameters["numb_cluster_threshold"],
+            "dt": steps.inputs.parameters["dt"],
+            "slice_mode": steps.inputs.parameters["slice_mode"],
+            "label_gmx_config": steps.inputs.parameters["label_gmx_config"],
+            "kappas": steps.inputs.parameters["kappas"],
+            "train_config": steps.inputs.parameters["train_config"]
+        },
+        artifacts={
+            "models":  block_step.outputs.artifacts["models"],
+            "topology": steps.inputs.artifacts["topology"],
+            "confs": block_step.outputs.artifacts["conf_outs"],
+            "data_old": block_step.outputs.artifacts["data"]
+        },
+        when = "%s + 1 < %s" % (recorder_step.outputs.parameters['next_iteration'], steps.inputs.parameters["numb_iters"]),
+    )
+    steps.add(next_step)    
+
+    steps.outputs.artifacts['exploration_trajectory'].from_expression = \
+        if_expression(
+            _if = (recorder_step.outputs.parameters['next_iteration'] >= steps.inputs.parameters["numb_iters"]),
+            _then = block_step.outputs.artifacts['exploration_trajectory'],
+            _else = next_step.outputs.artifacts['exploration_trajectory'],
+        )
+    steps.outputs.artifacts['conf_outs'].from_expression = \
+        if_expression(
+            _if = (recorder_step.outputs.parameters['next_iteration'] >= steps.inputs.parameters["numb_iters"]),
+            _then = block_step.outputs.artifacts['conf_outs'],
+            _else = next_step.outputs.artifacts['conf_outs'],
+        )
+    steps.outputs.artifacts['models'].from_expression = \
+        if_expression(
+            _if = (recorder_step.outputs.parameters['next_iteration'] >= steps.inputs.parameters["numb_iters"]),
+            _then = block_step.outputs.artifacts['models'],
+            _else = next_step.outputs.artifacts['models'],
+        )
+    steps.outputs.artifacts['data'].from_expression = \
+        if_expression(
+            _if = (recorder_step.outputs.parameters['next_iteration'] >= steps.inputs.parameters["numb_iters"]),
+            _then = block_step.outputs.artifacts['data'],
+            _else = next_step.outputs.artifacts['data'],
+        )
+
+    return steps
+
+
+class ReinforcedDynamics(Steps):
     def __init__(
             self,
             name : str,
+            init_block_op : Steps,
             block_op : Steps,
-            step_config : dict = normalize_step_dict({}),
+            step_config : dict,
             upload_python_package : str = None,
     ):
-        self.loop = ConcurrentLearningLoop(
-            name+'-loop',
-            block_op,
-            step_config = step_config,
-            upload_python_package = upload_python_package,
-        )
         
-        self._input_parameters={
-            "type_map" : InputParameter(),
-            "numb_models": InputParameter(type=int),
-            "template_script" : InputParameter(),
-            "train_config" : InputParameter(),
-            "lmp_config" : InputParameter(),
-            "fp_config" : InputParameter(),
-        }
+        self._input_parameters={}
         self._input_artifacts={
-            "exploration_scheduler" : InputArtifact(),
-            "init_models" : InputArtifact(optional=True),
-            "init_data" : InputArtifact(),
-            "iter_data" : InputArtifact(),
-            "fp_inputs" : InputArtifact(),
+            "models": InputArtifact(optional=True),
+            "topology": InputArtifact(),
+            "confs": InputArtifact(),
+            "rid_config": InputArtifact(),
         }
         self._output_parameters={
         }
         self._output_artifacts={
-            "exploration_scheduler": OutputArtifact(),
+            "exploration_trajectory": OutputArtifact(),
             "models": OutputArtifact(),
-            "iter_data" : OutputArtifact(),
+            "data": OutputArtifact(),
+            "conf_outs": OutputArtifact()
         }        
         
         super().__init__(
@@ -255,18 +296,17 @@ class ConcurrentLearning(Steps):
             ),
         )
 
-        self._init_keys = ['scheduler', 'id']
-        self.loop_key = 'loop'
-        self.step_keys = {}
-        for ii in self._init_keys:
-            self.step_keys[ii] = '--'.join(['init', ii])
+        _init_keys = ['recorder', 'block']
+        step_keys = {}
+        for ii in _init_keys:
+            step_keys[ii] = '--'.join(['init', ii])
 
-        self = _dpgen(
+        self = _rid(
             self,
-            self.step_keys,
+            step_keys,
             name, 
-            self.loop,
-            self.loop_key,
+            init_block_op,
+            block_op,
             step_config = step_config,
             upload_python_package = upload_python_package,
         )
@@ -296,208 +336,131 @@ class ConcurrentLearning(Steps):
         return [self.loop_key] + self.loop.keys
 
 
-def _loop (
-        steps, 
-        step_keys,
-        name : str,
-        block_op : OP,
-        step_config : dict = normalize_step_dict({}),
-        upload_python_package : str = None,
-):    
-    step_config = deepcopy(step_config)
-    step_template_config = step_config.pop('template_config')
-    step_executor = init_executor(step_config.pop('executor'))
-
-    block_step = Step(
-        name = name + '-block',
-        template = block_op,
-        parameters={
-            "block_id" : steps.inputs.parameters["block_id"],
-            "type_map" : steps.inputs.parameters["type_map"],
-            "numb_models" : steps.inputs.parameters["numb_models"],
-            "template_script" : steps.inputs.parameters["template_script"],
-            "train_config" : steps.inputs.parameters["train_config"],
-            "lmp_config" : steps.inputs.parameters["lmp_config"],
-            "conf_selector" : steps.inputs.parameters["conf_selector"],
-            "fp_config" : steps.inputs.parameters["fp_config"],
-        },
-        artifacts={
-            "lmp_task_grp" : steps.inputs.artifacts["lmp_task_grp"],
-            "fp_inputs" : steps.inputs.artifacts["fp_inputs"],            
-            "init_models": steps.inputs.artifacts["init_models"],
-            "init_data": steps.inputs.artifacts["init_data"],
-            "iter_data": steps.inputs.artifacts["iter_data"],
-        },
-        key = step_keys['block'],
-    )
-    steps.add(block_step)
-
-    scheduler_step = Step(
-        name = name + '-scheduler',
-        template=PythonOPTemplate(
-            SchedulerWrapper,
-            python_packages = upload_python_package,
-            **step_template_config,
-        ),
-        parameters={
-            "exploration_report": block_step.outputs.parameters['exploration_report'],
-        },
-        artifacts={
-            "exploration_scheduler": steps.inputs.artifacts['exploration_scheduler'],
-            "trajs" : block_step.outputs.artifacts['trajs'],
-        },
-        key = step_keys['scheduler'],
-        executor = step_executor,
-        **step_config,
-    )
-    steps.add(scheduler_step)
-
-    id_step = Step(
-        name = name + '-make-block-id',
-        template=PythonOPTemplate(
-            MakeBlockId,
-            python_packages = upload_python_package,
-            **step_template_config,
-        ),
-        parameters={
-        },
-        artifacts={
-            "exploration_scheduler": scheduler_step.outputs.artifacts['exploration_scheduler'],
-        },
-        key = step_keys['id'],
-        executor = step_executor,
-        **step_config,
-    )
-    steps.add(id_step)
-
-    next_step = Step(
-        name = name+'-next',
-        template = steps,
-        parameters={
-            "block_id" : id_step.outputs.parameters['block_id'],
-            "type_map" : steps.inputs.parameters["type_map"],
-            "numb_models" : steps.inputs.parameters["numb_models"],
-            "template_script" : steps.inputs.parameters["template_script"],
-            "train_config" : steps.inputs.parameters["train_config"],
-            "lmp_config" : steps.inputs.parameters["lmp_config"],
-            "conf_selector" : scheduler_step.outputs.parameters["conf_selector"],
-            "fp_config" : steps.inputs.parameters["fp_config"],
-        },
-        artifacts={
-            "exploration_scheduler" : scheduler_step.outputs.artifacts["exploration_scheduler"],
-            "lmp_task_grp" : scheduler_step.outputs.artifacts["lmp_task_grp"],
-            "fp_inputs" : steps.inputs.artifacts["fp_inputs"],
-            "init_models" : block_step.outputs.artifacts['models'],
-            "init_data" : steps.inputs.artifacts['init_data'],
-            "iter_data" : block_step.outputs.artifacts['iter_data'],
-        },
-        when = "%s == false" % (scheduler_step.outputs.parameters['converged']),
-    )
-    steps.add(next_step)    
-
-    steps.outputs.artifacts['exploration_scheduler'].from_expression = \
-        if_expression(
-            _if = (scheduler_step.outputs.parameters['converged'] == True),
-            _then = scheduler_step.outputs.artifacts['exploration_scheduler'],
-            _else = next_step.outputs.artifacts['exploration_scheduler'],
-        )
-    steps.outputs.artifacts['models'].from_expression = \
-        if_expression(
-            _if = (scheduler_step.outputs.parameters['converged'] == True),
-            _then = block_step.outputs.artifacts['models'],
-            _else = next_step.outputs.artifacts['models'],
-        )
-    steps.outputs.artifacts['iter_data'].from_expression = \
-        if_expression(
-            _if = (scheduler_step.outputs.parameters['converged'] == True),
-            _then = block_step.outputs.artifacts['iter_data'],
-            _else = next_step.outputs.artifacts['iter_data'],
-        )
-
-    return steps
-
-
-def _dpgen(
+def _rid(
         steps, 
         step_keys,
         name,
-        loop_op,
-        loop_key,
-        step_config : dict = normalize_step_dict({}),
-        upload_python_package : str = None
-):    
-    step_config = deepcopy(step_config)
-    step_template_config = step_config.pop('template_config')
-    step_executor = init_executor(step_config.pop('executor'))
+        init_block_op,
+        block_op,
+        step_config : dict,
+        upload_python_package : Optional[str] = None
+    ):  
 
-    scheduler_step = Step(
-        name = name + '-scheduler',
+    _step_config = deepcopy(step_config)
+    step_template_config = _step_config.pop('template_config')
+    step_executor = init_executor(_step_config.pop('executor'))
+
+    prep_rid = Step(
+        name = 'prepare-rid',
         template=PythonOPTemplate(
-            SchedulerWrapper,
+            PrepRiD,
+            python_packages = upload_python_package,
+            **step_template_config,
+        ),
+        parameters={},
+        artifacts={
+            "confs": steps.inputs.artifacts['confs'],
+            "rid_config" : steps.inputs.artifacts['rid_config'],
+        },
+        key = 'prepare-rid',
+        executor = step_executor,
+        **_step_config,
+    )
+    steps.add(prep_rid)
+
+    recorder_step = Step(
+        name = name + '-recorder',
+        template=PythonOPTemplate(
+            Recorder,
             python_packages = upload_python_package,
             **step_template_config,
         ),
         parameters={
-            "exploration_report": None,
+            "iteration": None,
         },
-        artifacts={
-            "exploration_scheduler": steps.inputs.artifacts['exploration_scheduler'],
-            "trajs" : None,
-        },
-        key = step_keys['scheduler'],
+        artifacts={},
+        key = "init-recorder",
         executor = step_executor,
-        **step_config,
+        **_step_config,
     )
-    steps.add(scheduler_step)
+    steps.add(recorder_step)
 
-    id_step = Step(
-        name = name + '-make-block-id',
-        template=PythonOPTemplate(
-            MakeBlockId,
-            python_packages = upload_python_package,
-            **step_template_config,
-        ),
+    init_block = Step(
+        name = name + '-block',
+        template = init_block_op,
         parameters={
+            "block_tag": recorder_step.outputs.parameters["block_tag"],
+            "walker_tags": prep_rid.outputs.parameters["walker_tags"],
+            "model_tags": prep_rid.outputs.parameters["model_tags"],
+            "exploration_gmx_config": prep_rid.outputs.parameters["exploration_gmx_config"],
+            "cv_config": prep_rid.outputs.parameters["cv_config"],
+            "trust_lvl_1" : prep_rid.outputs.parameters["trust_lvl_1"],
+            "trust_lvl_2": prep_rid.outputs.parameters["trust_lvl_2"],
+            "numb_cluster_upper": prep_rid.outputs.parameters['numb_cluster_upper'],
+            "numb_cluster_lower": prep_rid.outputs.parameters['numb_cluster_lower'],
+            "cluster_threshold": prep_rid.outputs.parameters["cluster_threshold"],
+            "angular_mask": prep_rid.outputs.parameters["angular_mask"],
+            "weights": prep_rid.outputs.parameters["weights"],
+            "max_selection": prep_rid.outputs.parameters["max_selection"],
+            "dt": prep_rid.outputs.parameters["dt"],
+            "slice_mode": prep_rid.outputs.parameters["slice_mode"],
+            "label_gmx_config": prep_rid.outputs.parameters["label_gmx_config"],
+            "kappas": prep_rid.outputs.parameters["kappas"],
+            "train_config": prep_rid.outputs.parameters["train_config"]
         },
         artifacts={
-            "exploration_scheduler": scheduler_step.outputs.artifacts['exploration_scheduler'],
+            "models": steps.inputs.artifacts["models"],
+            "topology": steps.inputs.artifacts["topology"],
+            "confs": prep_rid.outputs.artifacts["confs"]
         },
-        key = step_keys['id'],
-        executor = step_executor,
-        **step_config,
+        key = "%s-init-block"%recorder_step.outputs.parameters["block_tag"]
     )
-    steps.add(id_step)
+    steps.add(init_block)
 
     loop_step = Step(
         name = name + '-loop',
-        template = loop_op,
-        parameters = {
-            "block_id" : id_step.outputs.parameters['block_id'],
-            "type_map" : steps.inputs.parameters['type_map'],
-            "numb_models" : steps.inputs.parameters['numb_models'],
-            "template_script" : steps.inputs.parameters['template_script'],
-            "train_config" : steps.inputs.parameters['train_config'],
-            "conf_selector" : scheduler_step.outputs.parameters['conf_selector'],
-            "lmp_config" : steps.inputs.parameters['lmp_config'],
-            "fp_config" : steps.inputs.parameters['fp_config'],
+        template = ReinforcedDynamicsLoop(
+            name = "RiD-Loop",
+            block_op = block_op,
+            step_config = step_config,
+            upload_python_package = upload_python_package
+        ),
+        parameters={
+            "numb_iters": prep_rid.outputs.parameters["numb_iters"],
+            "last_iteration": recorder_step.outputs.parameters["next_iteration"],
+            "block_tag": recorder_step.outputs.parameters["block_tag"],
+            "walker_tags": prep_rid.outputs.parameters["walker_tags"],
+            "model_tags": prep_rid.outputs.parameters["model_tags"],
+            "exploration_gmx_config": prep_rid.outputs.parameters["exploration_gmx_config"],
+            "cv_config": prep_rid.outputs.parameters["cv_config"],
+            "trust_lvl_1" : prep_rid.outputs.parameters["trust_lvl_1"],
+            "trust_lvl_2": prep_rid.outputs.parameters["trust_lvl_2"],
+            "init_trust_lvl_1": prep_rid.outputs.parameters["trust_lvl_1"],
+            "init_trust_lvl_2": prep_rid.outputs.parameters["trust_lvl_2"],
+            "cluster_threshold":  prep_rid.outputs.parameters["cluster_threshold"],
+            "angular_mask": prep_rid.outputs.parameters["angular_mask"],
+            "weights": prep_rid.outputs.parameters["weights"],
+            "max_selection": prep_rid.outputs.parameters["max_selection"],
+            "numb_cluster_threshold": prep_rid.outputs.parameters["numb_cluster_threshold"],
+            "dt": prep_rid.outputs.parameters["dt"],
+            "slice_mode": prep_rid.outputs.parameters["slice_mode"],
+            "label_gmx_config": prep_rid.outputs.parameters["label_gmx_config"],
+            "kappas": prep_rid.outputs.parameters["kappas"],
+            "train_config": prep_rid.outputs.parameters["train_config"]
         },
         artifacts={
-            "exploration_scheduler" : scheduler_step.outputs.artifacts['exploration_scheduler'],
-            "lmp_task_grp" : scheduler_step.outputs.artifacts['lmp_task_grp'],
-            "fp_inputs" : steps.inputs.artifacts['fp_inputs'],
-            "init_models": steps.inputs.artifacts["init_models"],
-            "init_data": steps.inputs.artifacts["init_data"],
-            "iter_data": steps.inputs.artifacts["iter_data"],
+            "models":  init_block.outputs.artifacts["models"],
+            "topology": steps.inputs.artifacts["topology"],
+            "confs": init_block.outputs.artifacts["conf_outs"],
+            "data_old": init_block.outputs.artifacts["data"]
         },
-        key = '--'.join(["%s"%id_step.outputs.parameters['block_id'], loop_key]),
+        key = "rid-loop",
     )
     steps.add(loop_step)
 
-    steps.outputs.artifacts["exploration_scheduler"]._from = \
-        loop_step.outputs.artifacts["exploration_scheduler"]
-    steps.outputs.artifacts["models"]._from = \
-        loop_step.outputs.artifacts["models"]
-    steps.outputs.artifacts["iter_data"]._from = \
-        loop_step.outputs.artifacts["iter_data"]
+    steps.outputs.artifacts["exploration_trajectory"]._from = loop_step.outputs.artifacts["exploration_trajectory"]
+    steps.outputs.artifacts["models"]._from = loop_step.outputs.artifacts["models"]
+    steps.outputs.artifacts["data"]._from = loop_step.outputs.artifacts["data"]
+    steps.outputs.artifacts["conf_outs"]._from = loop_step.outputs.artifacts["conf_outs"]
     
     return steps

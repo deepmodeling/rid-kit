@@ -76,7 +76,7 @@ class PrepRiD(OP):
                 "cv_config": Dict,
                 "trust_lvl_1": List[float],
                 "trust_lvl_2": List[float],
-                "cluster_threshold": float,
+                "cluster_threshold": List[float],
                 "angular_mask": List,
                 "weights": List,
                 "numb_cluster_upper": int,
@@ -125,6 +125,9 @@ class PrepRiD(OP):
         trust_lvl_2 = jdata.pop("trust_lvl_2")
         trust_lvl_1_list = [trust_lvl_1 for _ in range(numb_walkers)]
         trust_lvl_2_list = [trust_lvl_2 for _ in range(numb_walkers)]
+
+        cluster_threshold = selection_config.pop("cluster_threshold")
+        cluster_threshold_list = [cluster_threshold for _ in range(numb_walkers)]
         
         op_out = OPIO(
             {
@@ -139,7 +142,7 @@ class PrepRiD(OP):
                 "cv_config": cv_config,
                 "trust_lvl_1": trust_lvl_1_list,
                 "trust_lvl_2": trust_lvl_2_list,
-                "cluster_threshold": selection_config.pop("cluster_threshold"),
+                "cluster_threshold": cluster_threshold_list,
                 "angular_mask": angular_mask,
                 "weights": weights,
                 "numb_cluster_upper": selection_config.pop("numb_cluster_upper"),
@@ -150,7 +153,7 @@ class PrepRiD(OP):
                 "slice_mode": selection_config.pop("slice_mode"),
                 "label_gmx_config": label_md_config,
                 "kappas": kappas,
-                "train_config": jdata.pop("Train")
+                "train_config": train_config
             }
         )
         return op_out

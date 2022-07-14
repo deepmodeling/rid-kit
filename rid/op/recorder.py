@@ -32,7 +32,7 @@ class Recorder(OP):
         op_in: OPIO,
     ) -> OPIO:
         if op_in["iteration"] is None:
-            next_iteration = 0
+            next_iteration = 1
         else:
             next_iteration = op_in["iteration"] + 1
         block_tag = block_tag_fmt.format(idx_iter=next_iteration)

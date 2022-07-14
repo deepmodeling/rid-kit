@@ -27,7 +27,7 @@ from dflow.python import(
 from rid.utils import init_executor
 
 
-class FirstRunBlock(Steps):
+class InitBlock(Steps):
     def __init__(
         self,
         name: str,

@@ -52,6 +52,12 @@ def prep_confs(confs, numb_walkers):
 
 class PrepRiD(OP):
 
+    """Pre-processing of RiD.
+    1. Parse RiD configuration JSON file, get default value if parameters are not provided.
+    2. Rearrange conformation files.
+    3. Make task names and formats.
+    """
+
     @classmethod
     def get_input_sign(cls):
         return OPIOSign(
@@ -96,6 +102,49 @@ class PrepRiD(OP):
         self,
         op_in: OPIO,
     ) -> OPIO:
+
+        r"""Execute the OP.
+        Parameters
+        ----------
+        op_in : dict
+            Input dict with components:
+        
+            - `confs`: (`Artifact(Path)`) User-provided initial conformation files (.gro) for reinfoced dynamics.
+            - `rid_config`: (`Artifact(Path)`) Configuration file (.json) of RiD. 
+                Parameters in this file will be parsed.
+           
+        Returns
+        -------
+            Output dict with components:
+        
+            - `numb_iters`: (`int`) Max number of iterations for Ri.
+            - `numb_walkers`: (`int`) Number of parallel walkers for exploration.
+            - `numb_models`: (`int`) Number of neural network models of RiD.
+            - `confs`: (`Artifact(List[Path])`) Rearranged initial conformation files (.gro) for reinfoced dynamics.
+            - `walker_tags`: (`List`) Tag formmat for parallel walkers.
+            - `model_tags`: (`List`) Tag formmat for neural network models.
+            
+            - `exploration_gmx_config`: (`Dict`) Configuration of Gromacs simulations in exploration steps.
+            - `cv_config`: (`Dict`) Configuration to create CV in PLUMED2 style.
+            - `trust_lvl_1`: (`List[float]`) Trust level 1, or e0.
+            - `trust_lvl_2`: (`List[float]`) Trust level 2, or e1.
+            - `cluster_threshold`: (`List[float]`) Initial guess of cluster threshold.
+            - `angular_mask`: (`List`) Angular mask for periodic collective variables. 
+                1 represents periodic, 0 represents non-periodic.
+            - `weights`: (`List`) Weights for clustering collective variables. see details in cluster algorithms.
+            - `numb_cluster_upper`: (`int`) Upper limit of cluster number to make cluster threshold.
+            - `numb_cluster_lower`: (`int`) Lower limit of cluster number to make cluster threshold.
+            - `max_selection`: (`int`) Max selection number of clusters in Selection steps for each parallel walker.
+            - `numb_cluster_threshold`: (`int`) Used to adjust trust level. When cluster number is grater than this threshold, 
+                trust levels will be increased adaptively.
+            - `dt`: (`float`) Time interval of exploration MD simulations. Gromacs `trjconv` commands will need this parameters 
+                to slice trajectories by `-dump` tag, see `selection` steps for detail.
+            - `slice_mode`: (`str`) Mode to slice trajectories. Either `gmx` or `mdtraj`.
+            - `label_gmx_config`: (`Dict`) Configuration of Gromacs simulations in labeling steps.
+            - `kappas`: (`List`) Force constants of harmonic restraints to perform restrained MD simulations.
+            - `train_config`: (`Dict`) Configuration to train neural networks, including training strategy and network structures.
+        """
+
         jdata = deepcopy(load_json(op_in["rid_config"]))
         numb_walkers = jdata.pop("numb_walkers")
         train_config = jdata.pop("Train")

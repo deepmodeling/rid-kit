@@ -21,6 +21,17 @@ import numpy as np
 
 class PrepSelect(OP):
 
+    """PrepSelect OP clusters CV outputs of each parallel walker from exploration steps and prepares representative 
+    frames of each clusters for further selection steps.
+    RiD-kit employs agglomerative clustering algorithm performed by Scikit-Learn python package. The distance matrix of CVs
+    is pre-calculated, which is defined by Euclidean distance in CV space. For each cluster, one representive frame will 
+    be randomly chosen from cluster members.
+    For periodic collective variables, RiD-kit uses `angular_mask` to identify them and handle their periodic conditions 
+    during distance calculation.
+    In the first run of RiD iterations, PrepSelect will make a cluster threshold automatically from the initial guess of this value 
+    and make cluter numbers of each parallel walker fall into the interval of `[numb_cluster_lower, numb_cluster_upper]`.
+    """
+
     @classmethod
     def get_input_sign(cls):
         return OPIOSign(
@@ -53,6 +64,35 @@ class PrepSelect(OP):
         self,
         op_in: OPIO,
     ) -> OPIO:
+        
+        r"""Execute the OP.
+        Parameters
+        ----------
+        op_in : dict
+            Input dict with components:
+
+            - `task_name`: (`str`) Task names, used to make sub-directory for tasks.
+            - `plm_out`: (`Artifact(Path)`) Outputs of CV values (`plumed.out` by default) from exploration steps.
+            - `cluster_threshold`: (`float`) Cluster threshold of agglomerative clustering algorithm
+            - `angular_mask`: (`array_like`) Mask for periodic collective variables. 1 represents periodic, 0 represents non-periodic.
+            - `weights`: (`array_like`) Weights to cluster collective variables. see details in cluster parts.
+            - `numb_cluster_upper`: (`Optional[float]`) Upper limit of cluster number to make cluster threshold.
+            - `numb_cluster_lower`: (`Optional[float]`) Lower limit of cluster number to make cluster threshold.
+            - `max_selection`: (`int`) Max selection number of clusters in Selection steps for each parallel walker.
+                For each cluster, one representive frame will be randomly chosen from cluster members.
+            - `if_make_threshold`: (`bool`) whether to make threshold to fit the cluster number interval. Usually `True` in the 1st 
+                iteration and `False` in the further iterations. 
+
+        Returns
+        -------
+            Output dict with components:
+        
+            - `numb_cluster`: (`int`) Number of clusters.
+            - `cluster_threshold`: (`float`) Cluster threshold of agglomerative clustering algorithm. 
+            - `culster_selection_index`: (`Artifact(Path)`) Indice of chosen representive frames of clusters in trajectories.
+            - `culster_selection_data`: (`Artifact(Path)`) Collective variable values of chosen representive frames of clusters.
+        """
+
         # the first column of plm_out is time index
         data = np.loadtxt(op_in["plm_out"])[:,1:]
         cv_cluster = Cluster(

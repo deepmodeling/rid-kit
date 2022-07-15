@@ -21,6 +21,28 @@ from rid.task.builder import EnhcMDTaskBuilder
 
 class PrepExplore(OP):
 
+    r"""Prepare files for exploration tasks.
+    Currently, RiD is based on Gromacs with PLUMED2 plugin. Input files must contain .gro for conformations,
+    .top for topology (with pre-defined force fields) and corresponding configuration in Dict formats while `models` 
+    (graph files, .pb) are optional. Exploration step would run biased MD sampling with neural network models or 
+    brute force MD sampling without neural network model provided.
+
+    With models provided, the bias forces will be the average value of outputs of these models and tuned by a switching function.
+    .. math::
+        F(r) = -\nabla_{r_i} U(r) + \sigma( \me ( s( r))) \nabla_{r_i} A(r)
+    where :math:`F(r)` is forces exrted on atoms, :math:`U(r)` is potential energy and :math:`A(r)` is free energy 
+    represented by neural networks.
+    .. math::
+        \sigma(\epsilon)=
+            \begin{cases}
+                    1, & \epsilon<\epsilon_0 \\
+                    \frac{1}{2}+\frac{1}{2}\cos{(\pi \frac{\epsilon-\epsilon_0}{\epsilon_1-\epsilon_0})}, & \epsilon_0 <\epsilon < \epsilon_1 \\
+                    0, &\epsilon > \epsilon_1
+            \end{cases}
+    where :math:`\sigma(\epsilon)` is the switching function with parameters trust level (`trust_lvl_1` and `trust_lvl_2`).
+
+    """
+
     @classmethod
     def get_input_sign(cls):
         return OPIOSign(
@@ -50,6 +72,31 @@ class PrepExplore(OP):
         self,
         op_in: OPIO,
     ) -> OPIO:
+
+        r"""Execute the OP.
+        Parameters
+        ----------
+        op_in : dict
+            Input dict with components:
+        
+            - `models`: (`Artifact(List[Path])`) Optional. RiD neural network models used to bias the simulation. 
+                Run brute force MD simulations if not provided.
+            - `trust_lvl_1`: (`float`) Trust level 1.
+            - `trust_lvl_2`: (`float`) Trust level 2.
+            - `topology`: (`Artifact(Path)`) Topology files (.top) for Gromacs simulations.
+            - `conf`: (`Artifact(Path)`) Conformation files (.gro) for Gromacs simulations.
+            - `gmx_config`: (`Dict`) Configuration in `Dict` format for Gromacs run. Must contains:
+                `dt`, `steps`, `temperature`, `output_freq`.
+            - `cv_config`: (`Dict`) Configuration for CV creation.
+            - `task_name`: (`str`) Task name used to make sub-dir for tasks.
+           
+        Returns
+        -------
+            Output dict with components:
+        
+            - `task_path`: (`Artifact(Path)`) A directory containing files for RiD exploration.
+            - `cv_dim`: (`int`) CV dimensions.
+        """
 
         if op_in["cv_config"]["mode"] == "torsion":
             cv_file = None,

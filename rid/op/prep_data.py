@@ -19,6 +19,9 @@ import numpy as np
 
 class CollectData(OP):
 
+    r"""Gather data of different simulations to a single file.
+    """
+
     @classmethod
     def get_input_sign(cls):
         return OPIOSign(
@@ -61,6 +64,11 @@ class CollectData(OP):
 
 
 class MergeData(OP):
+    
+    r"""Merge old data and new generated data. 
+    If old data not existed, it will return new data.
+    If new data is empty, it will return old data.
+    """
 
     @classmethod
     def get_input_sign(cls):

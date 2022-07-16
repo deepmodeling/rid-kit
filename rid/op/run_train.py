@@ -17,6 +17,10 @@ from rid.utils import load_txt
 
 class TrainModel(OP):
 
+    """`TrainModel` trains a set of neural network models (set by `numb_model` in `train_config`). 
+    RiD-kit is powered by TensorFlow framework. The output model files are frozen in `.pb` formats by `rid.nn.freeze`.
+    """
+
     @classmethod
     def get_input_sign(cls):
         return OPIOSign(
@@ -41,6 +45,26 @@ class TrainModel(OP):
         self,
         op_in: OPIO,
     ) -> OPIO:
+
+        r"""Execute the OP.
+        Parameters
+        ----------
+        op_in : dict
+            Input dict with components:
+
+            - `model_tag`: (`str`) Tags for neural network model files. In formats of `model_{model_tag}.pb`.
+            - `angular_mask`: (`List`) Angular mask for periodic collective variables. 1 represents periodic, 0 represents non-periodic.
+            - `data`: (`Artifact(Path)`) Data files for training. Prepared by `rid.op.prep_data`.
+                `data` has the shape of `[number_conf, 2 * dimension_cv]` and contains the CV values and corresponding mean forces.
+            - `train_config`: (`Dict`) Configuration to train neural networks, including training strategy and network structures.
+          
+        Returns
+        -------
+            Output dict with components:
+        
+            - `model`: (`Artifact(Path)`) Neural network models in `.pb` formats.
+        """
+
         data_shape = load_txt(op_in["data"]).shape
         cv_dim = int(data_shape[1] // 2)
         train_config = op_in["train_config"]

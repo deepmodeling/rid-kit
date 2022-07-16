@@ -38,6 +38,12 @@ logger = logging.getLogger(__name__)
 
 class RunExplore(OP):
 
+    """Run (biased or brute-force) MD simulations with files provided by `PrepExplore` OP.
+    RiD-kit emploies Gromacs as MD engine with PLUMED2 plugin (with or without MPI-implement). Make sure work environment 
+    has properly installed Gromacs with patched PLUMED2. Also, PLUMED2 need an additional `DeePFE.cpp` patch to use bias potential of RiD.
+    See `install` in the home page for details.
+    """
+
     @classmethod
     def get_input_sign(cls):
         return OPIOSign(
@@ -64,6 +70,28 @@ class RunExplore(OP):
         self,
         op_in: OPIO,
     ) -> OPIO:
+
+        r"""Execute the OP.
+        Parameters
+        ----------
+        op_in : dict
+            Input dict with components:
+
+            - `task_path`: (`Artifact(Path)`) A directory path containing files for Gromacs MD simulations.
+            - `gmx_config`: (`Dict`) Configuration of Gromacs simulations in exploration steps.
+            - `models`: (`Artifact(List[Path])`) Optional. Neural network model files (`.pb`) used to bias the simulation. 
+                Run brute force MD simulations if not provided.
+          
+        Returns
+        -------
+            Output dict with components:
+        
+            - `plm_out`: (`Artifact(Path)`) Outputs of CV values (`plumed.out` by default) from exploration steps.
+            - `md_log`: (`Artifact(Path)`) Log files of Gromacs `mdrun` commands.
+            - `trajectory`: (`Artifact(Path)`) Trajectory files (`.xtc`). The output frequency is defined in `gmx_config`.
+            - `conf_out`: (`Artifact(Path)`) Final frames of conformations in simulations.
+        """
+
         gmx_grompp_cmd = get_grompp_cmd(
             mdp = gmx_mdp_name,
             conf = gmx_conf_name,

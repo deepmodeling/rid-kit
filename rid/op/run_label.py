@@ -35,6 +35,12 @@ logger = logging.getLogger(__name__)
 
 class RunLabel(OP):
 
+    """
+    In `RunLabel`, labeling processes are achieved by restrained MD simulations 
+    wehre harmonnic restraints are exerted on collective variables.
+    `RunLabel` is able to run in a standard Gromacs-PLUMED2 env.
+    """
+
     @classmethod
     def get_input_sign(cls):
         return OPIOSign(
@@ -58,6 +64,24 @@ class RunLabel(OP):
         self,
         op_in: OPIO,
     ) -> OPIO:
+
+        r"""Execute the OP.
+        Parameters
+        ----------
+        op_in : dict
+            Input dict with components:
+
+            - `task_path`: (`Artifact(Path)`) A directory path containing files for Gromacs MD simulations.
+            - `gmx_config`: (`Dict`) Configuration of Gromacs simulations in label steps.
+          
+        Returns
+        -------
+            Output dict with components:
+        
+            - `plm_out`: (`Artifact(Path)`) Outputs of CV values (`plumed.out` by default) from label steps.
+            - `md_log`: (`Artifact(Path)`) Log files of Gromacs `mdrun` commands.
+        """
+
         gmx_grompp_cmd = get_grompp_cmd(
             mdp = gmx_mdp_name,
             conf = gmx_conf_name,

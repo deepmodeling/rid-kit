@@ -79,7 +79,7 @@ class PrepExplore(OP):
         op_in : dict
             Input dict with components:
         
-            - `models`: (`Artifact(List[Path])`) Optional. RiD neural network models used to bias the simulation. 
+            - `models`: (`Artifact(List[Path])`) Optional. Neural network model files (`.pb`) used to bias the simulation. 
                 Run brute force MD simulations if not provided.
             - `trust_lvl_1`: (`float`) Trust level 1.
             - `trust_lvl_2`: (`float`) Trust level 2.

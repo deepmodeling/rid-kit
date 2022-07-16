@@ -20,6 +20,16 @@ from rid.select.model_devi import make_std
 
 class RunSelect(OP):
 
+    """
+    `RunSelect` calculates model ddeviations for each chosen representive cluster frames from `PrepSelect` and select 
+    ones with low uncertainty from them.
+    As RiD-kit is based on `Gromacs`, please provide trajectories in `.xtc` format (single-point precision) and NN models in 
+    `.pb` format. 
+    Warning: We highly recommend use `slice_mode = "gmx"` due to the inconsistent format convention of `mdtraj` that may lead to topology
+    mismatch of next label steps. If you use `mdtraj` mode, please make sure the name conventions of molecules in Gromacs topology 
+    files satisfy PDB standards. This could happen in some old Gromcas version.
+    """
+
     @classmethod
     def get_input_sign(cls):
         return OPIOSign(
@@ -53,6 +63,34 @@ class RunSelect(OP):
         self,
         op_in: OPIO,
     ) -> OPIO:
+
+        r"""Execute the OP.
+        Parameters
+        ----------
+        op_in : dict
+            Input dict with components:
+
+            - `task_name`: str,
+            - `culster_selection_index`: Artifact(Path),
+            - `culster_selection_data`: Artifact(Path),
+            - `models`: Artifact(List[Path], optional=True),
+            - `trust_lvl_1`: float,
+            - `trust_lvl_2`: float,
+            - `xtc_traj`: Artifact(Path),
+            - `topology`: Artifact(Path),
+            - `dt`: Parameter(Optional[float], default=None),
+            - `slice_mode`: Parameter(str, default=`gmx`)
+          
+        Returns
+        -------
+            Output dict with components:
+        
+            - `selected_confs`: (`Artifact(Path)`) Selected conformation files by model deviations from representative frames of clusters.
+            - `selected_cv_init`: (`Artifact(Path)`) Collective variables of selected conformations (`selected_confs`).
+            - `model_devi`: (`Artifact(Path)`) Model deviation values of selected conformation files (`selected_confs`) .
+            - `selected_indices`: (`Artifact(Path)`) Indices of selected conformation files (`selected_confs`) in trajectories.
+        """
+
         cls_sel_idx = load_txt(op_in["culster_selection_index"], dtype=int)
         cls_sel_data = load_txt(op_in["culster_selection_data"], dtype=float)
 

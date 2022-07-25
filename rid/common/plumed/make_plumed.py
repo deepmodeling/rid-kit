@@ -233,6 +233,7 @@ def get_cv_name(
         conf: Optional[str] = None,
         cv_file: Optional[str] = None,
         selected_resid: Optional[List[int]] = None,
+        stride: int = 100,
         mode: str = "torsion"
     ):
     if mode == "torsion":

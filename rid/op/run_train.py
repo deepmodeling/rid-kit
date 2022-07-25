@@ -6,6 +6,7 @@ from dflow.python import (
     Parameter
 )
 
+import numpy as np
 import json, shutil
 from typing import Tuple, List, Optional, Dict
 from pathlib import Path
@@ -65,7 +66,7 @@ class TrainModel(OP):
             - `model`: (`Artifact(Path)`) Neural network models in `.pb` formats.
         """
 
-        data_shape = load_txt(op_in["data"]).shape
+        data_shape = np.load(op_in["data"]).shape
         cv_dim = int(data_shape[1] // 2)
         train_config = op_in["train_config"]
         train(

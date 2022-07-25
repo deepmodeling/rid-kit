@@ -21,7 +21,7 @@ from rid.select.model_devi import make_std
 class RunSelect(OP):
 
     """
-    `RunSelect` calculates model ddeviations for each chosen representive cluster frames from `PrepSelect` and select 
+    `RunSelect` calculates model deviations for each chosen representive cluster frames from `PrepSelect` and select 
     ones with low uncertainty from them.
     As RiD-kit is based on `Gromacs`, please provide trajectories in `.xtc` format (single-point precision) and NN models in 
     `.pb` format. 

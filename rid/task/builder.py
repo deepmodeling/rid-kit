@@ -52,6 +52,7 @@ class EnhcMDTaskBuilder(TaskBuilder):
         self.cv_names = get_cv_name(
             conf=self.conf, cv_file=self.cv_file, 
             selected_resid=self.selected_resid,
+            stride=self.stride,
             mode=self.cv_mode
         )
     

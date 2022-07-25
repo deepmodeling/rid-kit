@@ -54,7 +54,7 @@ class CollectData(OP):
         forces = np.reshape(forces, [len(op_in["forces"]), -1])
         centers = np.reshape(centers, [len(op_in["forces"]), -1])
         data = np.concatenate((centers, forces), axis=1)
-        np.savetxt(data_new, data, fmt="%.6e")
+        np.save(data_new, data)
         op_out = OPIO(
             {
                 "data_new": Path(data_new)
@@ -75,7 +75,7 @@ class MergeData(OP):
         return OPIOSign(
             {
                 "data_old": Artifact(Path, optional=True),
-                "data_new": Artifact(Path)
+                "data_new": Artifact(Path),
             }
         )
 
@@ -96,10 +96,10 @@ class MergeData(OP):
             return OPIO({"data_raw": op_in["data_new"]})
         if os.stat(op_in["data_new"]).st_size == 0:
             return OPIO({"data_raw": op_in["data_old"]})
-        _data_old = load_txt(op_in["data_old"])
-        _data_new = load_txt(op_in["data_new"])
+        _data_old = np.load(op_in["data_old"])
+        _data_new = np.load(op_in["data_new"])
         data = np.concatenate((_data_old, _data_new), axis=0)
-        np.savetxt(data_raw, data, fmt="%.6e")
+        np.save(data_raw, data)
         op_out = OPIO(
             {
                 "data_raw": Path(data_raw)

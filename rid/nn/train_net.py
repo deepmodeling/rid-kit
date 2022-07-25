@@ -44,7 +44,7 @@ class Config(object):
 
 
 def reset_batch_size(config):
-    tr_data = np.loadtxt(config.data_path)
+    tr_data = np.load(config.data_path)
     if tr_data.shape[0] < config.batch_size:
         config.batch_size = tr_data.shape[0]
         print("using new batch_size of %d" % config.batch_size)

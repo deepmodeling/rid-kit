@@ -130,12 +130,13 @@ class PrepLabel(OP):
         """
 
         if op_in["cv_config"]["mode"] == "torsion":
-            cv_file = None,
+            cv_file = None
             selected_resid = op_in["cv_config"]["selected_resid"]
         elif op_in["cv_config"]["mode"] == "custom":
-            cv_file = op_in["cv_config"]["cv_file"],
+            cv_file = op_in["cv_config"]["cv_file"]
             selected_resid = None
         at = load_txt(op_in["at"])
+ 
         gmx_task_builder = RestrainedMDTaskBuilder(
             conf = op_in["conf"],
             topology = op_in["topology"],

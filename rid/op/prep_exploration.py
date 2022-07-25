@@ -99,10 +99,10 @@ class PrepExplore(OP):
         """
 
         if op_in["cv_config"]["mode"] == "torsion":
-            cv_file = None,
+            cv_file = None
             selected_resid = op_in["cv_config"]["selected_resid"]
         elif op_in["cv_config"]["mode"] == "custom":
-            cv_file = op_in["cv_config"]["cv_file"],
+            cv_file = op_in["cv_config"]["cv_file"]
             selected_resid = None
         if op_in["models"] is None:
             models = []

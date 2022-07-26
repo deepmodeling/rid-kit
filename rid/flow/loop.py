@@ -71,6 +71,7 @@ class ReinforcedDynamicsLoop(Steps):
         }
         self._input_artifacts={
             "models" : InputArtifact(optional=True),
+            "forcefield" : InputArtifact(optional=True),
             "topology" : InputArtifact(),
             "confs" : InputArtifact(),
             "data_old": InputArtifact(),
@@ -186,6 +187,7 @@ def _loop (
         },
         artifacts={
             "models": steps.inputs.artifacts["models"],
+            "forcefield" : steps.inputs.artifacts['forcefield'],
             "topology": steps.inputs.artifacts["topology"],
             "confs": steps.inputs.artifacts["confs"],
             "data_old": steps.inputs.artifacts["data_old"]
@@ -222,6 +224,7 @@ def _loop (
         },
         artifacts={
             "models":  block_step.outputs.artifacts["models"],
+            "forcefield" : steps.inputs.artifacts['forcefield'],
             "topology": steps.inputs.artifacts["topology"],
             "confs": block_step.outputs.artifacts["conf_outs"],
             "data_old": block_step.outputs.artifacts["data"]
@@ -271,6 +274,7 @@ class ReinforcedDynamics(Steps):
         self._input_parameters={}
         self._input_artifacts={
             "models": InputArtifact(optional=True),
+            "forcefield": InputArtifact(optional=True),
             "topology": InputArtifact(),
             "confs": InputArtifact(),
             "rid_config": InputArtifact(),
@@ -410,6 +414,7 @@ def _rid(
         },
         artifacts={
             "models": steps.inputs.artifacts["models"],
+            "forcefield" : steps.inputs.artifacts['forcefield'],
             "topology": steps.inputs.artifacts["topology"],
             "confs": prep_rid.outputs.artifacts["confs"]
         },
@@ -450,6 +455,7 @@ def _rid(
         },
         artifacts={
             "models":  init_block.outputs.artifacts["models"],
+            "forcefield" : steps.inputs.artifacts['forcefield'],
             "topology": steps.inputs.artifacts["topology"],
             "confs": init_block.outputs.artifacts["conf_outs"],
             "data_old": init_block.outputs.artifacts["data"]

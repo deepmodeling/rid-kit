@@ -46,6 +46,7 @@ class RunLabel(OP):
         return OPIOSign(
             {
                 "task_path": Artifact(Path),
+                "forcefield": Artifact(Path),
                 "gmx_config": Dict
             }
         )
@@ -95,6 +96,9 @@ class RunLabel(OP):
             nt=op_in["gmx_config"]["nt"],
             ntmpi=op_in["gmx_config"]["ntmpi"]
         )
+        if op_in["forcefield"] is not None:
+            os.symlink(os.path.abspath(op_in["forcefield"]), 
+                       os.path.abspath(op_in["task_path"])+"/"+os.path.basename(op_in["forcefield"])) 
         with set_directory(op_in["task_path"]):
             logger.info(list_to_string(gmx_grompp_cmd, " "))
             return_code, out, err = run_command(gmx_grompp_cmd)

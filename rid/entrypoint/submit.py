@@ -16,6 +16,10 @@ from dflow.python import (
     Slices
 )
 
+from dflow.python import upload_packages
+from rid import SRC_ROOT
+upload_packages.append(SRC_ROOT)
+
 from rid.utils import normalize_resources
 from rid.superop.exploration import Exploration
 from rid.op.prep_exploration import PrepExplore

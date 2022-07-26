@@ -13,6 +13,9 @@
 	* 2.3. [Install rid package](#Installridpackage)
 * 3. [Quick Start](#QuickStart)
 	* 3.1. [CV selection](#CVselection)
+        * 3.1.1. [Dihedral-Angle-Only Collective Variables](#Dihedral-Angle-OnlyCollectiveVariables)
+        * 3.1.2. [Custom Colective Variables](#CustomColectiveVariables)
+        * 3.1.3. [PLUMED Output](#PLUMEDOutput)
 	* 3.2. [Dispatching](#Dispatching)
 		* 3.2.1. [Batch Job](#BatchJob)
 		* 3.2.2. [Local Job](#LocalJob)
@@ -170,7 +173,9 @@ The process will be recorded in `(work_path)/recoord.txt` in which its iteration
 However, if there is NOT a record file in the working path, the whole process will restrat at the very beginning. The old one will become a backup folder as `old_folder.bk000`.
 
 ###  3.1. <a name='CVselection'></a>**CV selection**
-In this version, the users can choose the dihedral angles as CVs.  In the CV file(`cv.json`), the users can write the indexes of the selected residues, the two dihedral angles ($\psi$ and $\phi$) will be set as the CVs. 
+RiD-kit offer two ways for users to define CVs.
+#### 3.1.1 <a name='Dihedral-Angle-OnlyCollectiveVariables'></a> **Dihedral-Angle-Only Collective Variables**
+If users only choose the dihedral angles as CVs, one can write the indexes of the selected residues in the CV file(`cv.json`), , two dihedral angles ($\psi$ and $\phi$) of each selected residue will be set as the CVs. 
 
 Let's begin with a simple example, ala2, which has a sequence (1ACE, 2ALA, 3NME). The `cv.json` file can be set as:
 ```JSON
@@ -194,16 +199,25 @@ Let's begin with a simple example, ala2, which has a sequence (1ACE, 2ALA, 3NME)
 
 > ***Note***: The indexes in `cv.json` start from **0**, while the indexes of residues in `.gro` file start from **1**.
 
-Plumed will output all selected angles during every MD process, and the users can find them in `work_path/iter.0000xx/00.enhcMD/00x/plm.out`, file `angle.rad.out` in the same path is a copy but removing the frame indexes. Thus, in the previous example of ala2, the processed output `angle.rad.out` will look like:
+#### 3.1.2 <a name='CustomColectiveVariables'></a>**Custom Colective Variables**
+For custom CVs, users can use the PLUMED2-format files as input files. Any CV well-defined in Plumed2 will be available in RiD-kit. 
+As an example, one may write a file(`cv.dat`) like:
+```
+cv1: DISTANCE ATOMS=1, 2
+cv2: TORSION ATOMS=3, 4, 5, 6
+```
+All lines are PLUMED style. Then use `-c cv.dat` flag when running RiD-kit.
+
+#### 3.1.3 <a name='PLUMEDOutput'></a>**PLUMED Output**
+
+Plumed will output all defined CVs during every MD process, and the users can find them in `work_path/iter.0000xx/00.enhcMD/00x/plm.out`, file `angle.rad.out` in the same path is a copy but removing the frame indexes. Thus, in the previous example of ala2, the processed output `angle.rad.out` will look like:
 ```
 -2.429137 2.552929
 -2.503469 2.463779
 ...
 -1.240340 2.390756
 ```
-These data are nothing but the dihedral angles in every frame. The first column is $\phi$ angle, the second column is $\psi$ angle. 
-
-We will add more features for users to select more different (and customed) CVs.
+These data are the dihedral angles (or custom CVs) in every output frame. The first column is $\phi$ angle, the second column is $\psi$ angle. 
 
 ###  3.2. <a name='Dispatching'></a>**Dispatching**
 Every task of RiD can be assigned to either compute nodes or local machines, which can be achieved in the machine configuration file(for instance, `machine.json or local.json`). These settings give the messages of users to `dpdispatcher` which can automatically distribute resources.

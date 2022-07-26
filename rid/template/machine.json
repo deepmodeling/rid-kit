@@ -9,10 +9,10 @@
         "remote_slurm": {
             "executor": {
                 "type": "slurm",
-                "host": "101.200.149.59",
+                "host": "",
                 "port": 22,
-                "username": "dongdong",
-                "password": "dongdong1234!",
+                "username": "",
+                "password": "",
                 "header": [
                     "#!/bin/bash",
                     "#SBATCH --partition GPU_2080Ti",

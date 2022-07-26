@@ -44,6 +44,7 @@ class Exploration(Steps):
         }        
         self._input_artifacts = {
             "models" : InputArtifact(optional=True),
+            "forcefield": InputArtifact(optional=True),
             "topology" : InputArtifact(),
             "confs" : InputArtifact(),
         }
@@ -167,6 +168,7 @@ def _exploration(
         },
         artifacts={
             "task_path" : prep_exploration.outputs.artifacts["task_path"],
+            "forcefield": exploration_steps.inputs.artifacts['forcefield'],
             "models" : exploration_steps.inputs.artifacts['models']
         },
         key = step_keys["run_exploration"],

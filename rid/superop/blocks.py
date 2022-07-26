@@ -64,6 +64,7 @@ class InitBlock(Steps):
         }        
         self._input_artifacts = {
             "models" : InputArtifact(optional=True),
+            "forcefield" : InputArtifact(optional=True),
             "topology" : InputArtifact(),
             "confs" : InputArtifact(),
         }
@@ -147,6 +148,7 @@ def _first_run_block(
         },
         artifacts={
             "models" : block_steps.inputs.artifacts['models'],
+            "forcefield" : block_steps.inputs.artifacts['forcefield'],
             "topology" : block_steps.inputs.artifacts['topology'],
             "confs" : block_steps.inputs.artifacts['confs']
         },
@@ -196,6 +198,7 @@ def _first_run_block(
         },
         artifacts={
             "topology": block_steps.inputs.artifacts["topology"],
+            "forcefield" : block_steps.inputs.artifacts['forcefield'],
             "confs": selection.outputs.artifacts["selected_confs"],
             "at": selection.outputs.artifacts["selected_cv_init"]
         },
@@ -296,6 +299,7 @@ class IterBlock(Steps):
         }        
         self._input_artifacts = {
             "models" : InputArtifact(optional=True),
+            "forcefield" : InputArtifact(optional=True),
             "topology" : InputArtifact(),
             "confs" : InputArtifact(),
             "data_old": InputArtifact(),
@@ -386,6 +390,7 @@ def _iter_block(
         },
         artifacts={
             "models" : block_steps.inputs.artifacts['models'],
+            "forcefield" : block_steps.inputs.artifacts['forcefield'],
             "topology" : block_steps.inputs.artifacts['topology'],
             "confs" : block_steps.inputs.artifacts['confs']
         },
@@ -465,6 +470,7 @@ def _iter_block(
         },
         artifacts={
             "topology": block_steps.inputs.artifacts["topology"],
+            "forcefield" : block_steps.inputs.artifacts['forcefield'],
             "confs": selection.outputs.artifacts["selected_confs"],
             "at": selection.outputs.artifacts["selected_cv_init"]
         },

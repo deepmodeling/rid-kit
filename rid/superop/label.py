@@ -50,6 +50,8 @@ class Label(Steps):
         }        
         self._input_artifacts = {
             "topology": InputArtifact(),
+            "models" : InputArtifact(optional=True),
+            "forcefield" : InputArtifact(optional=True),
             "confs": InputArtifact(),
             "at": InputArtifact()
         }
@@ -175,6 +177,7 @@ def _label(
             "gmx_config": label_steps.inputs.parameters["gmx_config"]
         },
         artifacts={
+            "forcefield": label_steps.inputs.artifacts['forcefield'],
             "task_path": prep_label.outputs.artifacts["task_path"]
         },
         key = step_keys['run_label'],

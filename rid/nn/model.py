@@ -189,7 +189,7 @@ class Model(object):
         self.inputs_train = tf.placeholder(
             tf_precision, [None, self.n_input + self.cv_dim], name='inputs')
         self.is_training = tf.placeholder(tf.bool)
-        self.drop_out_rate = tf.compat.v1.placeholder(tf.float32, name='drop_out_rate')  ### drop out ###
+        self.drop_out_rate = tf.placeholder(tf.float32, name='drop_out_rate')  ### drop out ###
         self._extra_train_ops = []
         self.global_step = tf.get_variable('global_step', [],
                                            initializer=tf.constant_initializer(

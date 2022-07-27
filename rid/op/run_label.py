@@ -46,7 +46,7 @@ class RunLabel(OP):
         return OPIOSign(
             {
                 "task_path": Artifact(Path),
-                "forcefield": Artifact(Path),
+                "forcefield": Artifact(Path, optional=True),
                 "gmx_config": Dict
             }
         )

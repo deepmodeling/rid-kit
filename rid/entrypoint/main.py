@@ -170,8 +170,6 @@ def parse_args(args: Optional[List[str]] = None):
 
 def main():
     args = parse_args()
-    logger.info("{}\n{}".format("Software Statement", information))
-    # print(args)
     if args.command == "submit":
         
         logger.info("Preparing RiD ...")

@@ -49,7 +49,7 @@ class RunExplore(OP):
         return OPIOSign(
             {
                 "task_path": Artifact(Path),
-                "forcefield": Artifact(Path),
+                "forcefield": Artifact(Path, optional=True),
                 "gmx_config": Dict,
                 "models": Artifact(List[Path], optional=True)
             }

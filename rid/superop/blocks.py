@@ -193,7 +193,7 @@ def _first_run_block(
             "cv_config": block_steps.inputs.parameters['cv_config'],
             "kappas": block_steps.inputs.parameters['kappas'],
             "tail": block_steps.inputs.parameters['tail'],
-            "task_names" : block_steps.inputs.parameters['walker_tags'],
+            "task_names" : selection.outputs.parameters['selected_conf_tags'],
             "block_tag" : block_steps.inputs.parameters['block_tag'],
         },
         artifacts={

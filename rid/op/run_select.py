@@ -54,7 +54,8 @@ class RunSelect(OP):
                 "selected_confs": Artifact(List[Path]),
                 "selected_cv_init": Artifact(List[Path]),
                 "model_devi": Artifact(Path, optional=True),
-                "selected_indices": Artifact(Path)
+                "selected_indices": Artifact(Path),
+                "selected_conf_tags": List[str]
             }
         )
 
@@ -121,17 +122,20 @@ class RunSelect(OP):
                 raise RuntimeError("Unknown Style for Slicing Trajectory.")
             gro_list = []
             cv_init_list = []
+            tag_list = []
             for ii, sel in enumerate(sel_idx):
                 gro_list.append(task_path.joinpath(sel_gro_name.format(idx=sel)))
                 save_txt(cv_init_label.format(idx=sel), sel_data[ii])
                 cv_init_list.append(task_path.joinpath(cv_init_label.format(idx=sel)))
+                tag_list.append(f"{op_in["task_name"]}_{sel_idx[sel]}")
             
         op_out = OPIO(
             {
                "selected_confs": gro_list,
                "selected_cv_init": cv_init_list,
                "model_devi": task_path.joinpath("cls_"+model_devi_name),
-               "selected_indices": task_path.joinpath(sel_ndx_name)
+               "selected_indices": task_path.joinpath(sel_ndx_name),
+               "selected_conf_tags": tag_list
             }
         )
         return op_out

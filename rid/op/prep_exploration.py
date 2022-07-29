@@ -107,7 +107,7 @@ class PrepExplore(OP):
         if op_in["models"] is None:
             models = []
         else:
-            models = [str(model) for model in op_in["models"]]
+            models = [str(model.name) for model in op_in["models"]]
 
         gmx_task_builder = EnhcMDTaskBuilder(
             conf = op_in["conf"],

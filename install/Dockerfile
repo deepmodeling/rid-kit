@@ -1,7 +1,7 @@
 # Run "docker build --network=host --tag *** ." to build the image
 
 # Build from nvidia/cuda iamge
-FROM nvidia/cuda:11.0.3-cudnn8-runtime-ubuntu20.04
+FROM nvidia/cuda:11.0.3-cudnn8-devel-ubuntu20.04
 SHELL ["/bin/bash", "-c"]
 
 # Add public key of the image to trusted set of keys
@@ -22,15 +22,15 @@ ENV CXX=/usr/bin/g++
 # Install Miniconda package manager.
 RUN wget -O /root/miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 # ADD Miniconda3-latest-Linux-x86_64.sh /root/
-RUN bash /root/Miniconda3-latest-Linux-x86_64.sh -b -p /opt/conda
-RUN rm /root/Miniconda3-latest-Linux-x86_64.sh
+RUN bash /root/miniconda.sh -b -p /opt/conda
+RUN rm /root/miniconda.sh
 ENV PATH /opt/conda/bin:$PATH
 RUN conda init bash && source /root/.bashrc \
     && conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/  \
     && conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/  \
     && conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/  \
     && conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge  \
-    && conda install python=3.9 libtensorflow_cc=2.6.2=*cuda110* tensorflow=2.6.2=*cuda110* nccl -y
+    && conda install python=3.9 libtensorflow_cc=2.6.2=*cuda110* tensorflow=2.6.2=*cuda110* nccl MDAnalysis mdtraj numpy -y
 
 # Solve library inconsistency
 RUN source activate base && rm ${CONDA_PREFIX}/lib/libtinfo.so* && ln -s /usr/lib/x86_64-linux-gnu/libtinfo.so.6 ${CONDA_PREFIX}/lib/libtinfo.so.6 \

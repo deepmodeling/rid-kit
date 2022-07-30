@@ -127,7 +127,7 @@ class RunSelect(OP):
                 gro_list.append(task_path.joinpath(sel_gro_name.format(idx=sel)))
                 save_txt(cv_init_label.format(idx=sel), sel_data[ii])
                 cv_init_list.append(task_path.joinpath(cv_init_label.format(idx=sel)))
-                conf_tags[sel_gro_name.format(idx=sel)] = f"{op_in['task_name']}_{sel_idx[sel]}"
+                conf_tags[sel_gro_name.format(idx=sel)] = f"{op_in['task_name']}_{sel}"
             
         op_out = OPIO(
             {

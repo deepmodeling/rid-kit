@@ -1,8 +1,8 @@
 import subprocess
-from typing import Optional
+from typing import Optional, List
 
 def run_command(
-        cmd: str, 
+        cmd: List, 
         stdin: Optional[str] = None,
         shell: Optional[bool] = None
     ):

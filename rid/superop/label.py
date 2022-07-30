@@ -31,6 +31,7 @@ class Label(Steps):
     def __init__(
         self,
         name: str,
+        check_input_op: OP,
         prep_op: OP,
         run_op: OP,
         post_op: OP,
@@ -45,7 +46,7 @@ class Label(Steps):
             "kappas": InputParameter(type=List[float]),
             "angular_mask": InputParameter(type=List),
             "tail": InputParameter(type=float, value=0.9),
-            "task_names": InputParameter(type=str),
+            "conf_tags": InputParameter(type=List),
             "block_tag" : InputParameter(type=str, value="")
         }        
         self._input_artifacts = {
@@ -75,6 +76,7 @@ class Label(Steps):
             )
         
         step_keys = {
+            "check_label_inputs": "{}-check-label-inputs".format(self.inputs.parameters["block_tag"]),
             "prep_label": "{}-prep-label".format(self.inputs.parameters["block_tag"]),
             "run_label": "{}-run-label".format(self.inputs.parameters["block_tag"]),
             "post_label": "{}-post-label".format(self.inputs.parameters["block_tag"])
@@ -83,6 +85,7 @@ class Label(Steps):
         self = _label(
             self, 
             step_keys,
+            check_input_op,
             prep_op,
             run_op,
             post_op,
@@ -116,6 +119,7 @@ class Label(Steps):
 def _label(
         label_steps,
         step_keys,
+        check_label_input_op : OP,
         prep_label_op : OP,
         run_label_op : OP,
         post_label_op : OP,
@@ -134,6 +138,24 @@ def _label(
     run_executor = init_executor(run_config.pop('executor'))
     post_executor = init_executor(post_config.pop('executor'))
 
+    check_label_inputs = Step(
+        'check-label-inputs',
+        template=PythonOPTemplate(
+            check_label_input_op,
+            python_packages = upload_python_package
+        ),
+        parameters={
+            "conf_tags": label_steps.inputs.parameters['conf_tags'],  
+        },
+        artifacts={
+            "confs": label_steps.inputs.artifacts['confs'],
+        },
+        key = step_keys['check_label_inputs'],
+        executor = prep_executor,
+        **prep_config,
+    )
+    label_steps.add(check_label_inputs)
+
     prep_label = Step(
         'prep-label',
         template=PythonOPTemplate(
@@ -148,7 +170,7 @@ def _label(
         parameters={
             "gmx_config": label_steps.inputs.parameters['gmx_config'],
             "cv_config": label_steps.inputs.parameters['cv_config'],
-            "task_name": label_steps.inputs.parameters['task_names'],
+            "task_name": check_label_inputs.outputs.parameters['conf_tags'],
             "kappas": label_steps.inputs.parameters['kappas']
         },
         artifacts={
@@ -158,7 +180,8 @@ def _label(
         },
         key = step_keys['prep_label'],
         executor = prep_executor,
-        with_param=argo_range(argo_len(label_steps.inputs.parameters['task_names'])),
+        with_param=argo_range(argo_len(check_label_inputs.outputs.parameters['conf_tags'])),
+        when = "%s > 0" % (check_label_inputs.outputs.parameters["if_continue"]),
         **prep_config,
     )
     label_steps.add(prep_label)
@@ -182,7 +205,7 @@ def _label(
         },
         key = step_keys['run_label'],
         executor = run_executor,
-        with_param=argo_range(argo_len(label_steps.inputs.parameters['task_names'])),
+        with_param=argo_range(argo_len(check_label_inputs.outputs.parameters['conf_tags'])),
         **run_config,
     )
     label_steps.add(run_label)
@@ -199,7 +222,7 @@ def _label(
             **run_template_config,
         ),
         parameters={
-            "task_name": label_steps.inputs.parameters['task_names'],
+            "task_name": check_label_inputs.outputs.parameters['conf_tags'],
             "kappas": label_steps.inputs.parameters['kappas'],
             "tail": label_steps.inputs.parameters['tail'],
             "angular_mask": label_steps.inputs.parameters['angular_mask']
@@ -210,7 +233,7 @@ def _label(
         },
         key = step_keys['post_label'],
         executor = run_executor,
-        with_param=argo_range(argo_len(label_steps.inputs.parameters['task_names'])),
+        with_param=argo_range(argo_len(check_label_inputs.outputs.parameters['conf_tags'])),
         **run_config,
     )
     label_steps.add(post_label)

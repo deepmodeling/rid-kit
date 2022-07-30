@@ -66,10 +66,15 @@ class CheckLabelInputs(OP):
             if_continue = 0
         else:
             if_continue = 1
-        
+
         tags = {}
         for tag in op_in["conf_tags"]:
-            tags.update(tags)
+            if isinstance(tag, Dict):
+                tags.update(tag)
+            elif isinstance(tag, str):
+                tags.update(json.loads(tag))
+            else:
+                raise RuntimeError("Unkown Error.")
         
         conf_tags = []
         for conf in op_in["confs"]:

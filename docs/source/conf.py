@@ -12,6 +12,8 @@
 #
 import os
 import sys
+from recommonmark.parser import CommonMarkParser
+
 sys.path.insert(0, os.path.abspath('../../rid'))
 
 
@@ -31,19 +33,18 @@ release = '2.0'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 
+
 extensions = [
-    'myst_parser',
     'sphinx.ext.duration',
     'sphinx.ext.doctest',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
 ]
 
-source_suffix = {
-    '.rst': 'restructuredtext',
-    '.txt': 'markdown',
-    '.md': 'markdown',
+source_parsers = {
+    '.md': CommonMarkParser,
 }
+source_suffix = ['.rst', '.md']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

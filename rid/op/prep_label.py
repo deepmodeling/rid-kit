@@ -2,7 +2,8 @@ from dflow.python import (
     OP,
     OPIO,
     OPIOSign,
-    Artifact
+    Artifact,
+    Parameter
 )
 
 import json, shutil
@@ -30,7 +31,8 @@ class CheckLabelInputs(OP):
     def get_input_sign(cls):
         return OPIOSign(
             {
-                "confs": Artifact(List[Path], optional=True)
+                "confs": Artifact(List[Path], optional=True),
+                "conf_tags": Parameter(List, default=[])
             }
         )
 
@@ -38,7 +40,8 @@ class CheckLabelInputs(OP):
     def get_output_sign(cls):
         return OPIOSign(
             {
-                "if_continue": bool,
+                "if_continue": int,
+                "conf_tags": List
             }
         )
 
@@ -60,13 +63,22 @@ class CheckLabelInputs(OP):
         """
 
         if op_in["confs"] is None:
-            if_continue = False
+            if_continue = 0
         else:
-            if_continue = True
+            if_continue = 1
+        
+        tags = {}
+        for tag in op_in["conf_tags"]:
+            tags.update(tags)
+        
+        conf_tags = []
+        for conf in op_in["confs"]:
+            conf_tags.append(str(tags[conf.name]))
 
         op_out = OPIO(
             {
-                "if_continue": if_continue
+                "if_continue": if_continue,
+                "conf_tags": conf_tags
             }
         )
         return op_out

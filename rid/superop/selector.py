@@ -62,7 +62,7 @@ class Selector(Steps):
         self._output_parameters = {
             "cluster_threshold": OutputParameter(type=List[int]),
             "numb_cluster": OutputParameter(type=List[int]),
-            "selected_conf_tags": OutputParameter(type=List[str]),
+            "selected_conf_tags": OutputParameter(type=List),
         }
         self._output_artifacts = {
             "culster_selection_index": OutputArtifact(),
@@ -208,7 +208,7 @@ def _select(
 
     select_steps.outputs.parameters["cluster_threshold"].value_from_parameter = prep_select.outputs.parameters["cluster_threshold"]
     select_steps.outputs.parameters["numb_cluster"].value_from_parameter = prep_select.outputs.parameters["numb_cluster"]
-    select_steps.outputs.artifacts["selected_conf_tags"].value_from_parameter = run_select.outputs.parameters["selected_conf_tags"]
+    select_steps.outputs.parameters["selected_conf_tags"].value_from_parameter = run_select.outputs.parameters["selected_conf_tags"]
 
     select_steps.outputs.artifacts["culster_selection_index"]._from = prep_select.outputs.artifacts["culster_selection_index"]
     select_steps.outputs.artifacts["selected_confs"]._from = run_select.outputs.artifacts["selected_confs"]

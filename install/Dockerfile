@@ -37,7 +37,8 @@ RUN source activate base && rm ${CONDA_PREFIX}/lib/libtinfo.so* && ln -s /usr/li
     && rm ${CONDA_PREFIX}/lib/libcurl.so* && ln -s /usr/lib/x86_64-linux-gnu/libcurl.so.4 ${CONDA_PREFIX}/lib/libcurl.so.4
 
 # Compile Plumed from source
-RUN wget -O ~/plumed-2.8.0.tgz https://github.com/plumed/plumed2/releases/download/v2.8.0/plumed-2.8.0.tgz
+RUN wget -O /root/plumed-2.8.0.tgz https://github.com/plumed/plumed2/releases/download/v2.8.0/plumed-2.8.0.tgz
+RUN tar zxvf /root/plumed-2.8.0.tgz
 #ADD plumed-2.8.0.tgz /root/
 COPY DeePFE.cpp /root/plumed-2.8.0/src/bias/
 RUN source activate base \
@@ -56,6 +57,7 @@ ENV PLUMED_KERNEL "/opt/conda/lib/libplumedKernel.@SOEXT@"
 
 # Compile gromacs from source
 RUN wget -O root/gromacs-2021.4.tar.gz https://github.com/gromacs/gromacs/archive/refs/tags/v2021.4.tar.gz --no-check-certificate
+RUN tar zxvf /root/gromacs-2021.4.tar.gz
 #ADD gromacs-2021.4.tar.gz /root/
 RUN source activate base && echo $PLUMED_KERNEL && ls $CONDA_PREFIX/lib/ | grep plumed \
     && cd /root/gromacs-2021.4 \

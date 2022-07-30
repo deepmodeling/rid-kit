@@ -25,7 +25,7 @@ from rid.superop.exploration import Exploration
 from rid.op.prep_exploration import PrepExplore
 from rid.op.run_exploration import RunExplore
 from rid.superop.label import Label
-from rid.op.prep_label import PrepLabel
+from rid.op.prep_label import PrepLabel, CheckLabelInputs
 from rid.op.run_label import RunLabel
 from rid.op.calc_mf import CalcMF
 from rid.superop.selector import Selector
@@ -60,6 +60,7 @@ def prep_rid_op(
 
     label_op = Label(
         "label",
+        CheckLabelInputs,
         PrepLabel,
         RunLabel,
         CalcMF,

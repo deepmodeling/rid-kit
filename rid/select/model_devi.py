@@ -56,7 +56,7 @@ def make_std(
 
     forces = []
     for model in models:
-        graph = load_graph(model)
+        graph = load_graph(str(model))
         with tf.Session(graph=graph) as sess:
             _, force = test_ef(sess, data)
             forces = np.append(forces, force)

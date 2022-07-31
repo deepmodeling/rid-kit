@@ -152,7 +152,7 @@ def _first_run_block(
             "topology" : block_steps.inputs.artifacts['topology'],
             "confs" : block_steps.inputs.artifacts['confs']
         },
-        key = '{}_exploration'.format(block_steps.inputs.parameters['block_tag'])
+        key = '{}-exploration'.format(block_steps.inputs.parameters['block_tag'])
     )
     block_steps.add(exploration)
 
@@ -180,7 +180,7 @@ def _first_run_block(
             "xtc_traj": exploration.outputs.artifacts["trajectory"],
             "topology": block_steps.inputs.artifacts["confs"]
         },
-        key = '{}_selection'.format(block_steps.inputs.parameters['block_tag']),
+        key = '{}-selection'.format(block_steps.inputs.parameters['block_tag']),
     )
     block_steps.add(selection)
 
@@ -202,7 +202,7 @@ def _first_run_block(
             "confs": selection.outputs.artifacts["selected_confs"],
             "at": selection.outputs.artifacts["selected_cv_init"]
         },
-        key = '{}_label'.format(block_steps.inputs.parameters['block_tag'])
+        key = '{}-label'.format(block_steps.inputs.parameters['block_tag'])
     )
     block_steps.add(label)
 
@@ -214,7 +214,7 @@ def _first_run_block(
             "forces": label.outputs.artifacts["forces"],
             "centers": selection.outputs.artifacts["selected_cv_init"]
         },
-        key = '{}_gen_data'.format(block_steps.inputs.parameters['block_tag']),
+        key = '{}-gen-data'.format(block_steps.inputs.parameters['block_tag']),
     )
     block_steps.add(gen_data)
 
@@ -241,7 +241,7 @@ def _first_run_block(
         },
         executor = train_executor,
         with_param=argo_range(argo_len(block_steps.inputs.parameters["model_tags"])),
-        key = "{}_train".format(block_steps.inputs.parameters["block_tag"]),
+        key = "{}-train".format(block_steps.inputs.parameters["block_tag"]),
         **train_config,
     )
     block_steps.add(train)
@@ -394,7 +394,7 @@ def _iter_block(
             "topology" : block_steps.inputs.artifacts['topology'],
             "confs" : block_steps.inputs.artifacts['confs']
         },
-        key = '{}_exploration'.format(block_steps.inputs.parameters['block_tag'])
+        key = '{}-exploration'.format(block_steps.inputs.parameters['block_tag'])
     )
     block_steps.add(exploration)
 
@@ -420,7 +420,7 @@ def _iter_block(
             "xtc_traj": exploration.outputs.artifacts["trajectory"],
             "topology": block_steps.inputs.artifacts["confs"]
         },
-        key = '{}_selection'.format(block_steps.inputs.parameters['block_tag']),
+        key = '{}-selection'.format(block_steps.inputs.parameters['block_tag']),
     )
     block_steps.add(selection)
 
@@ -451,7 +451,7 @@ def _iter_block(
         artifacts={},
         with_param=argo_range(argo_len(block_steps.inputs.parameters["trust_lvl_1"])),
         executor = adjust_lvl_executor,
-        key = '{}_adjust_level'.format(block_steps.inputs.parameters['block_tag']),
+        key = '{}-adjust-level'.format(block_steps.inputs.parameters['block_tag']),
         **adjust_lvl_config,
     )
     block_steps.add(adjust_lvl)
@@ -474,7 +474,7 @@ def _iter_block(
             "confs": selection.outputs.artifacts["selected_confs"],
             "at": selection.outputs.artifacts["selected_cv_init"]
         },
-        key = '{}_label'.format(block_steps.inputs.parameters['block_tag'])
+        key = '{}-label'.format(block_steps.inputs.parameters['block_tag'])
     )
     block_steps.add(label)
 
@@ -487,7 +487,7 @@ def _iter_block(
             "centers": selection.outputs.artifacts["selected_cv_init"],
             "data_old": block_steps.inputs.artifacts['data_old']
         },
-        key = '{}_gen_data'.format(block_steps.inputs.parameters['block_tag']),
+        key = '{}-gen-data'.format(block_steps.inputs.parameters['block_tag']),
     )
     block_steps.add(gen_data)
 
@@ -514,7 +514,7 @@ def _iter_block(
         },
         executor = train_executor,
         with_param=argo_range(argo_len(block_steps.inputs.parameters["model_tags"])),
-        key = "{}_train".format(block_steps.inputs.parameters["block_tag"]),
+        key = "{}-train".format(block_steps.inputs.parameters["block_tag"]),
         **train_config,
     )
     block_steps.add(train)

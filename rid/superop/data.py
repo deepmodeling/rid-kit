@@ -113,7 +113,7 @@ def _gen_data(
             "forces": data_steps.inputs.artifacts['forces'],
             "centers": data_steps.inputs.artifacts['centers']
         },
-        key = '{}_collect_data'.format(data_steps.inputs.parameters["block_tag"]),
+        key = '{}-collect-data'.format(data_steps.inputs.parameters["block_tag"]),
         executor = run_executor,
         **run_config,
     )
@@ -131,7 +131,7 @@ def _gen_data(
             "data_old": data_steps.inputs.artifacts["data_old"],
             "data_new": collect_data.outputs.artifacts["data_new"]
         },
-        key = '{}_merge_data'.format(data_steps.inputs.parameters["block_tag"]),
+        key = '{}-merge-data'.format(data_steps.inputs.parameters["block_tag"]),
         executor = run_executor,
         **run_config,
     )

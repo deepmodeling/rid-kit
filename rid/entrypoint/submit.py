@@ -122,19 +122,20 @@ def submit_rid(
         machine_config_dict = json.load(mcg)
     resources = machine_config_dict["resources"]
     tasks = machine_config_dict["tasks"]
-    normailized_resources = {}
+    normalized_resources = {}
     for resource_type in resources.keys():
-        normailized_resources[resource_type] = normalize_resources(resources[resource_type])
+        normalized_resources[resource_type] = normalize_resources(resources[resource_type])
+
     rid_op = prep_rid_op(
-        prep_exploration_config = normailized_resources[tasks["prep_exploration_config"]],
-        run_exploration_config = normailized_resources[tasks["run_exploration_config"]],
-        prep_label_config = normailized_resources[tasks["prep_label_config"]],
-        run_label_config = normailized_resources[tasks["run_label_config"]],
-        prep_select_config = normailized_resources[tasks["prep_select_config"]],
-        run_select_config = normailized_resources[tasks["run_select_config"]],
-        prep_data_config = normailized_resources[tasks["prep_data_config"]],
-        run_train_config = normailized_resources[tasks["run_train_config"]],
-        workflow_steps_config = normailized_resources[tasks["workflow_steps_config"]]
+        prep_exploration_config = normalized_resources[tasks["prep_exploration_config"]],
+        run_exploration_config = normalized_resources[tasks["run_exploration_config"]],
+        prep_label_config = normalized_resources[tasks["prep_label_config"]],
+        run_label_config = normalized_resources[tasks["run_label_config"]],
+        prep_select_config = normalized_resources[tasks["prep_select_config"]],
+        run_select_config = normalized_resources[tasks["run_select_config"]],
+        prep_data_config = normalized_resources[tasks["prep_data_config"]],
+        run_train_config = normalized_resources[tasks["run_train_config"]],
+        workflow_steps_config = normalized_resources[tasks["workflow_steps_config"]]
     )
 
     if isinstance(confs, str):

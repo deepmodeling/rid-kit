@@ -131,9 +131,11 @@ def _label(
     prep_config = deepcopy(prep_config)
     run_config = deepcopy(run_config)
     post_config = deepcopy(post_config)
+
     prep_template_config = prep_config.pop('template_config')
     run_template_config = run_config.pop('template_config')
     post_template_config = post_config.pop('template_config')
+
     prep_executor = init_executor(prep_config.pop('executor'))
     run_executor = init_executor(run_config.pop('executor'))
     post_executor = init_executor(post_config.pop('executor'))
@@ -142,7 +144,8 @@ def _label(
         'check-label-inputs',
         template=PythonOPTemplate(
             check_label_input_op,
-            python_packages = upload_python_package
+            python_packages = upload_python_package,
+            **prep_template_config,
         ),
         parameters={
             "conf_tags": label_steps.inputs.parameters['conf_tags'],  
@@ -219,7 +222,7 @@ def _label(
                 input_parameter=["task_name"],
                 input_artifact=["plm_out", "at"],
                 output_artifact=["forces"]),
-            **run_template_config,
+            **post_template_config,
         ),
         parameters={
             "task_name": check_label_inputs.outputs.parameters['conf_tags'],
@@ -232,9 +235,9 @@ def _label(
             "at": label_steps.inputs.artifacts['at']
         },
         key = step_keys['post_label'],
-        executor = run_executor,
+        executor = post_executor,
         with_param=argo_range(argo_len(check_label_inputs.outputs.parameters['conf_tags'])),
-        **run_config,
+        **post_config,
     )
     label_steps.add(post_label)
 

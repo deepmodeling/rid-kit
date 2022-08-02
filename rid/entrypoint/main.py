@@ -68,6 +68,12 @@ def main_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
 
+    subparsers.add_parser(
+        "dp",
+        help="Something interesting.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+
     parser_rm = subparsers.add_parser(
         "rm",
         help="Remove workflows of RiD.",
@@ -222,5 +228,7 @@ def main():
         rid_ls()
     elif args.command == "rm":
         rid_rm(args.workflow_id)
+    elif args.command == "dp":
+        logger.info("Molecule Simulates the Future!")
     else:
         raise RuntimeError(f"unknown command {args.command}")

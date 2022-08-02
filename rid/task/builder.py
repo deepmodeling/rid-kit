@@ -7,11 +7,10 @@ from rid.constants import (
         gmx_top_name,
         gmx_mdp_name, 
         plumed_input_name,
-        plumed_output_name
     )
-from rid.utils import read_binary, write_binary, read_txt, write_txt
-from rid.common.gromacs import make_md_mdp_from_config, make_md_mdp_string
-from rid.common.plumed import make_deepfe_plumed, check_deepfe_input, make_restraint_plumed, get_cv_name
+from rid.utils import read_txt
+from rid.common.gromacs import make_md_mdp_string
+from rid.common.plumed import make_deepfe_plumed, make_restraint_plumed, get_cv_name
 
 
 class TaskBuilder(ABC):

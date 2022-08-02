@@ -1,4 +1,5 @@
 # rid task name format
+argo_namespace = "argo"
 walker_tag_fmt = "{idx:03d}"
 init_conf_name = "conf_{idx:03d}.gro"
 explore_task_pattern = "{:03d}"

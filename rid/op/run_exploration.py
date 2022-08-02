@@ -1,24 +1,20 @@
+import os, sys
+import logging
+from typing import List, Dict
+from pathlib import Path
 from dflow.python import (
     OP,
     OPIO,
     OPIOSign,
-    Artifact,
-    Parameter
+    Artifact
 )
-import os, sys
-import logging
-import json, shutil
-from typing import Tuple, List, Optional, Dict
-from pathlib import Path
 from rid.constants import (
-        explore_task_pattern, 
         gmx_conf_name,
         gmx_top_name,
         gmx_mdp_name, 
         gmx_tpr_name,
         plumed_input_name,
         plumed_output_name,
-        gmx_grompp_log,
         gmx_mdrun_log,
         xtc_name,
         gmx_conf_out

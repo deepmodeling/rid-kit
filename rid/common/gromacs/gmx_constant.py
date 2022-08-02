@@ -25,7 +25,7 @@ mdp_parameters = {
         "pbc": "xyz", 
         "compressibility": "4.5e-5", 
         "energygrps": "", 
-        "constraints": "all-bonds", 
+        "constraints": "h-bonds", 
         "pme-order": "4", 
         "nstvout": "500", 
         "energygrp-excl": "", 

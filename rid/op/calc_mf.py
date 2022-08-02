@@ -6,15 +6,13 @@ from dflow.python import (
     Parameter
 )
 
-import json, shutil
-from typing import Tuple, List, Optional, Dict, Union
+from typing import List, Optional, Union
 from pathlib import Path
 import numpy as np
 from rid.constants import (
         force_out
     )
-from rid.utils import load_txt, save_txt, set_directory
-from rid.common.gromacs.command import get_grompp_cmd, get_mdrun_cmd
+from rid.utils import load_txt
 
 
 class CalcMF(OP):

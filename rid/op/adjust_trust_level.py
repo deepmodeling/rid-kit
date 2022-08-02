@@ -1,8 +1,7 @@
 from dflow.python import (
     OP,
     OPIO,
-    OPIOSign,
-    Parameter
+    OPIOSign
     )
 
 

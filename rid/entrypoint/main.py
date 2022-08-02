@@ -1,23 +1,31 @@
-import argparse, os, json, glob, sys, logging
+import argparse, os, glob, sys, logging
 from pathlib import Path
-
-from dflow import (
-    Workflow,
-    Step,
-    Steps,
-    upload_artifact,
-    download_artifact,
-)
 from typing import (
     Optional,
     List,
 )
+
+
+NUMEXPR_MAX_THREADS = os.getenv("NUMEXPR_MAX_THREADS")
+if NUMEXPR_MAX_THREADS is None:
+    NUMEXPR_MAX_THREADS = 8
+    os.environ["NUMEXPR_MAX_THREADS"] = str(NUMEXPR_MAX_THREADS)
+
+try:
+    import tensorflow.compat.v1 as tf
+    tf.logging.set_verbosity(tf.logging.ERROR)
+    tf.disable_v2_behavior()
+except ImportError:
+    import tensorflow as tf
+    tf.logging.set_verbosity(tf.logging.ERROR)
+
+
 from .submit import submit_rid
 from .info import information
 from .server import forward_ports
-from rid import (
-    __version__
-)
+from .cli import rid_ls, rid_rm
+from rid import __version__
+
 
 logging.basicConfig(
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
@@ -54,13 +62,21 @@ def main_parser() -> argparse.ArgumentParser:
         epilog="\n"
     )
     
-    parser_run = subparsers.add_parser(
-        "status",
-        help="Task status and Server status",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        epilog="\n"
+    subparsers.add_parser(
+        "ls",
+        help="List all rid tasks.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
-    
+
+    parser_rm = subparsers.add_parser(
+        "rm",
+        help="Remove workflows of RiD.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    parser_rm.add_argument(
+        "WORKFLOW-ID", help="Workflow ID"
+    )
+
     # workflow submit.
     parser_run = subparsers.add_parser(
         "submit",
@@ -71,19 +87,29 @@ def main_parser() -> argparse.ArgumentParser:
     parser_run.add_argument(
         "--mol", "-i", help="Initial conformation files.", dest="mol",
     )
-    # parser_run.add_argument(
-    #     "--conf", "-i", help="Initial conformation files.", dest="model"
-    # )
-    # parser_run.add_argument(
-    #     "--top", "-p", help="Topology file.", dest="top"
-    # )
-    # parser_run.add_argument(
-    #     "--forcefield", "-f", help="Forcefield files.", dest="ff"
-    # )
     parser_run.add_argument(
         "--config", "-c", help="RiD configuration.", dest="config"
     )
     parser_run.add_argument(
+        "--machine", "-m", help="Machine configuration.", dest="machine"
+    )
+
+    # resubmit
+    parser_rerun = subparsers.add_parser(
+        "resubmit",
+        help="Submit RiD workflow",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser_rerun.add_argument(
+        "ID", help="Workflow ID."
+    )
+    parser_rerun.add_argument(
+        "--mol", "-i", help="Initial conformation files.", dest="mol",
+    )
+    parser_rerun.add_argument(
+        "--config", "-c", help="RiD configuration.", dest="config"
+    )
+    parser_rerun.add_argument(
         "--machine", "-m", help="Machine configuration.", dest="machine"
     )
     
@@ -96,15 +122,6 @@ def main_parser() -> argparse.ArgumentParser:
     parser_exp.add_argument(
         "--mol", "-i", help="Initial conformation files.", dest="mol",
     )
-    # parser_exp.add_argument(
-    #     "--conf", "-i", help="Initial conformation files.", dest="model"
-    # )
-    # parser_exp.add_argument(
-    #     "--top", "-p", help="Topology file.", dest="top"
-    # )
-    # parser_exp.add_argument(
-    #     "--forcefield", "-f", help="Forcefield files.", dest="ff"
-    # )
     parser_exp.add_argument(
         "--config", "-c", help="RiD configuration.", dest="config"
     )
@@ -171,7 +188,6 @@ def parse_args(args: Optional[List[str]] = None):
 def main():
     args = parse_args()
     if args.command == "submit":
-        
         logger.info("Preparing RiD ...")
         mol_path = Path(args.mol)
         confs = glob.glob(str(mol_path.joinpath("*.gro")))
@@ -202,5 +218,9 @@ def main():
         return None
     elif args.command == "port-forward":
         forward_ports()
+    elif args.command == "ls":
+        rid_ls()
+    elif args.command == "rm":
+        rid_rm(args.workflow_id)
     else:
         raise RuntimeError(f"unknown command {args.command}")

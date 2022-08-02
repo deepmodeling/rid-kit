@@ -11,14 +11,10 @@ from dflow import (
     Steps,
     argo_range,
     argo_len,
-    argo_sequence
 )
 from dflow.python import(
     PythonOPTemplate,
     OP,
-    OPIO,
-    OPIOSign,
-    Artifact,
     Slices
 )
 from rid.utils import init_executor

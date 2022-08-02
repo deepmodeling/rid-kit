@@ -1,3 +1,6 @@
+import numpy as np
+from typing import List, Dict
+from pathlib import Path
 from dflow.python import (
     OP,
     OPIO,
@@ -5,15 +8,9 @@ from dflow.python import (
     Artifact,
     Parameter
 )
-
-import numpy as np
-import json, shutil
-from typing import Tuple, List, Optional, Dict
-from pathlib import Path
 from rid.constants import tf_model_name
 from rid.nn.train_net import train
 from rid.nn.freeze import freeze_model
-from rid.utils import load_txt
 
 
 class TrainModel(OP):

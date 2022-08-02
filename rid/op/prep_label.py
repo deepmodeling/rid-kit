@@ -6,15 +6,10 @@ from dflow.python import (
     Parameter
 )
 
-import json, shutil
-from typing import Tuple, List, Optional, Dict
+import json
+from typing import List, Dict
 from pathlib import Path
 from rid.constants import (
-        explore_task_pattern, 
-        gmx_conf_name,
-        gmx_top_name,
-        gmx_mdp_name, 
-        plumed_input_name,
         plumed_output_name
     )
 from rid.task.builder import RestrainedMDTaskBuilder

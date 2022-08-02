@@ -2,18 +2,12 @@ from dflow.python import (
     OP,
     OPIO,
     OPIOSign,
-    Artifact,
-    Parameter
+    Artifact
 )
 
-from typing import Tuple, List, Optional, Dict
+from typing import List, Dict
 from pathlib import Path
 from rid.constants import (
-        explore_task_pattern, 
-        gmx_conf_name,
-        gmx_top_name,
-        gmx_mdp_name, 
-        plumed_input_name,
         plumed_output_name
     )
 from rid.task.builder import EnhcMDTaskBuilder

@@ -1,24 +1,14 @@
+import os, sys, shutil, logging
+from typing import List, Dict
+from pathlib import Path
+from copy import deepcopy
 from dflow.python import (
     OP,
     OPIO,
     OPIOSign,
     Artifact
 )
-
-import os, sys, json, shutil, logging
-from typing import Tuple, List, Optional, Dict
-from pathlib import Path
-from rid.constants import (
-        explore_task_pattern, 
-        gmx_conf_name,
-        gmx_top_name,
-        gmx_mdp_name, 
-        plumed_input_name,
-        plumed_output_name
-    )
-from copy import deepcopy
-from rid.task.builder import RestrainedMDTaskBuilder
-from rid.utils import load_txt, load_json
+from rid.utils import load_json
 from rid.constants import model_tag_fmt, init_conf_name, walker_tag_fmt
 
 

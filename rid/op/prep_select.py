@@ -6,7 +6,7 @@ from dflow.python import (
     Parameter
 )
 
-from typing import Tuple, List, Optional, Dict, Union
+from typing import List, Optional, Union
 from pathlib import Path
 from rid.select.cluster import Cluster
 from rid.utils import save_txt, set_directory

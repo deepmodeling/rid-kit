@@ -5,15 +5,13 @@ from dflow.python import (
     Artifact
 )
 import os
-import json, shutil
-from typing import Tuple, List, Optional, Dict
+from typing import List
 from pathlib import Path
 from rid.constants import (
         data_new,
         data_raw
     )
-from rid.task.builder import EnhcMDTaskBuilder
-from rid.utils import load_txt, save_txt
+from rid.utils import load_txt
 import numpy as np
 
 

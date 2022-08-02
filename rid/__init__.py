@@ -1,3 +1,5 @@
+import os
+
 __author__ = 'Yanze Wang; Jiahao Fan'
 __author_email__ = 'yanze039@mit.edu; jiahaofan@pku.edu.cn'
 try:

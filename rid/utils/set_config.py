@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict
 from dflow.plugins.lebesgue import LebesgueExecutor
 from dflow import SlurmRemoteExecutor
 

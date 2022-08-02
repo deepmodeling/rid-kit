@@ -7,14 +7,6 @@ from dflow import (
     Step,
     upload_artifact
 )
-from dflow.python import (
-    PythonOPTemplate,
-    OP,
-    OPIO,
-    OPIOSign,
-    Artifact,
-    Slices
-)
 
 from dflow.python import upload_packages
 from rid import SRC_ROOT

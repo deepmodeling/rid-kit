@@ -1,3 +1,6 @@
+from typing import List, Optional, Dict
+from pathlib import Path
+import numpy as np
 from dflow.python import (
     OP,
     OPIO,
@@ -5,14 +8,8 @@ from dflow.python import (
     Artifact,
     Parameter
 )
-
-import json, shutil
-from typing import Tuple, List, Optional, Dict
-from pathlib import Path
-import numpy as np
 from rid.utils import load_txt, save_txt, set_directory
 from rid.constants import sel_gro_name, cv_init_label, model_devi_name, model_devi_precision, sel_ndx_name
-from rid.common.gromacs.command import get_grompp_cmd, get_mdrun_cmd
 from rid.select.conf_select import select_from_devi
 from rid.common.mol import slice_xtc
 from rid.select.model_devi import make_std

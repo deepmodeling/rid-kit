@@ -1,10 +1,10 @@
+from typing import Optional
 from dflow.python import (
     OP,
     OPIO,
     OPIOSign,
     Parameter
     )
-from typing import Optional
 from rid.constants import block_tag_fmt
 
 class Recorder(OP):

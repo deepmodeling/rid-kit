@@ -80,7 +80,7 @@ def main_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser_rm.add_argument(
-        "WORKFLOW-ID", help="Workflow ID"
+        "WORKFLOW_ID", help="Workflow ID"
     )
 
     # workflow submit.
@@ -227,7 +227,7 @@ def main():
     elif args.command == "ls":
         rid_ls()
     elif args.command == "rm":
-        rid_rm(args.workflow_id)
+        rid_rm(args.WORKFLOW_ID)
     elif args.command == "dp":
         logger.info("Molecule Simulates the Future!")
     else:

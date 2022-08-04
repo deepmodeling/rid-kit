@@ -21,6 +21,7 @@ except ImportError:
 
 
 from .submit import submit_rid
+from .resubmit import resubmit_rid
 from .info import information
 from .server import forward_ports
 from .cli import rid_ls, rid_rm
@@ -107,7 +108,7 @@ def main_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser_rerun.add_argument(
-        "ID", help="Workflow ID."
+        "WORKFLOW_ID", help="Workflow ID."
     )
     parser_rerun.add_argument(
         "--mol", "-i", help="Initial conformation files.", dest="mol",
@@ -189,26 +190,36 @@ def parse_args(args: Optional[List[str]] = None):
         parser.print_help()
 
     return parsed_args
-    
+
+
+def parse_submit(args):
+    mol_path = Path(args.mol)
+    confs = glob.glob(str(mol_path.joinpath("*.gro")))
+    assert len(confs) > 0, "No valid conformation files."
+    top = glob.glob(str(mol_path.joinpath("*.top")))
+    assert len(top) > 0, "No valid topology files."
+    top_file = top[0]
+    forcefield = glob.glob(str(mol_path.joinpath("*.ff")))
+    if len(forcefield) == 0:
+        forcefield = None
+    else:
+        forcefield = forcefield[0]
+    models = glob.glob(str(mol_path.joinpath("*.pb")))
+    if len(models) == 0:
+        models = None
+    return confs, top_file, models, forcefield
+
+
+def log_ui():
+    logger.info('The task is displayed on "https://127.0.0.1:2746".')
+    logger.info('Artifacts (Files) are listed on "https://127.0.0.1:9001".')
+
 
 def main():
     args = parse_args()
     if args.command == "submit":
         logger.info("Preparing RiD ...")
-        mol_path = Path(args.mol)
-        confs = glob.glob(str(mol_path.joinpath("*.gro")))
-        assert len(confs) > 0, "No valid conformation files."
-        top = glob.glob(str(mol_path.joinpath("*.top")))
-        assert len(top) > 0, "No valid topology files."
-        top_file = top[0]
-        forcefield = glob.glob(str(mol_path.joinpath("*.ff")))
-        if len(forcefield) == 0:
-            forcefield = None
-        else:
-            forcefield = forcefield[0]
-        models = glob.glob(str(mol_path.joinpath("*.pb")))
-        if len(models) == 0:
-            models = None
+        confs, top_file, models, forcefield = parse_submit(args)
         submit_rid(
             confs = confs,
             topology = top_file,
@@ -217,8 +228,20 @@ def main():
             models = models,
             forcefield = forcefield
         )
-        logger.info('The task is displayed on "https://127.0.0.1:2746".')
-        logger.info('Artifacts (Files) are listed on "https://127.0.0.1:9001".')
+        log_ui()
+    elif args.command == "resubmit":
+        logger.info("Preparing RiD ...")
+        confs, top_file, models, forcefield = parse_submit(args)
+        resubmit_rid(
+            workflow_id=args.WORKFLOW_ID,
+            confs = confs,
+            topology = top_file,
+            rid_config = args.config,
+            machine_config = args.machine,
+            models = models,
+            forcefield = forcefield
+        )
+        log_ui()
     elif args.command == "explore":
         logger.info("RiD Exploration.")
         return None

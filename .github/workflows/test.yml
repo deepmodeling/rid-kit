@@ -13,5 +13,6 @@ jobs:
     - uses: actions/checkout@v2
     - name: Run unittest
       run: |
+        pip install pydflow
         cd ./tests
         python -m unittest

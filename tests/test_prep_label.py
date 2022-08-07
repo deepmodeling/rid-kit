@@ -34,7 +34,8 @@ class Test_CheckLabelInputs(unittest.TestCase):
         
         op_in1 = OPIO(
             {
-                "confs": [conf_path]
+                "confs": [conf_path],
+                "conf_tags": ["000_000"]
             }
         )
         op_in2 = OPIO(
@@ -44,8 +45,8 @@ class Test_CheckLabelInputs(unittest.TestCase):
         )
         op_out1 = op.execute(op_in1)
         op_out2 = op.execute(op_in2)
-        self.assertTrue(op_out1["if_continue"] == True)
-        self.assertTrue(op_out2["if_continue"] == False)
+        self.assertTrue(op_out1["if_continue"] == 1)
+        self.assertTrue(op_out2["if_continue"] == 0)
 
 
 class Test_PrepLabel(unittest.TestCase):

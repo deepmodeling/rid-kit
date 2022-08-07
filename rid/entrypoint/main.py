@@ -4,7 +4,7 @@ from typing import (
     Optional,
     List,
 )
-
+import rid
 
 NUMEXPR_MAX_THREADS = os.getenv("NUMEXPR_MAX_THREADS")
 if NUMEXPR_MAX_THREADS is None:

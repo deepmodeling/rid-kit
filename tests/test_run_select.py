@@ -29,11 +29,17 @@ class Test_MockedRunSelect(unittest.TestCase):
     def setUp(self):
         self.taskname = "selected"
         self.datapath = "data"
+        cls_data = np.loadtxt(Path(self.datapath)/"cls_sel.out")
+        np.save(Path(self.datapath)/"cls_sel.out.npy", cls_data)
     
     def tearDown(self):
         ii = Path(self.taskname)
         if ii.is_dir():
             shutil.rmtree(ii)
+        cls_npy = Path(self.datapath)/"cls_sel.out.npy"
+        if os.path.exists(cls_npy):
+            os.remove(cls_npy)
+        
     
     @patch('rid.op.run_select.slice_xtc')
     def test(self, mocked_run):
@@ -41,7 +47,7 @@ class Test_MockedRunSelect(unittest.TestCase):
         op = RunSelect()
         data = Path(self.datapath)
         cluster_indx = data/"cls_sel.ndx"
-        cluster_data = data/"cls_sel.out"
+        cluster_data = data/"cls_sel.out.npy"
         xtc_traj = data/"traj_comp.xtc"
         top_path = data/"topol.top"
         model_path1 = ".."/data/"model_000.pb"

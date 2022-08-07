@@ -35,7 +35,7 @@ class Test_CheckLabelInputs(unittest.TestCase):
         op_in1 = OPIO(
             {
                 "confs": [conf_path],
-                "conf_tags": ["000_000"]
+                "conf_tags": [{"conf.gro": "000"}]
             }
         )
         op_in2 = OPIO(

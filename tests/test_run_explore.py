@@ -43,7 +43,8 @@ class Test_MockedRunExplore(unittest.TestCase):
             {
                 "task_path": task_path,
                 "gmx_config": gmx_config,
-                "models": []
+                "models": None,
+                "forcefield": None
             }
             )
         op_out = op.execute(op_in)

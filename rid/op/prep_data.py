@@ -94,8 +94,10 @@ class MergeData(OP):
             return OPIO({"data_raw": op_in["data_new"]})
         if os.stat(op_in["data_new"]).st_size == 0:
             return OPIO({"data_raw": op_in["data_old"]})
-        _data_old = np.load(op_in["data_old"])
         _data_new = np.load(op_in["data_new"])
+        if len(_data_new) == 0:
+            return OPIO({"data_raw": op_in["data_old"]})
+        _data_old = np.load(op_in["data_old"])
         data = np.concatenate((_data_old, _data_new), axis=0)
         np.save(data_raw, data)
         op_out = OPIO(

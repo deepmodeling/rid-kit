@@ -25,7 +25,7 @@ from rid.constants import (
         init_conf_name
     )
 
-class Test_MockedRunSelect(unittest.TestCase):
+class Test_MockedRunLabel(unittest.TestCase):
     def setUp(self):
         self.taskname = "001"
     
@@ -42,7 +42,8 @@ class Test_MockedRunSelect(unittest.TestCase):
             {
                 "task_path": Path(self.taskname),
                 "gmx_config": {"nsteps": 50, "output_freq": 1, "temperature": 300, 
-                               "dt": 0.002, "output_mode": "both", "ntmpi": 1, "nt": 8, "max_warning": 0}
+                               "dt": 0.002, "output_mode": "both", "ntmpi": 1, "nt": 8, "max_warning": 0},
+                "forcefield": None
             }
         )
     

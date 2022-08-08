@@ -158,7 +158,7 @@ def _select(
         artifacts={
             "plm_out": select_steps.inputs.artifacts['plm_out']
         },
-        key = step_keys["prep_select"],
+        key = step_keys["prep_select"]+"-{{item}}",
         executor = prep_executor,
         with_param=argo_range(argo_len(select_steps.inputs.parameters['task_names'])),
         **prep_config,
@@ -192,7 +192,7 @@ def _select(
             "xtc_traj": select_steps.inputs.artifacts["xtc_traj"],
             "topology": select_steps.inputs.artifacts["topology"]
         },
-        key = step_keys["run_select"],
+        key = step_keys["run_select"]+"-{{item}}",
         executor = run_executor,
         with_param=argo_range(argo_len(select_steps.inputs.parameters["task_names"])),
         **run_config,

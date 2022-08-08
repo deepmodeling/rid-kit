@@ -226,7 +226,7 @@ def _first_run_block(
         template=PythonOPTemplate(
             train_op,
             python_packages = upload_python_package,
-            slices=Slices(
+            slices=Slices("{{item}}",
                 input_parameter=["model_tag"],
                 output_artifact=["model"]),
             **train_template_config,
@@ -241,7 +241,7 @@ def _first_run_block(
         },
         executor = train_executor,
         with_param=argo_range(argo_len(block_steps.inputs.parameters["model_tags"])),
-        key = "{}-train".format(block_steps.inputs.parameters["block_tag"]),
+        key = "{}-train".format(block_steps.inputs.parameters["block_tag"])+"-{{item}}",
         **train_config,
     )
     block_steps.add(train)
@@ -433,7 +433,7 @@ def _iter_block(
         template=PythonOPTemplate(
             adjust_lvl_op,
             python_packages = upload_python_package,
-            slices=Slices(
+            slices=Slices("{{item}}",
                 input_parameter=["trust_lvl_1", "trust_lvl_2", "numb_cluster", "init_trust_lvl_1", "init_trust_lvl_2"],
                 output_parameter=["adjust_trust_lvl_1", "adjust_trust_lvl_2"]),
             **adjust_lvl_template_config,
@@ -451,7 +451,7 @@ def _iter_block(
         artifacts={},
         with_param=argo_range(argo_len(block_steps.inputs.parameters["trust_lvl_1"])),
         executor = adjust_lvl_executor,
-        key = '{}-adjust-level'.format(block_steps.inputs.parameters['block_tag']),
+        key = '{}-adjust-level'.format(block_steps.inputs.parameters['block_tag'])+"-{{item}}",
         **adjust_lvl_config,
     )
     block_steps.add(adjust_lvl)
@@ -499,7 +499,7 @@ def _iter_block(
         template=PythonOPTemplate(
             train_op,
             python_packages = upload_python_package,
-            slices=Slices(
+            slices=Slices("{{item}}",
                 input_parameter=["model_tag"],
                 output_artifact=["model"]),
             **train_template_config,
@@ -514,7 +514,7 @@ def _iter_block(
         },
         executor = train_executor,
         with_param=argo_range(argo_len(block_steps.inputs.parameters["model_tags"])),
-        key = "{}-train".format(block_steps.inputs.parameters["block_tag"]),
+        key = "{}-train".format(block_steps.inputs.parameters["block_tag"])+"-{{item}}",
         **train_config,
     )
     block_steps.add(train)

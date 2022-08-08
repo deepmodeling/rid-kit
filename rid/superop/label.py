@@ -156,7 +156,7 @@ def _label(
         template=PythonOPTemplate(
             prep_label_op,
             python_packages = upload_python_package,
-            slices=Slices(
+            slices=Slices("{{item}}",
                 input_parameter=["task_name"],
                 input_artifact=["conf", "at"],
                 output_artifact=["task_path"]),
@@ -173,7 +173,7 @@ def _label(
             "conf": label_steps.inputs.artifacts['confs'],
             "at": label_steps.inputs.artifacts['at']
         },
-        key = step_keys['prep_label'],
+        key = step_keys['prep_label']+"-{{item}}",
         executor = prep_executor,
         with_param=argo_range(argo_len(check_label_inputs.outputs.parameters['conf_tags'])),
         when = "%s > 0" % (check_label_inputs.outputs.parameters["if_continue"]),
@@ -186,7 +186,7 @@ def _label(
         template=PythonOPTemplate(
             run_label_op,
             python_packages = upload_python_package,
-            slices=Slices(
+            slices=Slices("{{item}}",
                 input_artifact=["task_path"],
                 output_artifact=["plm_out", "md_log"]),
             **run_template_config,
@@ -198,7 +198,7 @@ def _label(
             "forcefield": label_steps.inputs.artifacts['forcefield'],
             "task_path": prep_label.outputs.artifacts["task_path"]
         },
-        key = step_keys['run_label'],
+        key = step_keys['run_label']+"-{{item}}",
         executor = run_executor,
         with_param=argo_range(argo_len(check_label_inputs.outputs.parameters['conf_tags'])),
         **run_config,
@@ -210,7 +210,7 @@ def _label(
         template=PythonOPTemplate(
             post_label_op,
             python_packages = upload_python_package,
-            slices=Slices(
+            slices=Slices("{{item}}",
                 input_parameter=["task_name"],
                 input_artifact=["plm_out", "at"],
                 output_artifact=["forces"]),
@@ -226,7 +226,7 @@ def _label(
             "plm_out": run_label.outputs.artifacts["plm_out"],
             "at": label_steps.inputs.artifacts['at']
         },
-        key = step_keys['post_label'],
+        key = step_keys['post_label']+"-{{item}}",
         executor = post_executor,
         with_param=argo_range(argo_len(check_label_inputs.outputs.parameters['conf_tags'])),
         **post_config,

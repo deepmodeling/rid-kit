@@ -14,15 +14,6 @@
         "cv_file":""
     },
 
-    "SelectorConfig": {
-        "numb_cluster_lower": 16,
-        "numb_cluster_upper": 26,
-        "cluster_threshold": 1,
-        "max_selection": 30,
-        "numb_cluster_threshold": 8,
-        "slice_mode": "gmx"
-    },
-
     "ExploreMDConfig": {
         "nsteps": 25000,
         "output_freq": 25,
@@ -32,6 +23,15 @@
         "ntmpi": 1,
         "nt": 8,
         "max_warning": 0
+    },
+
+    "SelectorConfig": {
+        "numb_cluster_lower": 16,
+        "numb_cluster_upper": 26,
+        "cluster_threshold": 1,
+        "max_selection": 30,
+        "numb_cluster_threshold": 8,
+        "slice_mode": "gmx"
     },
 
     "LabelMDConfig": {
@@ -55,11 +55,9 @@
         "init_lr": 0.0008,
         "decay_steps": 120,
         "decay_rate": 0.96,
-        "train_thread": 8,
         "drop_out_rate": 0.1,
         "numb_threads": 8,
         "use_mix": false,
         "restart": false,
-        "decay_steps_inner": 120
     }
 }

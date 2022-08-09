@@ -1,4 +1,5 @@
 import os
+from dflow import config
 
 __author__ = 'Yanze Wang; Jiahao Fan'
 __author_email__ = 'yanze039@mit.edu; jiahaofan@pku.edu.cn'
@@ -8,3 +9,5 @@ except ImportError:
     from .__about__ import __version__
 
 SRC_ROOT = __path__[0]
+config["extender_image_pull_policy"] = "IfNotPresent"
+config["util_image_pull_policy"] = "IfNotPresent"

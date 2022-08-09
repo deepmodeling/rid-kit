@@ -12,7 +12,6 @@
 #
 import os
 import sys
-from recommonmark.parser import CommonMarkParser
 
 sys.path.insert(0, os.path.abspath('../../rid'))
 
@@ -20,8 +19,8 @@ sys.path.insert(0, os.path.abspath('../../rid'))
 # -- Project information -----------------------------------------------------
 
 project = 'RiD-kit'
-copyright = '2022, Yanze Wang, Dongdong Wang, Junhan Chang, Fanjia Hao, Han Wang, Linfeng Zhang, Weinan E'
-author = 'Yanze Wang, Dongdong Wang, Junhan Chang, Fanjia Hao, Han Wang, Linfeng Zhang, Weinan E'
+copyright = '2022, Yanze Wang, Fanjia Hao'
+author = 'Yanze Wang, Fanjia Hao'
 
 # The full version, including alpha/beta/rc tags
 release = '2.0'
@@ -39,13 +38,12 @@ extensions = [
     'sphinx.ext.doctest',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
+    'myst_parser',
+    'sphinx.ext.napoleon'
 ]
+napoleon_numpy_docstring = True
 
-source_parsers = {
-    '.md': CommonMarkParser,
-}
 source_suffix = ['.rst', '.md']
-
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 

@@ -37,14 +37,6 @@ rid.main module
    :undoc-members:
    :show-inheritance:
 
-rid.parser module
------------------
-
-.. automodule:: rid.parser
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Module contents
 ---------------
 

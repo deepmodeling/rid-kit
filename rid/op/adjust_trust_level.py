@@ -12,6 +12,7 @@ class AdjustTrustLevel(OP):
     the trust level will be increased. 
     Trust levels won't increase infinitly. When current trust_lvl_1 > `max_level_multiple` * init_trust_lvl_1, 
     where init_trust_lvl_1 is the initial trust level, trust_lvl_1 will be tuned to its initial value.
+
     """
 
     @classmethod
@@ -44,6 +45,7 @@ class AdjustTrustLevel(OP):
         op_in: OPIO,
     ) -> OPIO:
         r"""Execute the OP.
+
         Parameters
         ----------
         op_in : dict
@@ -58,12 +60,14 @@ class AdjustTrustLevel(OP):
                 if `numb_cluster` > `numb_cluster_threshold`, `trust_lvl` will be increased.
             - `adjust_amplifier`: (`float`) Increasing multiple for trust level.
             - `max_level_multiple`: (`float`) The max multiple than trust level can be increased.
+
         Returns
         -------
             Output dict with components:
         
             - `adjust_trust_lvl_1`: (`float`) Adjusted Trust level 1 for next iteration.
             - `adjust_trust_lvl_2`: (`float`) Adjusted Trust level 2 for next iteration.
+            
         """
         if op_in["numb_cluster"] < op_in["numb_cluster_threshold"]:
             adjust_trust_lvl_1 = op_in["trust_lvl_1"] * op_in["adjust_amplifier"]

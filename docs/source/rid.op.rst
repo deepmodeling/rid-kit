@@ -100,14 +100,6 @@ rid.op.run\_train module
    :undoc-members:
    :show-inheritance:
 
-rid.op.tmp module
------------------
-
-.. automodule:: rid.op.tmp
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Module contents
 ---------------
 

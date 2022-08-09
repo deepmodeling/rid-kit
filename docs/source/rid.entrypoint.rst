@@ -4,6 +4,14 @@ rid.entrypoint package
 Submodules
 ----------
 
+rid.entrypoint.cli module
+-------------------------
+
+.. automodule:: rid.entrypoint.cli
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 rid.entrypoint.info module
 --------------------------
 
@@ -16,6 +24,14 @@ rid.entrypoint.main module
 --------------------------
 
 .. automodule:: rid.entrypoint.main
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+rid.entrypoint.resubmit module
+------------------------------
+
+.. automodule:: rid.entrypoint.resubmit
    :members:
    :undoc-members:
    :show-inheritance:

@@ -122,7 +122,7 @@ def _exploration(
         template=PythonOPTemplate(
             prep_exploration_op,
             python_packages = upload_python_package,
-            slices=Slices(
+            slices=Slices("{{item}}",
                 input_parameter=["task_name", "trust_lvl_1", "trust_lvl_2"],
                 input_artifact=["conf"],
                 output_artifact=["task_path"]
@@ -141,7 +141,7 @@ def _exploration(
             "topology" :exploration_steps.inputs.artifacts['topology'],
             "conf" : exploration_steps.inputs.artifacts['confs']
         },
-        key = step_keys["prep_exploration"],
+        key = step_keys["prep_exploration"]+"-{{item}}",
         with_param=argo_range(argo_len(exploration_steps.inputs.parameters['task_names'])),
         executor = prep_executor,
         **prep_config,
@@ -153,7 +153,7 @@ def _exploration(
         template=PythonOPTemplate(
             run_exploration_op,
             python_packages = upload_python_package,
-            slices=Slices(
+            slices=Slices("{{item}}",
                 input_artifact=["task_path"],
                 output_artifact=["plm_out", "trajectory", "md_log", "conf_out"]
             ),
@@ -167,7 +167,7 @@ def _exploration(
             "forcefield": exploration_steps.inputs.artifacts['forcefield'],
             "models" : exploration_steps.inputs.artifacts['models']
         },
-        key = step_keys["run_exploration"],
+        key = step_keys["run_exploration"]+"-{{item}}",
         executor = run_executor,
         with_param=argo_range(argo_len(exploration_steps.inputs.parameters['task_names'])),
         **run_config,

@@ -88,6 +88,6 @@ def resubmit_rid(
     for step in all_steps:
         if step["phase"] == "Succeeded" and step["type"] == "Pod":
             succeeded_steps.append(step)
-    wf = Workflow("reinforced-dynamics")
+    wf = Workflow("reinforced-dynamics", pod_gc_strategy="OnPodSuccess")
     wf.add(rid_steps)
     wf.submit(reuse_step=succeeded_steps)

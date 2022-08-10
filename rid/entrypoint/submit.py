@@ -165,6 +165,6 @@ def submit_rid(
             },
             parameters={}
         )
-    wf = Workflow("reinforced-dynamics")
+    wf = Workflow("reinforced-dynamics", pod_gc_strategy="OnPodSuccess")
     wf.add(rid_steps)
     wf.submit()

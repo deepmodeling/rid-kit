@@ -80,6 +80,7 @@ class PrepRiD(OP):
                 "max_selection": int,
                 "numb_cluster_threshold": int,
                 "dt": float,
+                "output_freq": float,
                 "slice_mode": str,
                 "label_gmx_config": Dict,
                 "kappas": List,
@@ -151,6 +152,7 @@ class PrepRiD(OP):
         
         exploration_gmx_config = jdata.pop("ExploreMDConfig")
         dt = exploration_gmx_config["dt"]
+        output_freq = exploration_gmx_config["output_freq"]
         cv_config = jdata.pop("CV")
         angular_mask = cv_config.pop("angular_mask")
         weights = cv_config.pop("weights")
@@ -189,6 +191,7 @@ class PrepRiD(OP):
                 "max_selection": selection_config.pop("max_selection"),
                 "numb_cluster_threshold": selection_config.pop("numb_cluster_threshold"),
                 "dt": dt,
+                "output_freq": output_freq,
                 "slice_mode": selection_config.pop("slice_mode"),
                 "label_gmx_config": label_md_config,
                 "kappas": kappas,

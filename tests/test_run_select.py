@@ -65,6 +65,7 @@ class Test_MockedRunSelect(unittest.TestCase):
                 "xtc_traj": xtc_traj,
                 "topology": top_path,
                 "dt": 0.002,
+                "output_freq": 2500,
                 "slice_mode": "gmx"
             }
         )
@@ -79,6 +80,7 @@ class Test_MockedRunSelect(unittest.TestCase):
                 "xtc_traj": xtc_traj,
                 "topology": top_path,
                 "dt": 0.002,
+                "output_freq": 2500,
                 "slice_mode": "mdtraj"
             }
         )
@@ -93,6 +95,7 @@ class Test_MockedRunSelect(unittest.TestCase):
                 "xtc_traj": xtc_traj,
                 "topology": top_path,
                 "dt": 0.002,
+                "output_freq": 2500,
                 "slice_mode": "gmx"
             }
         )
@@ -107,6 +110,7 @@ class Test_MockedRunSelect(unittest.TestCase):
                 "xtc_traj": xtc_traj,
                 "topology": top_path,
                 "dt": 0.002,
+                "output_freq": 2500,
                 "slice_mode": "others"
             }
         )

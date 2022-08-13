@@ -432,7 +432,7 @@ def _rid(
             "trust_lvl_2": prep_rid.outputs.parameters["trust_lvl_2"],
             "init_trust_lvl_1": prep_rid.outputs.parameters["trust_lvl_1"],
             "init_trust_lvl_2": prep_rid.outputs.parameters["trust_lvl_2"],
-            "cluster_threshold":  prep_rid.outputs.parameters["cluster_threshold"],
+            "cluster_threshold":  init_block.outputs.parameters["cluster_threshold"],
             "angular_mask": prep_rid.outputs.parameters["angular_mask"],
             "weights": prep_rid.outputs.parameters["weights"],
             "max_selection": prep_rid.outputs.parameters["max_selection"],

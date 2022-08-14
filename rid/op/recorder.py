@@ -36,6 +36,7 @@ class Recorder(OP):
         op_in: OPIO,
     ) -> OPIO:
         r"""Execute the OP.
+        
         Parameters
         ----------
         op_in : dict

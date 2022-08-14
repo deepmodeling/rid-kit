@@ -18,7 +18,9 @@ from rid.utils import load_txt
 
 class CheckLabelInputs(OP):
 
-    r"""Check Inputs of Label Steps. If inputs `conf` are empty or None, `if_continue` will be False,
+    r"""Check Inputs of Label Steps.
+    
+    If inputs `conf` are empty or None, `if_continue` will be False,
     and the following ops of Label steps won't be executed.
     """
 
@@ -46,11 +48,13 @@ class CheckLabelInputs(OP):
         op_in: OPIO,
     ) -> OPIO:
         r"""Execute the OP.
+        
         Parameters
         ----------
         op_in : dict
             Input dict with components:
             - `confs`: (`Artifact(List[Path])`) Conformations selected from trajectories of exploration steps.
+            
         Returns
         -------
             Output dict with components:
@@ -88,6 +92,7 @@ class CheckLabelInputs(OP):
 class PrepLabel(OP):
 
     r"""Prepare files for Label steps.
+    
     Labels of RiD are mean forces, which are calculated by restrained MD algorithm.
     Restrained MD simulations are performed by Gromacs with PLUMED2 plugin, so input files are in Gromacs format.
     """
@@ -121,6 +126,7 @@ class PrepLabel(OP):
     ) -> OPIO:
         
         r"""Execute the OP.
+        
         Parameters
         ----------
         op_in : dict

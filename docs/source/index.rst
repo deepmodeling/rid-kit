@@ -8,7 +8,7 @@ Welcome to RiD-kit's documentation!
 
 **Rid-kit** is a python package for enhanced sampling via the RiD (Reinforced Dynamics) method.
 
-.. Important:: The project DeePMD-kit is licensed under GNU LGPLv3.0.
+.. Important:: The project Rid-kit is licensed under GNU LGPLv3.0.
 
 .. mdinclude:: ../../README.md
 
@@ -24,7 +24,7 @@ Contents
 
    Installation <install>
    Configure Simulations <rid_configuration>
-   API doc <api>
+   Rid API <api/api>
    Trouble Shooting <troubleshooting/index> 
 
 Indices and tables

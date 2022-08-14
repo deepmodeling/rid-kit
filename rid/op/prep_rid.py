@@ -43,6 +43,7 @@ def prep_confs(confs, numb_walkers):
 class PrepRiD(OP):
 
     """Pre-processing of RiD.
+    
     1. Parse RiD configuration JSON file, get default value if parameters are not provided.
     2. Rearrange conformation files.
     3. Make task names and formats.
@@ -95,6 +96,7 @@ class PrepRiD(OP):
     ) -> OPIO:
 
         r"""Execute the OP.
+        
         Parameters
         ----------
         op_in : dict

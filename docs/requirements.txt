@@ -1,2 +1,8 @@
 myst-parser
 m2r2
+ipython
+jinja2==3.0.1
+docutils==0.17.1
+myst-parser
+m2r2
+nbsphinx

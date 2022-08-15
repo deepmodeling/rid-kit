@@ -176,7 +176,9 @@ def main_parser() -> argparse.ArgumentParser:
 
 
 def parse_args(args: Optional[List[str]] = None):
-    """RiD commandline options argument parsing.
+    """
+    RiD commandline options argument parsing.
+    
     Parameters
     ----------
     args: List[str]

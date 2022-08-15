@@ -71,6 +71,7 @@ class Cluster:
 
 def cv_dist(cv1, cv2, angular_mask, weights):
     diff = cv1 - cv2
+    angular_mask = np.array(angular_mask)
     angular_boolean = (angular_mask == 1)
     angular_diff = diff[angular_boolean]
     angular_diff[angular_diff < -np.pi] += 2 * np.pi

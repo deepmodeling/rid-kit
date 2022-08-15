@@ -4,15 +4,15 @@
 > 
 > If you want to set environments by hand, please follow settings 1.1.1 ~ 1.1.4. 
 You can also install environment of rid through the dockerfile, just run "docker build --net=host --tag rid-kit ." and then run "docker run -d -it --gpus all --net=host -v /mnt/workdir/:/mnt/workdir/ --shm-size=400g --name rid-container rid-kit" you can get the required enviroment.
-## 1 <a name='Installpythonandtensorflow'></a>**Install python and tensorflow**
+## Install python and tensorflow
 
-## 2 <a name='Install tensorflows C++ interface'></a>**Install tensorflow's C++ interface**
-### 2.1 <a name='Using Bazel'></a>**Using Bazel**
+## Install tensorflow's C++ interface
+### Using Bazel
 It is relatively simple and one can follow the steps <https://docs.deepmodeling.com/projects/deepmd/en/master/install/install-tf.2.3.html>
 
 The problem with Bazel compile is that it requires accessing website aboard. One way out is to use the compiled file and set path variables `PATH` and `LD_LIBRARY_PATH` accordingly.
 
-### 2.2 <a name='Using Conda'></a>**Using Conda**
+### Using Conda
 Use the command
 ```
 conda install libtensorflow_cc=2.6.2=*cuda113* nccl -c conda-forge
@@ -28,7 +28,7 @@ export tf_path=${CONDA_PREFIX}
 ```
 
 
-## 3 <a name='Installplumed2.8.0'></a>**Install plumed2.8.0**
+## Install plumed2.8.0
 You need to copy compiled `DeePFE.cpp` to the plumed directory. This file locates at `rid-kit/install/DeePFE.cpp`
 ```bash
 tar -xvzf plumed-2.8.0.tgz
@@ -48,7 +48,7 @@ export LD_LIBRARY_PATH=/opt/conda/lib:$LD_LIBRARY_PATH
 export PLUMED_KERNEL=/opt/conda/lib/libplumedKernel.@SOEXT@
 ```
 
-## 4 <a name='Installgromacs2021.4'></a>**Install gromacs 2021.4**
+## Install gromacs 2021.4
 
 ```bash
 tar -xzvf gromacs-2021.4.tar.gz

@@ -23,18 +23,21 @@ class PrepExplore(OP):
 
     With models provided, the bias forces will be the average value of outputs of these models and tuned by a switching function.
     .. math::
+    
         F(r) = -\nabla_{r_i} U(r) + \sigma( \me ( s( r))) \nabla_{r_i} A(r)
+        
     where :math:`F(r)` is forces exrted on atoms, :math:`U(r)` is potential energy and :math:`A(r)` is free energy 
     represented by neural networks.
     .. math::
+    
         \sigma(\epsilon)=
             \begin{cases}
                     1, & \epsilon<\epsilon_0 \\
                     \frac{1}{2}+\frac{1}{2}\cos{(\pi \frac{\epsilon-\epsilon_0}{\epsilon_1-\epsilon_0})}, & \epsilon_0 <\epsilon < \epsilon_1 \\
                     0, &\epsilon > \epsilon_1
             \end{cases}
+            
     where :math:`\sigma(\epsilon)` is the switching function with parameters trust level (`trust_lvl_1` and `trust_lvl_2`).
-
     """
 
     @classmethod
@@ -68,6 +71,7 @@ class PrepExplore(OP):
     ) -> OPIO:
 
         r"""Execute the OP.
+        
         Parameters
         ----------
         op_in : dict

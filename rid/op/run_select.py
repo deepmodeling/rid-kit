@@ -40,6 +40,7 @@ class RunSelect(OP):
                 "xtc_traj": Artifact(Path),
                 "topology": Artifact(Path),
                 "dt": Parameter(Optional[float], default=None),
+                "output_freq": Parameter(Optional[float], default=None),
                 "slice_mode": Parameter(str, default="gmx")
             }
         )
@@ -63,6 +64,7 @@ class RunSelect(OP):
     ) -> OPIO:
 
         r"""Execute the OP.
+        
         Parameters
         ----------
         op_in : dict
@@ -109,7 +111,7 @@ class RunSelect(OP):
             if op_in["slice_mode"] == "gmx":
                 assert op_in["dt"] is not None, "Please provide time step to slice trajectory."
                 for ii, sel in enumerate(sel_idx):
-                    time = sel * op_in["dt"]
+                    time = sel * op_in["dt"] * op_in["output_freq"]
                     slice_xtc(xtc=op_in["xtc_traj"], top=op_in["topology"],
                             selected_idx=time, output=sel_gro_name.format(idx=sel), style="gmx")
             elif op_in["slice_mode"] == "mdtraj":

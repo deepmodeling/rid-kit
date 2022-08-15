@@ -17,13 +17,16 @@ from rid.utils import load_txt
 
 class CalcMF(OP):
 
-    r"""Calculate mean force with the results of restrained MD. 
+    """
+    Calculate mean force with the results of restrained MD. 
+    
     .. math::
-        MeanForce = ( Average( CVs ) - Initial_CV ) \times kappa
+        MeanForce = ( Average(CVs) - Initial(CVs) ) * kappa
+        
     CalcMF will handle periodic CVs by `angular_mask`. 
     To get the mean value of CVs near equilibrium state under restrained MD, only part of outputs of CV values 
     (the last `tail` part, for example, the last 90% CV values) are used. 
-
+    
     """
 
     @classmethod

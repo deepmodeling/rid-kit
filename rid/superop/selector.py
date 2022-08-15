@@ -41,6 +41,7 @@ class Selector(Steps):
             "numb_cluster_lower": InputParameter(type=Optional[float], value=None),
             "max_selection": InputParameter(type=int),
             "dt": InputParameter(type=float, value=0.02),
+            "output_freq": InputParameter(type=float, value=2500),
             "slice_mode": InputParameter(type=str, value="gmx"),
             "if_make_threshold": InputParameter(type=bool, value=False),
             "task_names" : InputParameter(type=List[str]),
@@ -182,6 +183,7 @@ def _select(
             "trust_lvl_1": select_steps.inputs.parameters["trust_lvl_1"],
             "trust_lvl_2": select_steps.inputs.parameters["trust_lvl_2"],
             "dt": select_steps.inputs.parameters["dt"],
+            "output_freq": select_steps.inputs.parameters["output_freq"],
             "slice_mode": select_steps.inputs.parameters["slice_mode"],
             "task_name": select_steps.inputs.parameters['task_names']
         },

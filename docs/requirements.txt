@@ -1,7 +1,6 @@
-myst-parser
-m2r2
 pydflow
 numpy
+scikit-learn
 mdtraj
 tensorflow
 ipython

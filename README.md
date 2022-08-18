@@ -9,7 +9,7 @@
 # About Rid-kit
 Rid-kit is a package written in Python, designed to do enhanced sampling using reinforced dynamics. It aims to learn the free energy surface on the fly during MD run, and uses it as the bias potential during the next MD run. Its advantage is the ability to use a large number of CVs (100), thus can be used to simulate conformational changes of big molecules such as in the problem of protein folding.
 
-For more information, check the [documentation](https://rid-kit-dflow.readthedocs.io/).
+For more information, check the [documentation](https://rid-kit-dflow.readthedocs.io/en/latest/).
 
 # Main procedure of RiD
 

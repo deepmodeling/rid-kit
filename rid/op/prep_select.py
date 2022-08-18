@@ -12,9 +12,7 @@ from rid.select.cluster import Cluster
 from rid.utils import save_txt, set_directory
 from rid.constants import (
     culster_selection_data_name, 
-    culster_selection_index_name, 
-    cls_sel_precision, 
-    cls_ndx_precision
+    culster_selection_index_name
 )
 import numpy as np
 
@@ -112,7 +110,7 @@ class PrepSelect(OP):
         task_path = Path(op_in["task_name"])
         task_path.mkdir(exist_ok=True, parents=True)
         with set_directory(task_path):
-            save_txt(culster_selection_index_name, cls_sel_idx, fmt=cls_ndx_precision)
+            np.save(culster_selection_index_name, cls_sel_idx)
             np.save(culster_selection_data_name, selected_data)
         
         op_out = OPIO({

@@ -1,34 +1,27 @@
-# Installation of Software Environment
+# Environment settings
 
+The `enviroment` of rid-kit software is a bit complex, it uses `dflow` to manage the workflow in `kubernetes` enviroment refered to as `management environment`. The actual rid-kit code runs on local or remote (slurm, cloud) enviroment refered to as `computation environment`. The settings of the `management enviroment` has already been described in [Tutorial](tutorial.ipynb), only settings of `computation enviroment` is given as follows.
+
+## Configuration of computation environment
 > ***Note***:
 > 
-> If you want to set environments by hand, please follow settings 1.1.1 ~ 1.1.4. 
-You can also install environment of rid through the dockerfile, just run "docker build --net=host --tag rid-kit ." and then run "docker run -d -it --gpus all --net=host -v /mnt/workdir/:/mnt/workdir/ --shm-size=400g --name rid-container rid-kit" you can get the required enviroment.
-## Install python and tensorflow
+> If you want to set environments by hand, please follow settings of this section. 
+>
+> You can also set computation environment of rid through docker, just run "docker pull pkufjhdocker/rid-kit:latest" to get the docker image we built. Or build the image through the dockerfile in rid-kit/install directory.
 
-## Install tensorflow's C++ interface
-### Using Bazel
-It is relatively simple and one can follow the steps <https://docs.deepmodeling.com/projects/deepmd/en/master/install/install-tf.2.3.html>
-
-The problem with Bazel compile is that it requires accessing website aboard. One way out is to use the compiled file and set path variables `PATH` and `LD_LIBRARY_PATH` accordingly.
-
-### Using Conda
+### Install tensorflow's C++ interface and other necessary packages
+We recommend using conda to manage the python enviroment. 
 Use the command
 ```
-conda install libtensorflow_cc=2.6.2=*cuda113* nccl -c conda-forge
+conda create -n rid-drop python=3.9 libtensorflow_cc=2.6.2=*cuda110* tensorflow=2.6.2=*cuda110* nccl mdtraj numpy
 ```
-to get the compiled libtensorflow_cc. Or one can create a conda enviroment 
-```
-conda create -n rid-drop python=3.9 libtensorflow_cc=2.6.2=*cuda110* nccl MDAnalysis mdtraj numpy
-```
-After installation set the ```tf_path``` as the ```CONDA_PREFIX```
+to get the compiled libtensorflow_cc and other necessary packages.
+After installation, activate the enviroment
 ```
 conda activate rid-drop
-export tf_path=${CONDA_PREFIX}
 ```
 
-
-## Install plumed2.8.0
+### Install plumed2.8.0
 You need to copy compiled `DeePFE.cpp` to the plumed directory. This file locates at `rid-kit/install/DeePFE.cpp`
 ```bash
 tar -xvzf plumed-2.8.0.tgz
@@ -43,12 +36,12 @@ make install
 ```
 Set the ~/.bashrc
 ```bash
-export LIBRARY_PATH=/opt/conda/lib:$LIBRARY_PATH
-export LD_LIBRARY_PATH=/opt/conda/lib:$LD_LIBRARY_PATH
-export PLUMED_KERNEL=/opt/conda/lib/libplumedKernel.@SOEXT@
+export LIBRARY_PATH=${CONDA_PREFIX}/lib:$LIBRARY_PATH
+export LD_LIBRARY_PATH=${CONDA_PREFIX}/lib:$LD_LIBRARY_PATH
+export PLUMED_KERNEL=${CONDA_PREFIX}/lib/libplumedKernel.@SOEXT@
 ```
 
-## Install gromacs 2021.4
+### Install gromacs 2021.4
 
 ```bash
 tar -xzvf gromacs-2021.4.tar.gz
@@ -65,5 +58,5 @@ make install
 ```
 Set the bashrc
 ```bash
-source $CONDA_PREFIX/bin/GMXRC
+source ${CONDA_PREFIX}/bin/GMXRC
 ```

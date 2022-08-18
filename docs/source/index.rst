@@ -10,8 +10,6 @@ Welcome to RiD-kit's documentation!
 
 .. Important:: The project Rid-kit is licensed under GNU LGPLv3.0.
 
-.. mdinclude:: ../../README.md
-
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
@@ -22,7 +20,8 @@ Contents
 .. toctree::
    :maxdepth: 2
 
-   Installation <install>
+   Quick start <tutorial>
+   Environment settings  <install>
    Configure Simulations <rid_configuration>
    Rid API <api/api>
    Trouble Shooting <troubleshooting/index> 

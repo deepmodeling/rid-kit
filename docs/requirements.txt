@@ -1,5 +1,6 @@
 myst-parser
 m2r2
+pydflow
 ipython
 jinja2==3.0.1
 docutils==0.17.1

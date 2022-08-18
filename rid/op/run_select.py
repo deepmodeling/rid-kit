@@ -91,7 +91,7 @@ class RunSelect(OP):
             - `selected_indices`: (`Artifact(Path)`) Indices of selected conformation files (`selected_confs`) in trajectories.
         """
 
-        cls_sel_idx = load_txt(op_in["culster_selection_index"], dtype=int)
+        cls_sel_idx = np.load(op_in["culster_selection_index"])
         cls_sel_data = np.load(op_in["culster_selection_data"])
 
         task_path = Path(op_in["task_name"])

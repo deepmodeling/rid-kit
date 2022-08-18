@@ -5,7 +5,7 @@ init_conf_name = "conf_{idx:03d}.gro"
 explore_task_pattern = "{:03d}"
 explore_task_file = "explore_{walker:03d}.pkl"
 culster_selection_data_name = "cls_sel.out.npy"
-culster_selection_index_name = "cls_sel.ndx"
+culster_selection_index_name = "cls_sel.ndx.npy"
 sel_ndx_name = "sel.ndx"
 cv_init_label = "cv_init_{idx:d}.out"
 model_devi_name = "model_devi.txt"
@@ -51,6 +51,4 @@ f_cvt = 96.485
 inverse_f_cvt = 1 / f_cvt
 
 # precision
-cls_ndx_precision = "%d"
-cls_sel_precision = "%.6e"
 model_devi_precision = "%.6e"

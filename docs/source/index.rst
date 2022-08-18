@@ -21,7 +21,7 @@ Contents
    :maxdepth: 2
 
    Quick start <tutorial>
-   Installation of enviroment <install>
+   Environment settings  <install>
    Configure Simulations <rid_configuration>
    Rid API <api/api>
    Trouble Shooting <troubleshooting/index> 

@@ -9,7 +9,7 @@ The `enviroment` of rid-kit software is a bit complex, it uses `dflow` to manage
 >
 > You can also set computation environment of rid through docker, just run "docker pull pkufjhdocker/rid-kit:latest" to get the docker image we built. Or build the image through the dockerfile in rid-kit/install directory.
 
-## Install tensorflow's C++ interface and other necessary packages
+### Install tensorflow's C++ interface and other necessary packages
 We recommend using conda to manage the python enviroment. 
 Use the command
 ```
@@ -21,7 +21,7 @@ After installation, activate the enviroment
 conda activate rid-drop
 ```
 
-## Install plumed2.8.0
+### Install plumed2.8.0
 You need to copy compiled `DeePFE.cpp` to the plumed directory. This file locates at `rid-kit/install/DeePFE.cpp`
 ```bash
 tar -xvzf plumed-2.8.0.tgz
@@ -41,7 +41,7 @@ export LD_LIBRARY_PATH=${CONDA_PREFIX}/lib:$LD_LIBRARY_PATH
 export PLUMED_KERNEL=${CONDA_PREFIX}/lib/libplumedKernel.@SOEXT@
 ```
 
-## Install gromacs 2021.4
+### Install gromacs 2021.4
 
 ```bash
 tar -xzvf gromacs-2021.4.tar.gz

@@ -31,22 +31,25 @@ class Test_MockedRunSelect(unittest.TestCase):
         self.datapath = "data"
         cls_data = np.loadtxt(Path(self.datapath)/"cls_sel.out")
         np.save(Path(self.datapath)/"cls_sel.out.npy", cls_data)
+        cls_idx = np.loadtxt(Path(self.datapath)/"cls_sel.ndx", dtype=int)
+        np.save(Path(self.datapath)/"cls_sel.ndx.npy", cls_idx)
     
     def tearDown(self):
         ii = Path(self.taskname)
         if ii.is_dir():
             shutil.rmtree(ii)
-        cls_npy = Path(self.datapath)/"cls_sel.out.npy"
-        if os.path.exists(cls_npy):
-            os.remove(cls_npy)
+        cls_out_npy = Path(self.datapath)/"cls_sel.out.npy"
+        cls_ndx_npy = Path(self.datapath)/"cls_sel.ndx.npy"
+        for file in [cls_ndx_npy, cls_out_npy]:
+            if os.path.exists(file):
+                os.remove(file)
         
-    
     @patch('rid.op.run_select.slice_xtc')
     def test(self, mocked_run):
         mocked_run.return_value = None
         op = RunSelect()
         data = Path(self.datapath)
-        cluster_indx = data/"cls_sel.ndx"
+        cluster_indx = data/"cls_sel.ndx.npy"
         cluster_data = data/"cls_sel.out.npy"
         xtc_traj = data/"traj_comp.xtc"
         top_path = data/"topol.top"

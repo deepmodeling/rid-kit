@@ -1,6 +1,9 @@
 myst-parser
 m2r2
 pydflow
+numpy
+mdtraj
+tensorflow
 ipython
 jinja2==3.0.1
 docutils==0.17.1

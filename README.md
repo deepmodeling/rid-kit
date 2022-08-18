@@ -43,9 +43,9 @@ A quick-start on using Rid-kit can be found as follows:
 
 - [Tutorial](examples/tutorial.ipynb)
 
-# Installation of enviroment
+# Enviroment settings
 
-Installation of the running enviroment can be found in
+Installation of the computation enviroment can be found in
 - [Installation](docs/source/install.md)
   
 # Configure simulations

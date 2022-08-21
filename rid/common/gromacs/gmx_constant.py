@@ -70,7 +70,7 @@ mdp_parameters = {
         "energygrp-table": "", 
         "cutoff-scheme": "Verlet", 
         "refcoord-scaling": "No", 
-        "fourierspacing": "0.12", 
+        "fourierspacing": "0.15", 
         "userreal4": "0", 
         "userreal2": "0", 
         "gen-temp": "300", 

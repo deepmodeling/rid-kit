@@ -1,23 +1,16 @@
 from typing import Dict
-from dflow.plugins.lebesgue import LebesgueExecutor
 from dflow.plugins.dispatcher import DispatcherExecutor
-
+import os
 
 def init_executor(
         executor_dict,
     ):
     if executor_dict is None:
         return None
-    if "type" in executor_dict:
-        etype = executor_dict.pop('type')
-    else:
-        etype = executor_dict["machine_dict"]["batch_type"]
-    if etype.lower() == "lebesgue_v2":
-        return LebesgueExecutor(**executor_dict)
-    elif etype.lower() == "slurm":
+    if "private_key_file" in executor_dict:
         return DispatcherExecutor(**executor_dict)
     else:
-        raise RuntimeError('unknown executor type', etype)    
+        return DispatcherExecutor(**executor_dict, private_key_file = os.path.join(os.environ["HOME"], ".ssh", "id_rsa"))
 
 
 def normalize_resources(config_dict: Dict):
@@ -27,10 +20,5 @@ def normalize_resources(config_dict: Dict):
     if template_dict["executor"] is None:
         assert ("image" in template_dict["template_config"].keys()) and \
             template_dict["template_config"]["image"] is not None
-    elif template_dict["executor"] is not None and not "type" in template_dict["executor"]:
+    else:
         return template_dict
-    elif template_dict["executor"] is not None and template_dict["executor"]["type"] == "slurm":
-        header_list = template_dict["executor"]["header"]
-        template_dict["executor"]["header"] = "\n".join(header_list)
-    return template_dict
-

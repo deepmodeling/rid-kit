@@ -7,11 +7,8 @@ def init_executor(
     ):
     if executor_dict is None:
         return None
-    if "private_key_file" in executor_dict:
-        return DispatcherExecutor(**executor_dict)
     else:
-        return DispatcherExecutor(**executor_dict, private_key_file = os.path.join(os.environ["HOME"], ".ssh", "id_rsa"))
-
+        return DispatcherExecutor(**executor_dict)
 
 def normalize_resources(config_dict: Dict):
     template_dict = {}

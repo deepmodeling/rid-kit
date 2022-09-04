@@ -51,6 +51,10 @@ Installation of the computation enviroment can be found in
 # Configure simulations
 - [configure simulations](docs/source/rid_configuration.md)
 
+# Workflow Synopsis
+
+- ![image](docs/pics/rid_workflow.jpg)
+
 # Troubleshooting
 - [Installation](docs/source/troubleshooting/installation.md)
 - [Minikube](docs/source/troubleshooting/minikube.md)

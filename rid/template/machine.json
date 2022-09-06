@@ -6,42 +6,37 @@
                 "image_pull_policy" : "IfNotPresent"
             }
         },
-        "remote_slurm_2080": {
-            "executor":{
-                "machine_dict":{
-                    "batch_type": "Slurm",
-                    "context_type": "SSHContext",
-                    "local_root" : ".",
-                    "remote_root": "",
-                    "remote_profile":{
-                        "hostname": "",
-                        "username": "",
-                        "password": "",
-                        "port": 22,
-                        "timeout": 20
-                    }
-                },
-                "resources_dict":{
-                    "number_node": 1,
-                    "cpu_per_node": 8,
-                    "gpu_per_node": 1,
-                    "queue_name": "GPU",
-                    "group_size": 1,
-                    "source_list": [""]
-                }
+        "remote_slurm": {
+            "executor": {
+                "type": "slurm",
+                "host": "",
+                "port": 22,
+                "username": "",
+                "password": "",
+                "header": [
+                    "#!/bin/bash",
+                    "#SBATCH --partition GPU_2080Ti",
+                    "#SBATCH -N 1",
+                    "#SBATCH --ntasks-per-node 8",
+                    "#SBATCH -t 120:0:0",
+                    "#SBATCH --gres=gpu:1",
+                    "conda init bash",
+                    "source /home/dongdong/.bashrc",
+                    "source /home/dongdong/env/rid-drop2.env"
+                ]
             }
         }
     },
 
     "tasks": {
         "prep_exploration_config": "local_k8s",
-        "run_exploration_config": "remote_slurm_2080",
-        "prep_label_config": "remote_slurm_2080",
-        "run_label_config": "remote_slurm_2080",
-        "prep_select_config": "remote_slurm_2080",
-        "run_select_config": "remote_slurm_2080",
-        "prep_data_config": "remote_slurm_2080",
-        "run_train_config": "remote_slurm_2080",
+        "run_exploration_config": "remote_slurm",
+        "prep_label_config": "local_k8s",
+        "run_label_config": "remote_slurm",
+        "prep_select_config": "local_k8s",
+        "run_select_config": "local_k8s",
+        "prep_data_config": "local_k8s",
+        "run_train_config": "remote_slurm",
         "workflow_steps_config": "local_k8s"
     }
 }

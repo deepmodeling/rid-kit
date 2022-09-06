@@ -18,7 +18,7 @@ PORTS = {
 
 
 def check_port_status():
-    return_code, out, err = run_command(['ps', '-aux'])
+    return_code, out, err = run_command(['ps', 'aux'])
     assert return_code == 0
     job_list = out.split("\n")
     port_status = {

@@ -11,3 +11,4 @@ except ImportError:
 SRC_ROOT = __path__[0]
 config["extender_image_pull_policy"] = "IfNotPresent"
 config["util_image_pull_policy"] = "IfNotPresent"
+config["dispatcher_image_pull_policy"] = "IfNotPresent"

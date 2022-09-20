@@ -451,13 +451,34 @@ def _rid(
             "confs": init_block.outputs.artifacts["conf_outs"],
             "data_old": init_block.outputs.artifacts["data"]
         },
+        when = "%s < %s" % (recorder_step.outputs.parameters['next_iteration'], prep_rid.outputs.parameters["numb_iters"]),
         key = "rid-loop",
     )
     steps.add(loop_step)
 
-    steps.outputs.artifacts["exploration_trajectory"]._from = loop_step.outputs.artifacts["exploration_trajectory"]
-    steps.outputs.artifacts["models"]._from = loop_step.outputs.artifacts["models"]
-    steps.outputs.artifacts["data"]._from = loop_step.outputs.artifacts["data"]
-    steps.outputs.artifacts["conf_outs"]._from = loop_step.outputs.artifacts["conf_outs"]
+    steps.outputs.artifacts['exploration_trajectory'].from_expression = \
+        if_expression(
+            _if = (recorder_step.outputs.parameters['next_iteration'] >= prep_rid.outputs.parameters["numb_iters"]),
+            _then = init_block.outputs.artifacts['exploration_trajectory'],
+            _else = loop_step.outputs.artifacts['exploration_trajectory'],
+        )
+    steps.outputs.artifacts['conf_outs'].from_expression = \
+        if_expression(
+            _if = (recorder_step.outputs.parameters['next_iteration'] >= prep_rid.outputs.parameters["numb_iters"]),
+            _then = init_block.outputs.artifacts['conf_outs'],
+            _else = loop_step.outputs.artifacts['conf_outs'],
+        )
+    steps.outputs.artifacts['models'].from_expression = \
+        if_expression(
+            _if = (recorder_step.outputs.parameters['next_iteration'] >= prep_rid.outputs.parameters["numb_iters"]),
+            _then = init_block.outputs.artifacts['models'],
+            _else = loop_step.outputs.artifacts['models'],
+        )
+    steps.outputs.artifacts['data'].from_expression = \
+        if_expression(
+            _if = (recorder_step.outputs.parameters['next_iteration'] >= prep_rid.outputs.parameters["numb_iters"]),
+            _then = init_block.outputs.artifacts['data'],
+            _else = loop_step.outputs.artifacts['data'],
+        )
     
     return steps

@@ -21,8 +21,8 @@
                     "#SBATCH -t 120:0:0",
                     "#SBATCH --gres=gpu:1",
                     "conda init bash",
-                    "source /home/dongdong/.bashrc",
-                    "source /home/dongdong/env/rid-drop2.env"
+                    "source ~/.bashrc",
+                    "source /path/to/rid.env"
                 ]
             }
         }

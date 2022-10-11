@@ -26,6 +26,7 @@ center_out_name = "centers.out"
 # Gromacs file names
 gmx_conf_name = "conf.gro"
 gmx_top_name = "topol.top"
+gmx_idx_name = "index.ndx"
 gmx_mdp_name = "grompp.mdp"
 gmx_tpr_name = "topol.tpr"
 gmx_grompp_log = "gmx_grompp.log"
@@ -40,9 +41,12 @@ gmx_conf_out = "confout.gro"
 
 # Tensorflow files
 tf_model_name = "model_{tag}.pb"
+dp_model_name = "dp.pb"
 model_tag_fmt = "{idx:03d}"
 N_grid = 100
 
+# Dp config file
+dp_config_name = "dp_config"
 
 # Units
 kbT = (8.617343E-5) * 300

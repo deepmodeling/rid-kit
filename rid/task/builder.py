@@ -26,7 +26,7 @@ class EnhcMDTaskBuilder(TaskBuilder):
         conf: Optional[str],
         topology: Optional[str],
         gmx_config: Dict,
-        cv_file: Optional[str] = None,
+        cv_file: Optional[List[str]] = None,
         selected_resid: Optional[List[int]] = None,
         trust_lvl_1: float = 1.0,
         trust_lvl_2: float = 2.0,
@@ -49,7 +49,7 @@ class EnhcMDTaskBuilder(TaskBuilder):
         self.cv_mode = cv_mode
         self.task = Task()
         self.cv_names = get_cv_name(
-            conf=self.conf, cv_file=self.cv_file, 
+            conf=self.conf, cv_file=self.cv_file,
             selected_resid=self.selected_resid,
             stride=self.stride,
             mode=self.cv_mode
@@ -88,7 +88,7 @@ class RestrainedMDTaskBuilder(TaskBuilder):
         conf: Optional[str],
         topology: Optional[str],
         gmx_config: Dict,
-        cv_file: Optional[str] = None,
+        cv_file: Optional[List[str]] = None,
         selected_resid: Optional[List[int]] = None,
         kappa: Union[int, float, List[Union[int, float]]] = 0.5,
         at: Union[int, float, List[Union[int, float]]] = 1.0,
@@ -138,13 +138,7 @@ def build_gmx_dict(
     gmx_task_files = {}
     gmx_task_files[gmx_conf_name] = (read_txt(conf), "w")
     gmx_task_files[gmx_top_name]  = (read_txt(topology), "w")
-    mdp_string = make_md_mdp_string(
-        nsteps = gmx_config["nsteps"], 
-        output_freq = gmx_config["output_freq"], 
-        temperature = gmx_config["temperature"], 
-        dt = gmx_config["dt"], 
-        output_mode = gmx_config["output_mode"]
-    )
+    mdp_string = make_md_mdp_string(gmx_config)
     gmx_task_files[gmx_mdp_name]  = (mdp_string, "w")
     return gmx_task_files
     

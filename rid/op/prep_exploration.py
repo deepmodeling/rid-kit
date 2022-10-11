@@ -5,7 +5,7 @@ from dflow.python import (
     Artifact
 )
 
-from typing import List, Dict
+from typing import List, Dict, Union
 from pathlib import Path
 from rid.constants import (
         plumed_output_name
@@ -47,6 +47,7 @@ class PrepExplore(OP):
                 "models": Artifact(List[Path], optional=True),
                 "topology": Artifact(Path),
                 "conf": Artifact(Path),
+                "cv_file": Artifact(List[Path], optional=True),
                 "trust_lvl_1": float,
                 "trust_lvl_2": float,
                 "gmx_config": Dict,
@@ -95,23 +96,25 @@ class PrepExplore(OP):
             - `task_path`: (`Artifact(Path)`) A directory containing files for RiD exploration.
             - `cv_dim`: (`int`) CV dimensions.
         """
-
+        cv_file = []
+        selected_resid = None
         if op_in["cv_config"]["mode"] == "torsion":
-            cv_file = None
             selected_resid = op_in["cv_config"]["selected_resid"]
         elif op_in["cv_config"]["mode"] == "custom":
-            cv_file = op_in["cv_config"]["cv_file"]
-            selected_resid = None
+            #print("custom!!!")
+            cv_file = op_in["cv_file"]
         if op_in["models"] is None:
             models = []
         else:
             models = [str(model.name) for model in op_in["models"]]
 
+        #print("what is cv", cv_file)
+        
         gmx_task_builder = EnhcMDTaskBuilder(
             conf = op_in["conf"],
             topology = op_in["topology"],
             gmx_config = op_in["gmx_config"],
-            cv_file = cv_file,
+            cv_file=cv_file,
             selected_resid = selected_resid,
             trust_lvl_1 = op_in["trust_lvl_1"],
             trust_lvl_2 = op_in["trust_lvl_2"],

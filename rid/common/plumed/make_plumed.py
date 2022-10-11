@@ -102,6 +102,7 @@ def user_plumed_def(cv_file, pstride, pfile):
     logger.info("Custom CVs are created from plumed files.")
     ret = ""
     cv_names = []
+    ispath = False
     print_content = None
     with open(cv_file, 'r') as fp:
         for line in fp.readlines():
@@ -110,9 +111,25 @@ def user_plumed_def(cv_file, pstride, pfile):
                 break
             ret += line + "\n"
             if (":" in line) and ("#" not in line):
-                cv_names.append(("{}".format(line.split(":")[0])).strip())
+                cv_type = line.split(":")[1].strip().split(" ")[0]
+                print("CV type!", cv_type)
+                if cv_type != "PATH" and not ispath:
+                    cv_names.append(("{}".format(line.split(":")[0])).strip())
+                elif cv_type == "PATH":
+                    ispath = True
+                    cv_names = []
+                    cv_names.append(("{}.spath".format(line.split(":")[0])).strip())
+                    cv_names.append(("{}.zpath".format(line.split(":")[0])).strip())
             elif ("LABEL" in line) and ("#" not in line):
-                cv_names.append(("{}".format(line.split("LABEL=")[1])).strip())
+                cv_type = line.split("LABEL=")[0].strip().split(" ")[0]
+                print("CV type!", cv_type)
+                if cv_type != "PATH" and not ispath:
+                    cv_names.append(("{}".format(line.split("LABEL=")[1])).strip())
+                elif cv_type == "PATH":
+                    ispath = True
+                    cv_names = []
+                    cv_names.append(("{}.spath".format(line.split("LABEL=")[1].strip())))
+                    cv_names.append(("{}.zpath".format(line.split("LABEL=")[1].strip())))
     if ret == "" or cv_names == "":
         raise RuntimeError("Invalid customed plumed files.")
     if print_content is not None:
@@ -171,7 +188,7 @@ def make_torsion_list_from_file(
 
 def make_restraint_plumed(
         conf: Optional[str] = None,
-        cv_file: Optional[str] = None,
+        cv_file: Optional[List[str]] = None,
         selected_resid: Optional[List[int]] = None,
         kappa: Union[int, float, Sequence, np.ndarray] = 0.5,
         at: Union[int, float, Sequence, np.ndarray] = 1.0,
@@ -185,7 +202,7 @@ def make_restraint_plumed(
             make_torsion_list_from_file(conf, selected_resid)
         content_list += cv_content_list
     elif mode == "custom":
-        ret, cv_name_list, _ = user_plumed_def(cv_file, stride, output)
+        ret, cv_name_list, _ = user_plumed_def(cv_file[0], stride, output)
         content_list.append(ret)
     else:
         raise RuntimeError("Unknown mode for making plumed files.")
@@ -204,7 +221,7 @@ def make_restraint_plumed(
 
 def make_deepfe_plumed(
         conf: Optional[str] = None,
-        cv_file: Optional[str] = None,
+        cv_file: Optional[List[str]] = None,
         selected_resid: Optional[List[int]] = None,
         trust_lvl_1: float = 1.0,
         trust_lvl_2: float = 2.0,
@@ -219,7 +236,7 @@ def make_deepfe_plumed(
             make_torsion_list_from_file(conf, selected_resid)
         content_list += cv_content_list
     elif mode == "custom":
-        ret, cv_name_list, _ = user_plumed_def(cv_file, stride, output)
+        ret, cv_name_list, _ = user_plumed_def(cv_file[0], stride, output)
         content_list.append(ret)
     else:
         raise RuntimeError("Unknown mode for making plumed files.")
@@ -231,7 +248,7 @@ def make_deepfe_plumed(
 
 def get_cv_name(
         conf: Optional[str] = None,
-        cv_file: Optional[str] = None,
+        cv_file: Optional[List[str]] = None,
         selected_resid: Optional[List[int]] = None,
         stride: int = 100,
         mode: str = "torsion"
@@ -240,7 +257,7 @@ def get_cv_name(
         _, cv_name_list = \
             make_torsion_list_from_file(conf, selected_resid)
     elif mode == "custom":
-        _, cv_name_list, _ = user_plumed_def(cv_file, stride, "test.out")
+        _, cv_name_list, _ = user_plumed_def(cv_file[0], stride, "test.out")
     else:
         raise RuntimeError("Unknown mode for making plumed files.")
     return cv_name_list

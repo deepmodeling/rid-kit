@@ -62,6 +62,9 @@ class ReinforcedDynamicsLoop(Steps):
             "topology" : InputArtifact(),
             "confs" : InputArtifact(),
             "data_old": InputArtifact(),
+            "index_file": InputArtifact(optional=True),
+            "dp_files": InputArtifact(optional=True),
+            "cv_file": InputArtifact(optional=True)
         }
         self._output_parameters={
         }
@@ -178,7 +181,10 @@ def _loop (
             "forcefield" : steps.inputs.artifacts['forcefield'],
             "topology": steps.inputs.artifacts["topology"],
             "confs": steps.inputs.artifacts["confs"],
-            "data_old": steps.inputs.artifacts["data_old"]
+            "data_old": steps.inputs.artifacts["data_old"],
+            "index_file": steps.inputs.artifacts["index_file"],
+            "dp_files": steps.inputs.artifacts["dp_files"],
+            "cv_file": steps.inputs.artifacts["cv_file"]
         },
         key = step_keys['block'],
     )
@@ -216,7 +222,10 @@ def _loop (
             "forcefield" : steps.inputs.artifacts['forcefield'],
             "topology": steps.inputs.artifacts["topology"],
             "confs": block_step.outputs.artifacts["conf_outs"],
-            "data_old": block_step.outputs.artifacts["data"]
+            "data_old": block_step.outputs.artifacts["data"],
+            "index_file": steps.inputs.artifacts["index_file"],
+            "dp_files": steps.inputs.artifacts["dp_files"],
+            "cv_file": steps.inputs.artifacts["cv_file"]
         },
         when = "%s < %s" % (recorder_step.outputs.parameters['next_iteration'], steps.inputs.parameters["numb_iters"]),
     )
@@ -267,6 +276,9 @@ class ReinforcedDynamics(Steps):
             "topology": InputArtifact(),
             "confs": InputArtifact(),
             "rid_config": InputArtifact(),
+            "index_file": InputArtifact(optional=True),
+            "dp_files": InputArtifact(optional=True),
+            "cv_file": InputArtifact(optional=True)
         }
         self._output_parameters={
         }
@@ -406,7 +418,10 @@ def _rid(
             "models": steps.inputs.artifacts["models"],
             "forcefield" : steps.inputs.artifacts['forcefield'],
             "topology": steps.inputs.artifacts["topology"],
-            "confs": prep_rid.outputs.artifacts["confs"]
+            "confs": prep_rid.outputs.artifacts["confs"],
+            "index_file": steps.inputs.artifacts["index_file"],
+            "dp_files": steps.inputs.artifacts["dp_files"],
+            "cv_file": steps.inputs.artifacts["cv_file"]
         },
         key = "%s-init-block"%recorder_step.outputs.parameters["block_tag"]
     )
@@ -449,7 +464,10 @@ def _rid(
             "forcefield" : steps.inputs.artifacts['forcefield'],
             "topology": steps.inputs.artifacts["topology"],
             "confs": init_block.outputs.artifacts["conf_outs"],
-            "data_old": init_block.outputs.artifacts["data"]
+            "data_old": init_block.outputs.artifacts["data"],
+            "index_file": steps.inputs.artifacts["index_file"],
+            "dp_files": steps.inputs.artifacts["dp_files"],
+            "cv_file": steps.inputs.artifacts["cv_file"]
         },
         when = "%s < %s" % (recorder_step.outputs.parameters['next_iteration'], prep_rid.outputs.parameters["numb_iters"]),
         key = "rid-loop",

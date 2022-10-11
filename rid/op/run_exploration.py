@@ -1,6 +1,6 @@
 import os, sys
 import logging
-from typing import List, Dict
+from typing import List, Dict, Union
 from pathlib import Path
 from dflow.python import (
     OP,
@@ -47,7 +47,10 @@ class RunExplore(OP):
                 "task_path": Artifact(Path),
                 "forcefield": Artifact(Path, optional=True),
                 "gmx_config": Dict,
-                "models": Artifact(List[Path], optional=True)
+                "models": Artifact(List[Path], optional=True),
+                "index_file": Artifact(Path, optional=True),
+                "dp_files": Artifact(List[Path], optional=True),
+                "cv_file": Artifact(List[Path], optional=True)
             }
         )
 
@@ -89,12 +92,17 @@ class RunExplore(OP):
             - `trajectory`: (`Artifact(Path)`) Trajectory files (`.xtc`). The output frequency is defined in `gmx_config`.
             - `conf_out`: (`Artifact(Path)`) Final frames of conformations in simulations.
         """
-
+        if op_in["index_file"] is None:
+            index = None
+        else:
+            index = op_in["index_file"].name
+        
         gmx_grompp_cmd = get_grompp_cmd(
             mdp = gmx_mdp_name,
             conf = gmx_conf_name,
             topology = gmx_top_name,
             output = gmx_tpr_name,
+            index = index,
             max_warning=op_in["gmx_config"]["max_warning"]
         )
         gmx_run_cmd = get_mdrun_cmd(
@@ -110,6 +118,17 @@ class RunExplore(OP):
             if op_in["models"] is not None:
                 for model in op_in["models"]:
                     os.symlink(model, model.name)
+            if op_in["dp_files"] is not None:
+                for file in op_in["dp_files"]:
+                    os.symlink(file, file.name)
+            if op_in["index_file"] is not None:
+                os.symlink(op_in["index_file"], op_in["index_file"].name)
+            if op_in["cv_file"] is not None:
+                for file in op_in["cv_file"]:
+                    if file.name != "colvar":
+                        os.symlink(file, file.name)
+            
+            os.environ["GMX_DEEPMD_INPUT_JSON"] = "./input.json"
             logger.info(list_to_string(gmx_grompp_cmd, " "))
             return_code, out, err = run_command(gmx_grompp_cmd)
             assert return_code == 0, err

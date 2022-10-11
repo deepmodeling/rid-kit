@@ -1,6 +1,6 @@
 import os, sys
 import logging
-from typing import Dict
+from typing import Dict, List
 from pathlib import Path
 from dflow.python import (
     OP,
@@ -15,6 +15,7 @@ from rid.constants import (
         gmx_tpr_name,
         plumed_input_name,
         plumed_output_name,
+        gmx_idx_name,
         gmx_mdrun_log
     )
 from rid.utils import run_command, set_directory, list_to_string
@@ -43,7 +44,10 @@ class RunLabel(OP):
             {
                 "task_path": Artifact(Path),
                 "forcefield": Artifact(Path, optional=True),
-                "gmx_config": Dict
+                "gmx_config": Dict,
+                "index_file": Artifact(Path, optional=True),
+                "dp_files": Artifact(List[Path], optional=True),
+                "cv_file": Artifact(List[Path], optional=True)
             }
         )
 
@@ -79,12 +83,18 @@ class RunLabel(OP):
             - `plm_out`: (`Artifact(Path)`) Outputs of CV values (`plumed.out` by default) from label steps.
             - `md_log`: (`Artifact(Path)`) Log files of Gromacs `mdrun` commands.
         """
-
+        
+        if op_in["index_file"] is None:
+            index = None
+        else:
+            index = op_in["index_file"].name
+            
         gmx_grompp_cmd = get_grompp_cmd(
             mdp = gmx_mdp_name,
             conf = gmx_conf_name,
             topology = gmx_top_name,
             output = gmx_tpr_name,
+            index = index,
             max_warning=op_in["gmx_config"]["max_warning"]
         )
         gmx_run_cmd = get_mdrun_cmd(
@@ -93,10 +103,21 @@ class RunLabel(OP):
             nt=op_in["gmx_config"]["nt"],
             ntmpi=op_in["gmx_config"]["ntmpi"]
         )
-        if op_in["forcefield"] is not None:
-            os.symlink(os.path.abspath(op_in["forcefield"]), 
-                       os.path.abspath(op_in["task_path"])+"/"+os.path.basename(op_in["forcefield"])) 
+
         with set_directory(op_in["task_path"]):
+            if op_in["forcefield"] is not None:
+                os.symlink(op_in["forcefield"], op_in["forcefield"].name)
+            if op_in["dp_files"] is not None:
+                for file in op_in["dp_files"]:
+                    os.symlink(file, file.name)
+            if op_in["index_file"] is not None:
+                os.symlink(op_in["index_file"], op_in["index_file"].name)
+            if op_in["cv_file"] is not None:
+                for file in op_in["cv_file"]:
+                    if file.name != "colvar":
+                        os.symlink(file, file.name)
+            
+            os.environ["GMX_DEEPMD_INPUT_JSON"] = "./input.json"
             logger.info(list_to_string(gmx_grompp_cmd, " "))
             return_code, out, err = run_command(gmx_grompp_cmd)
             assert return_code == 0, err

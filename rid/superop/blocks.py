@@ -68,6 +68,9 @@ class InitBlock(Steps):
             "forcefield" : InputArtifact(optional=True),
             "topology" : InputArtifact(),
             "confs" : InputArtifact(),
+            "index_file": InputArtifact(optional=True),
+            "dp_files": InputArtifact(optional=True),
+            "cv_file": InputArtifact(optional=True)
         }
         self._output_parameters = {
             "cluster_threshold": OutputParameter(type=int)
@@ -145,13 +148,16 @@ def _first_run_block(
             "gmx_config" : block_steps.inputs.parameters['exploration_gmx_config'],
             "cv_config" : block_steps.inputs.parameters['cv_config'],
             "task_names" : block_steps.inputs.parameters['walker_tags'],
-            "block_tag" : block_steps.inputs.parameters['block_tag'],
+            "block_tag" : block_steps.inputs.parameters['block_tag']
         },
         artifacts={
             "models" : block_steps.inputs.artifacts['models'],
             "forcefield" : block_steps.inputs.artifacts['forcefield'],
             "topology" : block_steps.inputs.artifacts['topology'],
-            "confs" : block_steps.inputs.artifacts['confs']
+            "confs" : block_steps.inputs.artifacts['confs'],
+            "index_file": block_steps.inputs.artifacts['index_file'],
+            "dp_files": block_steps.inputs.artifacts['dp_files'],
+            "cv_file": block_steps.inputs.artifacts['cv_file']
         },
         key = '{}-exploration'.format(block_steps.inputs.parameters['block_tag'])
     )
@@ -202,7 +208,10 @@ def _first_run_block(
             "topology": block_steps.inputs.artifacts["topology"],
             "forcefield" : block_steps.inputs.artifacts['forcefield'],
             "confs": selection.outputs.artifacts["selected_confs"],
-            "at": selection.outputs.artifacts["selected_cv_init"]
+            "at": selection.outputs.artifacts["selected_cv_init"],
+            "index_file": block_steps.inputs.artifacts['index_file'],
+            "dp_files": block_steps.inputs.artifacts['dp_files'],
+            "cv_file": block_steps.inputs.artifacts['cv_file']
         },
         key = '{}-label'.format(block_steps.inputs.parameters['block_tag'])
     )
@@ -306,6 +315,9 @@ class IterBlock(Steps):
             "topology" : InputArtifact(),
             "confs" : InputArtifact(),
             "data_old": InputArtifact(),
+            "index_file": InputArtifact(optional=True),
+            "dp_files": InputArtifact(optional=True),
+            "cv_file": InputArtifact(optional=True)
         }
         self._output_parameters = {
             "cluster_threshold": OutputParameter(type=int),
@@ -395,7 +407,10 @@ def _iter_block(
             "models" : block_steps.inputs.artifacts['models'],
             "forcefield" : block_steps.inputs.artifacts['forcefield'],
             "topology" : block_steps.inputs.artifacts['topology'],
-            "confs" : block_steps.inputs.artifacts['confs']
+            "confs" : block_steps.inputs.artifacts['confs'],
+            "index_file": block_steps.inputs.artifacts['index_file'],
+            "dp_files": block_steps.inputs.artifacts['dp_files'],
+            "cv_file": block_steps.inputs.artifacts['cv_file']
         },
         key = '{}-exploration'.format(block_steps.inputs.parameters['block_tag'])
     )
@@ -476,7 +491,10 @@ def _iter_block(
             "topology": block_steps.inputs.artifacts["topology"],
             "forcefield" : block_steps.inputs.artifacts['forcefield'],
             "confs": selection.outputs.artifacts["selected_confs"],
-            "at": selection.outputs.artifacts["selected_cv_init"]
+            "at": selection.outputs.artifacts["selected_cv_init"],
+            "index_file": block_steps.inputs.artifacts['index_file'],
+            "dp_files": block_steps.inputs.artifacts['dp_files'],
+            "cv_file": block_steps.inputs.artifacts['cv_file']
         },
         key = '{}-label'.format(block_steps.inputs.parameters['block_tag'])
     )

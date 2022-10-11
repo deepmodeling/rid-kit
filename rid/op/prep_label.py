@@ -103,6 +103,7 @@ class PrepLabel(OP):
             {
                 "topology": Artifact(Path),
                 "conf": Artifact(Path),
+                "cv_file": Artifact(List[Path], optional=True),
                 "gmx_config": Dict,
                 "cv_config": Dict,
                 "task_name": str,
@@ -148,14 +149,17 @@ class PrepLabel(OP):
             - `task_path`: (`Artifact(Path)`) A directory containing files for Restrained MD.
         """
 
+        cv_file = []
+        selected_resid = None
         if op_in["cv_config"]["mode"] == "torsion":
-            cv_file = None
             selected_resid = op_in["cv_config"]["selected_resid"]
         elif op_in["cv_config"]["mode"] == "custom":
-            cv_file = op_in["cv_config"]["cv_file"]
-            selected_resid = None
+            print("custom!!!")
+            cv_file = op_in["cv_file"]
         at = load_txt(op_in["at"])
- 
+        
+        #print("what is cv", cv_file)
+        
         gmx_task_builder = RestrainedMDTaskBuilder(
             conf = op_in["conf"],
             topology = op_in["topology"],

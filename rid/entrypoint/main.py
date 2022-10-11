@@ -1,4 +1,5 @@
 import argparse, os, glob, sys, logging
+from operator import index
 from pathlib import Path
 from typing import (
     Optional,
@@ -206,10 +207,27 @@ def parse_submit(args):
         forcefield = None
     else:
         forcefield = forcefield[0]
-    models = glob.glob(str(mol_path.joinpath("*.pb")))
+    models = glob.glob(str(mol_path.joinpath("model*.pb")))
     if len(models) == 0:
         models = None
-    return confs, top_file, models, forcefield
+        
+    index_file = glob.glob(str(mol_path.joinpath("*.ndx")))
+    if len(index_file) == 0:
+        index_file = None
+    else:
+        index_file = index_file[0]
+        
+    dp_list = [glob.glob(str(mol_path.joinpath(e))) for e in ['*.json', '*.raw', 'dp*.pb']]
+    dp_files = [item for sublist in dp_list for item in sublist]
+    if len(dp_files) == 0:
+        dp_files = None
+        
+    cv_list = [glob.glob(str(mol_path.joinpath(e))) for e in ['colvar*', '*.pdb']]
+    cv_file = [item for sublist in cv_list for item in sublist]
+    if len(cv_file) == 0:
+        cv_file = None
+        
+    return confs, top_file, models, forcefield, index_file, dp_files, cv_file
 
 
 def log_ui():
@@ -221,14 +239,17 @@ def main():
     args = parse_args()
     if args.command == "submit":
         logger.info("Preparing RiD ...")
-        confs, top_file, models, forcefield = parse_submit(args)
+        confs, top_file, models, forcefield, index_file, dp_files, cv_file = parse_submit(args)
         submit_rid(
             confs = confs,
             topology = top_file,
             rid_config = args.config,
             machine_config = args.machine,
             models = models,
-            forcefield = forcefield
+            forcefield = forcefield,
+            index_file = index_file,
+            dp_files = dp_files,
+            cv_file = cv_file
         )
         log_ui()
     elif args.command == "resubmit":

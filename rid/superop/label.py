@@ -46,7 +46,10 @@ class Label(Steps):
             "models" : InputArtifact(optional=True),
             "forcefield" : InputArtifact(optional=True),
             "confs": InputArtifact(),
-            "at": InputArtifact()
+            "at": InputArtifact(),
+            "index_file": InputArtifact(optional=True),
+            "dp_files": InputArtifact(optional=True),
+            "cv_file": InputArtifact(optional=True)
         }
         self._output_parameters = {
         }
@@ -171,7 +174,8 @@ def _label(
         artifacts={
             "topology": label_steps.inputs.artifacts['topology'],
             "conf": label_steps.inputs.artifacts['confs'],
-            "at": label_steps.inputs.artifacts['at']
+            "at": label_steps.inputs.artifacts['at'],
+            "cv_file": label_steps.inputs.artifacts['cv_file']
         },
         key = step_keys['prep_label']+"-{{item}}",
         executor = prep_executor,
@@ -196,7 +200,10 @@ def _label(
         },
         artifacts={
             "forcefield": label_steps.inputs.artifacts['forcefield'],
-            "task_path": prep_label.outputs.artifacts["task_path"]
+            "task_path": prep_label.outputs.artifacts["task_path"],
+            "index_file": label_steps.inputs.artifacts['index_file'],
+            "dp_files": label_steps.inputs.artifacts['dp_files'],
+            "cv_file": label_steps.inputs.artifacts['cv_file']
         },
         key = step_keys['run_label']+"-{{item}}",
         executor = run_executor,

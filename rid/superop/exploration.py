@@ -43,6 +43,9 @@ class Exploration(Steps):
             "forcefield": InputArtifact(optional=True),
             "topology" : InputArtifact(),
             "confs" : InputArtifact(),
+            "index_file": InputArtifact(optional=True),
+            "dp_files": InputArtifact(optional=True),
+            "cv_file": InputArtifact(optional=True)
         }
         self._output_parameters = {
             "cv_dim": OutputParameter(type=List[int])
@@ -139,7 +142,8 @@ def _exploration(
         artifacts={
             "models" : exploration_steps.inputs.artifacts['models'],
             "topology" :exploration_steps.inputs.artifacts['topology'],
-            "conf" : exploration_steps.inputs.artifacts['confs']
+            "conf" : exploration_steps.inputs.artifacts['confs'],
+            "cv_file": exploration_steps.inputs.artifacts['cv_file']
         },
         key = step_keys["prep_exploration"]+"-{{item}}",
         with_param=argo_range(argo_len(exploration_steps.inputs.parameters['task_names'])),
@@ -165,7 +169,10 @@ def _exploration(
         artifacts={
             "task_path" : prep_exploration.outputs.artifacts["task_path"],
             "forcefield": exploration_steps.inputs.artifacts['forcefield'],
-            "models" : exploration_steps.inputs.artifacts['models']
+            "models" : exploration_steps.inputs.artifacts['models'],
+            "index_file": exploration_steps.inputs.artifacts['index_file'],
+            "dp_files": exploration_steps.inputs.artifacts['dp_files'],
+            "cv_file": exploration_steps.inputs.artifacts['cv_file']
         },
         key = step_keys["run_exploration"]+"-{{item}}",
         executor = run_executor,

@@ -1,6 +1,6 @@
-numpy
-scikit-learn
-pydflow
-tensorflow
-google
-mdtraj
+#numpy
+#scikit-learn
+#pydflow
+#tensorflow
+#google
+#mdtraj

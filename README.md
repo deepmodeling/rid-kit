@@ -42,7 +42,7 @@ A more detailed description of RiD is published now, please see:
 
 A quick-start on using Rid-kit can be found as follows:
 
-- [Tutorial](examples/tutorial.ipynb)
+- [Tutorial](/docs/source/tutorial.ipynb)
 
 # Enviroment settings
 

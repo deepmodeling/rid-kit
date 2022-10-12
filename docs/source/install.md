@@ -13,7 +13,7 @@ The `enviroment` of rid-kit software is a bit complex, it uses `dflow` to manage
 We recommend using conda to manage the python enviroment. 
 Use the command
 ```
-conda create -n rid-drop python=3.9 libtensorflow_cc=2.6.2=*cuda110* tensorflow=2.6.2=*cuda110* nccl mdtraj numpy scikit-learn cmake -c conda-forge
+conda create -n rid-drop python=3.9 libtensorflow_cc=2.6.2=*cuda110* nccl mdtraj numpy scikit-learn cmake -c conda-forge
 ```
 to get the compiled libtensorflow_cc and other necessary packages.
 After installation, activate the enviroment and set library path
@@ -38,7 +38,6 @@ tar -xvzf plumed-2.8.0.tgz
 cp DeePFE.cpp plumed-2.8.0/src/bias
 cd plumed-2.8.0
 ./configure --prefix=$CONDA_PREFIX \
-                   --enable-cxx=14 \
                    CXXFLAGS="-std=gnu++14 -I $CONDA_PREFIX/include/" \
                    LDFLAGS=" -L$CONDA_PREFIX/lib -ltensorflow_cc -ltensorflow_framework -Wl,-rpath=$CONDA_PREFIX/lib/" \
 make -j 6

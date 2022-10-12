@@ -7,3 +7,4 @@ dist
 build
 .gitignore
 tmp*
+_version.py

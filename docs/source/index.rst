@@ -22,6 +22,7 @@ Contents
 
    Quick start <tutorial>
    Environment settings  <install>
+   Installation with DP potential <install_dp>
    Configure Simulations <rid_configuration>
    Rid API <api/api>
    Trouble Shooting <troubleshooting/index> 

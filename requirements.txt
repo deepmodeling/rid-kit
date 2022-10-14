@@ -1,6 +1,6 @@
 numpy
 scikit-learn
 pydflow
-tensorflow
+tensorflow==2.6.2
 google
 mdtraj

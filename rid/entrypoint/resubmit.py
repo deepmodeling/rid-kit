@@ -23,7 +23,10 @@ def resubmit_rid(
         rid_config: str,
         machine_config: str,
         models: Optional[Union[str, List[str]]] = None,
-        forcefield: Optional[str] = None
+        index_file: Optional[str] = None,
+        dp_files: Optional[List[str]] = None,
+        forcefield: Optional[str] = None,
+        cv_file: Optional[List[str]] = None
     ):
     with open(machine_config, "r") as mcg:
         machine_config_dict = json.load(mcg)
@@ -61,6 +64,29 @@ def resubmit_rid(
     else:
         raise RuntimeError("Invalid type of `confs`.")
     
+    if index_file is None:
+        index_file_artifact = None
+    else:
+        index_file_artifact = upload_artifact(Path(index_file), archive=None)
+        
+    if dp_files is None:
+        dp_files_artifact = None
+    elif isinstance(dp_files, str):
+        dp_files_artifact = upload_artifact(Path(dp_files), archive=None)
+    elif isinstance(dp_files, List):
+        dp_files_artifact = upload_artifact([Path(p) for p in dp_files], archive=None)
+    else:
+        raise RuntimeError("Invalid type of `dp_files`.")
+    
+    if cv_file is None:
+        cv_file_artifact = None
+    elif isinstance(cv_file, str):
+        cv_file_artifact = upload_artifact(Path(cv_file), archive=None)
+    elif isinstance(cv_file, List):
+        cv_file_artifact = upload_artifact([Path(p) for p in cv_file], archive=None)
+    else:
+        raise RuntimeError("Invalid type of `cv_file`.")
+    
     if forcefield is None:
         forcefield_artifact = None
     else:
@@ -77,7 +103,10 @@ def resubmit_rid(
             "confs": confs_artifact,
             "rid_config": rid_config,
             "models": models_artifact,
-            "forcefield": forcefield_artifact
+            "forcefield": forcefield_artifact,
+            "index_file": index_file_artifact,
+            "dp_files": dp_files_artifact,
+            "cv_file": cv_file_artifact
         },
         parameters={}
         )
@@ -88,7 +117,8 @@ def resubmit_rid(
     for step in all_steps:
         if step["type"] == "Pod":
             if step["phase"] == "Succeeded":
-                succeeded_steps.append(step)
-    wf = Workflow("reinforced-dynamics", pod_gc_strategy="OnPodSuccess")
+                if step["key"] != "prepare-rid":
+                    succeeded_steps.append(step)
+    wf = Workflow("reinforced-dynamics", pod_gc_strategy="OnPodSuccess", parallelism=30)
     wf.add(rid_steps)
     wf.submit(reuse_step=succeeded_steps)

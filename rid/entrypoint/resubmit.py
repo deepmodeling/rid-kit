@@ -19,12 +19,13 @@ from .submit import prep_rid_op
 def resubmit_rid(
         workflow_id: str,
         confs: Union[str, List[str]],
-        topology: str,
+        topology: Optional[str],
         rid_config: str,
         machine_config: str,
         models: Optional[Union[str, List[str]]] = None,
         index_file: Optional[str] = None,
         dp_files: Optional[List[str]] = None,
+        inputfile: Optional[List[str]] = None,
         forcefield: Optional[str] = None,
         cv_file: Optional[List[str]] = None
     ):
@@ -69,6 +70,11 @@ def resubmit_rid(
     else:
         index_file_artifact = upload_artifact(Path(index_file), archive=None)
         
+    if inputfile is None:
+        inputfile_artifact = None
+    else:
+        inputfile_artifact = upload_artifact([Path(p) for p in inputfile], archive=None)
+        
     if dp_files is None:
         dp_files_artifact = None
     elif isinstance(dp_files, str):
@@ -92,7 +98,10 @@ def resubmit_rid(
     else:
         forcefield_artifact = upload_artifact(Path(forcefield), archive=None)
     
-    top_artifact = upload_artifact(Path(topology), archive=None)
+    if topology is None:
+        top_artifact = None
+    else:
+        top_artifact = upload_artifact(Path(topology), archive=None)
     rid_config = upload_artifact(Path(rid_config), archive=None)
 
     rid_steps = Step(
@@ -105,6 +114,7 @@ def resubmit_rid(
             "models": models_artifact,
             "forcefield": forcefield_artifact,
             "index_file": index_file_artifact,
+            "inputfile": inputfile_artifact,
             "dp_files": dp_files_artifact,
             "cv_file": cv_file_artifact
         },

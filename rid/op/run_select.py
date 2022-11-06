@@ -9,9 +9,9 @@ from dflow.python import (
     Parameter
 )
 from rid.utils import load_txt, save_txt, set_directory
-from rid.constants import sel_gro_name, cv_init_label, model_devi_name, model_devi_precision, sel_ndx_name
+from rid.constants import sel_gro_name, sel_lmp_name, cv_init_label, model_devi_name, model_devi_precision, sel_ndx_name
 from rid.select.conf_select import select_from_devi
-from rid.common.mol import slice_xtc
+from rid.common.mol import slice_xtc, slice_dump
 from rid.select.model_devi import make_std
 
 
@@ -19,7 +19,7 @@ class RunSelect(OP):
 
     """
     `RunSelect` calculates model deviations for each chosen representive cluster frames from `PrepSelect` and select 
-    ones with low uncertainty from them.
+    ones with high uncertainty from them.
     As RiD-kit is based on `Gromacs`, please provide trajectories in `.xtc` format (single-point precision) and NN models in 
     `.pb` format. 
     Warning: We highly recommend use `slice_mode = "gmx"` due to the inconsistent format convention of `mdtraj` that may lead to topology
@@ -117,20 +117,26 @@ class RunSelect(OP):
             elif op_in["slice_mode"] == "mdtraj":
                 slice_xtc(xtc=op_in["xtc_traj"], top=op_in["topology"],
                         selected_idx=sel_idx, output=sel_gro_name, style="mdtraj")
+            elif op_in["slice_mode"] == "dpdata":
+                slice_dump(dump=op_in["xtc_traj"],selected_idx=sel_idx, output=sel_lmp_name, style="dpdata")
             else:
                 raise RuntimeError("Unknown Style for Slicing Trajectory.")
-            gro_list = []
+            conf_list = []
             cv_init_list = []
             conf_tags = {}
             for ii, sel in enumerate(sel_idx):
-                gro_list.append(task_path.joinpath(sel_gro_name.format(idx=sel)))
+                if op_in["slice_mode"] == "dpdata":
+                    conf_list.append(task_path.joinpath(sel_lmp_name.format(idx=sel)))
+                    conf_tags[sel_lmp_name.format(idx=sel)] = f"{op_in['task_name']}_{sel}"
+                elif op_in["slice_mode"] == "gmx" or op_in["slice_mode"] == "mdtraj" :
+                    conf_list.append(task_path.joinpath(sel_gro_name.format(idx=sel)))
+                    conf_tags[sel_gro_name.format(idx=sel)] = f"{op_in['task_name']}_{sel}"
                 save_txt(cv_init_label.format(idx=sel), sel_data[ii])
                 cv_init_list.append(task_path.joinpath(cv_init_label.format(idx=sel)))
-                conf_tags[sel_gro_name.format(idx=sel)] = f"{op_in['task_name']}_{sel}"
             
         op_out = OPIO(
             {
-               "selected_confs": gro_list,
+               "selected_confs": conf_list,
                "selected_cv_init": cv_init_list,
                "model_devi": task_path.joinpath("cls_"+model_devi_name),
                "selected_indices": task_path.joinpath(sel_ndx_name),

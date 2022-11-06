@@ -49,9 +49,12 @@ class CollectData(OP):
             center = load_txt(op_in["centers"][idx])
             forces = np.append(forces, force)
             centers = np.append(centers, center)
-        forces = np.reshape(forces, [len(op_in["forces"]), -1])
-        centers = np.reshape(centers, [len(op_in["forces"]), -1])
-        data = np.concatenate((centers, forces), axis=1)
+        if op_in["forces"]:
+            forces = np.reshape(forces, [len(op_in["forces"]), -1])
+            centers = np.reshape(centers, [len(op_in["forces"]), -1])
+            data = np.concatenate((centers, forces), axis=1)
+        else:
+            data = np.array([])
         np.save(data_new, data)
         op_out = OPIO(
             {
@@ -62,7 +65,6 @@ class CollectData(OP):
 
 
 class MergeData(OP):
-    
     r"""Merge old data and new generated data. 
     If old data not existed, it will return new data.
     If new data is empty, it will return old data.

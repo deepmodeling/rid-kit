@@ -13,7 +13,7 @@ The `enviroment` of rid-kit software is a bit complex, it uses `dflow` to manage
 We recommend using conda to manage the python enviroment. 
 Use the command
 ```
-conda create -n rid-dp python=3.9 libtensorflow_cc=2.6.2=*cuda110* nccl mdtraj numpy scikit-learn cmake -c conda-forge
+conda create -n rid-dp python=3.9 libtensorflow_cc=2.6.2=*cuda110* tensorflow=2.6.2=*cuda110* nccl mdtraj numpy scikit-learn cmake -c conda-forge
 ```
 to get the compiled libtensorflow_cc and other necessary packages.
 After installation, activate the enviroment and set library path
@@ -104,4 +104,30 @@ make install
 Set the enviroment variables
 ```bash
 source ${CONDA_PREFIX}/bin/GMXRC
+```
+
+### Install Lammps-stable_23Jun2022_update1
+```bash
+cd $deepmd_source_dir/source/build
+make lammps
+```
+Then you will see USER-DEEPMD directory is generated in build dir.
+```bash
+tar -xzvf stable_23Jun2022_update1.tar.gz
+cd lammps-stable_23Jun2022_update1/src
+cp -r $deepmd_source_dir/source/build/USER-DEEPMD .
+make yes-user-deepmd
+```
+make packages you will use
+```bash
+make yes-extra-fix
+make yes-extra-dump
+make yes-kspace
+```
+make plumed
+```bash
+make lib-plumed args="-p $CONDA_PREFIX -m runtime"
+make yes-plumed
+make serial -j4 #build serial version of lammps
+ln -s /home/dongdong/software/lammps-stable_23Jun2022_update1/src/lmp_serial /home/dongdong/software/anaconda3/envs/rid_lmp/bin/lmp_serial
 ```

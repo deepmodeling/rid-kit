@@ -33,7 +33,7 @@ class Label(Steps):
     ):
 
         self._input_parameters = {
-            "gmx_config": InputParameter(type=Dict),
+            "label_config": InputParameter(type=Dict),
             "cv_config": InputParameter(type=Dict),
             "kappas": InputParameter(type=List[float]),
             "angular_mask": InputParameter(type=List),
@@ -42,9 +42,10 @@ class Label(Steps):
             "block_tag" : InputParameter(type=str, value="")
         }        
         self._input_artifacts = {
-            "topology": InputArtifact(),
+            "topology" : InputArtifact(optional=True),
             "models" : InputArtifact(optional=True),
             "forcefield" : InputArtifact(optional=True),
+            "inputfile": InputArtifact(optional=True),
             "confs": InputArtifact(),
             "at": InputArtifact(),
             "index_file": InputArtifact(optional=True),
@@ -166,7 +167,7 @@ def _label(
             **prep_template_config,
         ),
         parameters={
-            "gmx_config": label_steps.inputs.parameters['gmx_config'],
+            "label_config": label_steps.inputs.parameters['label_config'],
             "cv_config": label_steps.inputs.parameters['cv_config'],
             "task_name": check_label_inputs.outputs.parameters['conf_tags'],
             "kappas": label_steps.inputs.parameters['kappas']
@@ -196,14 +197,15 @@ def _label(
             **run_template_config,
         ),
         parameters={
-            "gmx_config": label_steps.inputs.parameters["gmx_config"]
+            "label_config": label_steps.inputs.parameters["label_config"]
         },
         artifacts={
             "forcefield": label_steps.inputs.artifacts['forcefield'],
             "task_path": prep_label.outputs.artifacts["task_path"],
             "index_file": label_steps.inputs.artifacts['index_file'],
             "dp_files": label_steps.inputs.artifacts['dp_files'],
-            "cv_file": label_steps.inputs.artifacts['cv_file']
+            "cv_file": label_steps.inputs.artifacts['cv_file'],
+            "inputfile": label_steps.inputs.artifacts['inputfile']
         },
         key = step_keys['run_label']+"-{{item}}",
         executor = run_executor,

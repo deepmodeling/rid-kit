@@ -1,3 +1,4 @@
+from logging import raiseExceptions
 from dflow.python import (
     OP,
     OPIO,
@@ -45,14 +46,14 @@ class PrepExplore(OP):
         return OPIOSign(
             {
                 "models": Artifact(List[Path], optional=True),
-                "topology": Artifact(Path),
+                "topology": Artifact(Path, optional=True),
                 "conf": Artifact(Path),
                 "cv_file": Artifact(List[Path], optional=True),
                 "trust_lvl_1": float,
                 "trust_lvl_2": float,
-                "gmx_config": Dict,
+                "exploration_config": Dict,
                 "cv_config": Dict,
-                "task_name": str,
+                "task_name": str
             }
         )
 
@@ -84,7 +85,7 @@ class PrepExplore(OP):
             - `trust_lvl_2`: (`float`) Trust level 2.
             - `topology`: (`Artifact(Path)`) Topology files (.top) for Gromacs simulations.
             - `conf`: (`Artifact(Path)`) Conformation files (.gro) for Gromacs simulations.
-            - `gmx_config`: (`Dict`) Configuration in `Dict` format for Gromacs run. Must contains:
+            - `exploration_config`: (`Dict`) Configuration in `Dict` format for Gromacs run. Must contains:
                 `dt`, `steps`, `temperature`, `output_freq`.
             - `cv_config`: (`Dict`) Configuration for CV creation.
             - `task_name`: (`str`) Task name used to make sub-dir for tasks.
@@ -113,19 +114,20 @@ class PrepExplore(OP):
         gmx_task_builder = EnhcMDTaskBuilder(
             conf = op_in["conf"],
             topology = op_in["topology"],
-            gmx_config = op_in["gmx_config"],
+            exploration_config = op_in["exploration_config"],
             cv_file=cv_file,
             selected_resid = selected_resid,
+            sampler_type = op_in["exploration_config"]["type"],
             trust_lvl_1 = op_in["trust_lvl_1"],
             trust_lvl_2 = op_in["trust_lvl_2"],
             model_list = models,
             plumed_output = plumed_output_name,
             cv_mode = op_in["cv_config"]["mode"]
         )
-        gmx_task = gmx_task_builder.build()
         cv_dim = gmx_task_builder.get_cv_dim()
         task_path = Path(op_in["task_name"])
         task_path.mkdir(exist_ok=True, parents=True)
+        gmx_task = gmx_task_builder.build()
         for fname, fconts in gmx_task.files.items():
             with open(task_path.joinpath(fname), fconts[1]) as ff:
                 ff.write(fconts[0])

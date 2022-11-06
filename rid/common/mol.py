@@ -3,6 +3,7 @@ import sys
 from typing import List, Dict, Sequence, Union
 import logging
 import mdtraj as md
+import dpdata
 from mdtraj.geometry.dihedral import _atom_sequence, PHI_ATOMS, PSI_ATOMS
 import numpy as np
 from rid.constants import sel_gro_name_gmx, sel_gro_name
@@ -102,3 +103,35 @@ def slice_xtc(
         )
     else:
         raise RuntimeError("Unknown Style for Slicing Trajectory.")
+
+def slice_dump_dpdata(
+    dump: str,
+    selected_idx,
+    output_format:str
+):
+    traj = dpdata.System(dump, fmt="lammps/dump")
+    for sel in selected_idx:
+        traj.to('lammps/lmp', output_format.format(idx=sel), frame_idx=sel)
+
+def slice_dump(
+    dump: str,
+    selected_idx,
+    output:str,
+    style: str = "dpdata"
+):
+    if style == "dpdata":
+        slice_dump_dpdata(
+            dump = dump,
+            selected_idx = selected_idx,
+            output_format=output
+        )
+    else:
+        raise RuntimeError("Unknown Style for Slicing Trajectory.")
+    
+def final_dump(
+    dump: str,
+    selected_idx,
+    output_format:str
+):
+    traj = dpdata.System(dump, fmt="lammps/dump")
+    traj.to('lammps/lmp', output_format, frame_idx=selected_idx)

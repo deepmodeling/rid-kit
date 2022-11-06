@@ -198,10 +198,23 @@ def parse_args(args: Optional[List[str]] = None):
 def parse_submit(args):
     mol_path = Path(args.mol)
     confs = glob.glob(str(mol_path.joinpath("*.gro")))
+    if len(confs) == 0:
+        confs = glob.glob(str(mol_path.joinpath("*.lmp")))
     assert len(confs) > 0, "No valid conformation files."
     top = glob.glob(str(mol_path.joinpath("*.top")))
-    assert len(top) > 0, "No valid topology files."
-    top_file = top[0]
+    # assert len(top) > 0, "No valid topology files."
+    # allfiles = glob.glob(str(mol_path.joinpath("*")))
+    # for file in allfiles:
+    #     if os.path.basename(file).endswith("ff"):
+    #         forcefield = file
+    #     elif os.path.basename(file).endswith("gro") or os.path.basename(file).endswith("lmp"):
+    #         conf.append(file)
+    #     else:
+    #         otherfiles.append(file)
+    if len(top) == 0:
+        top_file = None
+    else:
+        top_file = top[0]
     forcefield = glob.glob(str(mol_path.joinpath("*.ff")))
     if len(forcefield) == 0:
         forcefield = None
@@ -216,7 +229,11 @@ def parse_submit(args):
         index_file = None
     else:
         index_file = index_file[0]
-        
+    
+    inputfile = glob.glob(str(mol_path.joinpath("input*")))
+    if len(inputfile) == 0:
+        inputfile = None
+    
     dp_list = [glob.glob(str(mol_path.joinpath(e))) for e in ['*.json', '*.raw', 'dp*.pb']]
     dp_files = [item for sublist in dp_list for item in sublist]
     if len(dp_files) == 0:
@@ -227,7 +244,7 @@ def parse_submit(args):
     if len(cv_file) == 0:
         cv_file = None
         
-    return confs, top_file, models, forcefield, index_file, dp_files, cv_file
+    return confs, top_file, models, forcefield, index_file, inputfile, dp_files, cv_file
 
 
 def log_ui():
@@ -239,7 +256,7 @@ def main():
     args = parse_args()
     if args.command == "submit":
         logger.info("Preparing RiD ...")
-        confs, top_file, models, forcefield, index_file, dp_files, cv_file = parse_submit(args)
+        confs, top_file, models, forcefield, index_file, inputfile, dp_files, cv_file = parse_submit(args)
         submit_rid(
             confs = confs,
             topology = top_file,
@@ -248,13 +265,14 @@ def main():
             models = models,
             forcefield = forcefield,
             index_file = index_file,
+            inputfile = inputfile,
             dp_files = dp_files,
             cv_file = cv_file
         )
         log_ui()
     elif args.command == "resubmit":
         logger.info("Preparing RiD ...")
-        confs, top_file, models, forcefield = parse_submit(args)
+        confs, top_file, models, forcefield, index_file, inputfile, dp_files, cv_file = parse_submit(args)
         resubmit_rid(
             workflow_id=args.WORKFLOW_ID,
             confs = confs,
@@ -262,7 +280,11 @@ def main():
             rid_config = args.config,
             machine_config = args.machine,
             models = models,
-            forcefield = forcefield
+            forcefield = forcefield,
+            index_file = index_file,
+            inputfile = inputfile,
+            dp_files = dp_files,
+            cv_file = cv_file
         )
         log_ui()
     elif args.command == "explore":

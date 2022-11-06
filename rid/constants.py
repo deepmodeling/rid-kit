@@ -2,6 +2,7 @@
 argo_namespace = "argo"
 walker_tag_fmt = "{idx:03d}"
 init_conf_name = "conf_{idx:03d}.gro"
+init_input_name = "input_{idx:03d}.lammps"
 explore_task_pattern = "{:03d}"
 explore_task_file = "explore_{walker:03d}.pkl"
 culster_selection_data_name = "cls_sel.out.npy"
@@ -32,11 +33,18 @@ gmx_tpr_name = "topol.tpr"
 gmx_grompp_log = "gmx_grompp.log"
 gmx_mdrun_log = "md.log"
 restraint_md_mdp_name = "grompp_restraint.mdp"
-trr_name = "traj.trr"
-xtc_name = "traj_comp.xtc"
+gmx_trr_name = "traj.trr"
+gmx_xtc_name = "traj_comp.xtc"
 sel_gro_name = "conf_{idx:d}.gro"
 sel_gro_name_gmx = "conf_.gro"
 gmx_conf_out = "confout.gro"
+
+# Lammps file names
+lmp_conf_name = "conf.lmp"
+lmp_input_name = "input.lammps"
+lmp_mdrun_log = "log.lammps"
+sel_lmp_name = "conf_{idx:d}.lmp"
+lmp_conf_out = "confout.lmp"
 
 
 # Tensorflow files

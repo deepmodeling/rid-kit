@@ -46,7 +46,7 @@ class InitBlock(Steps):
             "model_tags": InputParameter(type=List),
             "trust_lvl_1" : InputParameter(type=List[float], value=2.0),
             "trust_lvl_2": InputParameter(type=List[float], value=3.0),
-            "exploration_gmx_config" : InputParameter(type=Dict),
+            "exploration_config" : InputParameter(type=Dict),
             "cv_config" : InputParameter(type=Dict),
             "cluster_threshold": InputParameter(type=float, value=1.0),
             "angular_mask": InputParameter(type=Optional[Union[np.ndarray, List]]),
@@ -57,16 +57,16 @@ class InitBlock(Steps):
             "dt": InputParameter(type=float, value=0.02),
             "output_freq": InputParameter(type=float, value=2500),
             "slice_mode": InputParameter(type=str, value="gmx"),
-            "label_gmx_config": InputParameter(type=Dict),
+            "label_config": InputParameter(type=Dict),
             "kappas": InputParameter(type=List[float]),
-            "angular_mask": InputParameter(type=List),
             "tail": InputParameter(type=float, value=0.9),
             "train_config": InputParameter(type=Dict)
         }        
         self._input_artifacts = {
             "models" : InputArtifact(optional=True),
             "forcefield" : InputArtifact(optional=True),
-            "topology" : InputArtifact(),
+            "topology" : InputArtifact(optional=True),
+            "inputfile": InputArtifact(optional=True),
             "confs" : InputArtifact(),
             "index_file": InputArtifact(optional=True),
             "dp_files": InputArtifact(optional=True),
@@ -95,7 +95,6 @@ class InitBlock(Steps):
                     artifacts=self._output_artifacts
                 ),
             )
-
         self = _first_run_block(
             self, 
             exploration_op,
@@ -138,14 +137,13 @@ def _first_run_block(
         train_config : Dict,
         upload_python_package : str = None,
     ):
-
     exploration = Step(
         "Exploration",
         template=exploration_op,
         parameters={
             "trust_lvl_1" : block_steps.inputs.parameters['trust_lvl_1'],
             "trust_lvl_2": block_steps.inputs.parameters['trust_lvl_2'],
-            "gmx_config" : block_steps.inputs.parameters['exploration_gmx_config'],
+            "exploration_config" : block_steps.inputs.parameters['exploration_config'],
             "cv_config" : block_steps.inputs.parameters['cv_config'],
             "task_names" : block_steps.inputs.parameters['walker_tags'],
             "block_tag" : block_steps.inputs.parameters['block_tag']
@@ -154,6 +152,7 @@ def _first_run_block(
             "models" : block_steps.inputs.artifacts['models'],
             "forcefield" : block_steps.inputs.artifacts['forcefield'],
             "topology" : block_steps.inputs.artifacts['topology'],
+            "inputfile": block_steps.inputs.artifacts['inputfile'],
             "confs" : block_steps.inputs.artifacts['confs'],
             "index_file": block_steps.inputs.artifacts['index_file'],
             "dp_files": block_steps.inputs.artifacts['dp_files'],
@@ -197,7 +196,7 @@ def _first_run_block(
         template=label_op,
         parameters={
             "angular_mask": block_steps.inputs.parameters['angular_mask'],
-            "gmx_config": block_steps.inputs.parameters['label_gmx_config'],
+            "label_config": block_steps.inputs.parameters['label_config'],
             "cv_config": block_steps.inputs.parameters['cv_config'],
             "kappas": block_steps.inputs.parameters['kappas'],
             "tail": block_steps.inputs.parameters['tail'],
@@ -210,6 +209,7 @@ def _first_run_block(
             "confs": selection.outputs.artifacts["selected_confs"],
             "at": selection.outputs.artifacts["selected_cv_init"],
             "index_file": block_steps.inputs.artifacts['index_file'],
+            "inputfile": block_steps.inputs.artifacts['inputfile'],
             "dp_files": block_steps.inputs.artifacts['dp_files'],
             "cv_file": block_steps.inputs.artifacts['cv_file']
         },
@@ -291,7 +291,7 @@ class IterBlock(Steps):
             "trust_lvl_2": InputParameter(type=List[float]),
             "init_trust_lvl_1" : InputParameter(type=List[float]),
             "init_trust_lvl_2": InputParameter(type=List[float]),
-            "exploration_gmx_config" : InputParameter(type=Dict),
+            "exploration_config" : InputParameter(type=Dict),
             "cv_config" : InputParameter(type=Dict),
             "cluster_threshold": InputParameter(type=float, value=1.0),
             "angular_mask": InputParameter(type=Optional[Union[np.ndarray, List]]),
@@ -301,9 +301,8 @@ class IterBlock(Steps):
             "dt": InputParameter(type=float, value=0.02),
             "output_freq": InputParameter(type=float, value=2500),
             "slice_mode": InputParameter(type=str, value="gmx"),
-            "label_gmx_config": InputParameter(type=Dict),
+            "label_config": InputParameter(type=Dict),
             "kappas": InputParameter(type=List[float]),
-            "angular_mask": InputParameter(type=List),
             "tail": InputParameter(type=float, value=0.9),
             "train_config": InputParameter(type=Dict),
             "adjust_amplifier": InputParameter(type=float, value=1.5),
@@ -312,7 +311,8 @@ class IterBlock(Steps):
         self._input_artifacts = {
             "models" : InputArtifact(optional=True),
             "forcefield" : InputArtifact(optional=True),
-            "topology" : InputArtifact(),
+            "topology" : InputArtifact(optional=True),
+            "inputfile": InputArtifact(optional=True),
             "confs" : InputArtifact(),
             "data_old": InputArtifact(),
             "index_file": InputArtifact(optional=True),
@@ -398,7 +398,7 @@ def _iter_block(
         parameters={
             "trust_lvl_1" : block_steps.inputs.parameters['trust_lvl_1'],
             "trust_lvl_2": block_steps.inputs.parameters['trust_lvl_2'],
-            "gmx_config" : block_steps.inputs.parameters['exploration_gmx_config'],
+            "exploration_config" : block_steps.inputs.parameters['exploration_config'],
             "cv_config" : block_steps.inputs.parameters['cv_config'],
             "task_names" : block_steps.inputs.parameters['walker_tags'],
             "block_tag" : block_steps.inputs.parameters['block_tag'],
@@ -407,6 +407,7 @@ def _iter_block(
             "models" : block_steps.inputs.artifacts['models'],
             "forcefield" : block_steps.inputs.artifacts['forcefield'],
             "topology" : block_steps.inputs.artifacts['topology'],
+            "inputfile": block_steps.inputs.artifacts['inputfile'],
             "confs" : block_steps.inputs.artifacts['confs'],
             "index_file": block_steps.inputs.artifacts['index_file'],
             "dp_files": block_steps.inputs.artifacts['dp_files'],
@@ -480,7 +481,7 @@ def _iter_block(
         template=label_op,
         parameters={
             "angular_mask": block_steps.inputs.parameters['angular_mask'],
-            "gmx_config": block_steps.inputs.parameters['label_gmx_config'],
+            "label_config": block_steps.inputs.parameters['label_config'],
             "cv_config": block_steps.inputs.parameters['cv_config'],
             "kappas": block_steps.inputs.parameters['kappas'],
             "tail": block_steps.inputs.parameters['tail'],
@@ -491,6 +492,7 @@ def _iter_block(
             "topology": block_steps.inputs.artifacts["topology"],
             "forcefield" : block_steps.inputs.artifacts['forcefield'],
             "confs": selection.outputs.artifacts["selected_confs"],
+            "inputfile": block_steps.inputs.artifacts['inputfile'],
             "at": selection.outputs.artifacts["selected_cv_init"],
             "index_file": block_steps.inputs.artifacts['index_file'],
             "dp_files": block_steps.inputs.artifacts['dp_files'],

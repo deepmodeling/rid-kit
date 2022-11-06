@@ -28,6 +28,8 @@ setuptools.setup(
         "rid",
         "rid/common",
         "rid/common/gromacs",
+        "rid/common/lammps",
+        "rid/common/sampler",
         "rid/common/plumed",
         "rid/entrypoint",
         "rid/flow",

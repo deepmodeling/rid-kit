@@ -15,7 +15,7 @@
     },
 
     "ExploreMDConfig": {
-        "type": "lmp",
+        "type": "gmx",
         "nsteps": 25000,
         "output_freq": 25,
         "ref-t": "300 300",
@@ -37,7 +37,7 @@
     },
 
     "LabelMDConfig": {
-        "type": "lmp",
+        "type": "gmx",
         "nsteps": 25000,
         "output_freq": 50,
         "ref-t": "300 300",

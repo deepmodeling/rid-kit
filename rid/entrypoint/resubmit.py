@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
 from typing import List, Union, Optional
+from rid.utils import load_json
+import os
 
 from dflow import (
     Workflow,
@@ -25,9 +27,8 @@ def resubmit_rid(
         models: Optional[Union[str, List[str]]] = None,
         index_file: Optional[str] = None,
         dp_files: Optional[List[str]] = None,
-        inputfile: Optional[List[str]] = None,
         forcefield: Optional[str] = None,
-        cv_file: Optional[List[str]] = None
+        otherfiles: Optional[List[str]] = None
     ):
     with open(machine_config, "r") as mcg:
         machine_config_dict = json.load(mcg)
@@ -69,12 +70,39 @@ def resubmit_rid(
         index_file_artifact = None
     else:
         index_file_artifact = upload_artifact(Path(index_file), archive=None)
-        
-    if inputfile is None:
+    
+    jdata = load_json(rid_config)
+    inputfiles = []
+    if "inputfile" in jdata["ExploreMDConfig"]:
+        inputfiles.append(jdata["ExploreMDConfig"]["inputfile"])
+        if "inputfile" in jdata["LabelMDConfig"]:
+            inputfiles.append(jdata["LabelMDConfig"]["inputfile"])
+    
+    cvfiles = []
+    if "cv_file" in jdata["CV"]:
+        assert isinstance(jdata["CV"]["cv_file"],list), "CV file input should be list."
+        for file in jdata["CV"]["cv_file"]:
+            cvfiles.append(file)
+    
+    inputfile_list = []
+    cvfile_list = []
+    if otherfiles is not None:
+        for file in otherfiles:
+            if os.path.basename(file) in inputfiles:
+                inputfile_list.append(file)
+            elif os.path.basename(file) in cvfiles:
+                cvfile_list.append(file)
+            
+    if len(inputfile_list) == 0:
         inputfile_artifact = None
     else:
-        inputfile_artifact = upload_artifact([Path(p) for p in inputfile], archive=None)
+        inputfile_artifact = upload_artifact([Path(p) for p in inputfile_list], archive=None)
         
+    if len(cvfile_list) == 0:
+        cv_file_artifact = None
+    else:
+        cv_file_artifact = upload_artifact([Path(p) for p in cvfile_list], archive=None)
+    
     if dp_files is None:
         dp_files_artifact = None
     elif isinstance(dp_files, str):
@@ -83,15 +111,6 @@ def resubmit_rid(
         dp_files_artifact = upload_artifact([Path(p) for p in dp_files], archive=None)
     else:
         raise RuntimeError("Invalid type of `dp_files`.")
-    
-    if cv_file is None:
-        cv_file_artifact = None
-    elif isinstance(cv_file, str):
-        cv_file_artifact = upload_artifact(Path(cv_file), archive=None)
-    elif isinstance(cv_file, List):
-        cv_file_artifact = upload_artifact([Path(p) for p in cv_file], archive=None)
-    else:
-        raise RuntimeError("Invalid type of `cv_file`.")
     
     if forcefield is None:
         forcefield_artifact = None

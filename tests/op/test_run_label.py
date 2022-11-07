@@ -38,12 +38,17 @@ class Test_MockedRunLabel(unittest.TestCase):
     def test(self, mocked_run):
         mocked_run.return_value = 0, 0, 1
         op = RunLabel()
+        gmx_config = {"type":"gmx", "nsteps": 50, "output_freq": 1, "temperature": 300, 
+                               "dt": 0.002, "output_mode": "both", "ntmpi": 1, "nt": 8, "max_warning": 0}
         op_in1 = OPIO(
             {
                 "task_path": Path(self.taskname),
-                "gmx_config": {"nsteps": 50, "output_freq": 1, "temperature": 300, 
-                               "dt": 0.002, "output_mode": "both", "ntmpi": 1, "nt": 8, "max_warning": 0},
-                "forcefield": None
+                "label_config": gmx_config,
+                "forcefield": None,
+                "index_file": None,
+                "dp_files": None,
+                "cv_file": None,
+                "inputfile": None
             }
         )
     

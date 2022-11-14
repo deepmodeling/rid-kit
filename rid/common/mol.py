@@ -70,6 +70,7 @@ def get_dihedral_from_resid(file_path: str, selected_resid: List[int]) -> Dict:
 def slice_xtc_mdtraj(
         xtc: str,
         top: str,
+        walker_idx: int,
         selected_idx: Sequence,
         output_format: str
     ):
@@ -77,12 +78,13 @@ def slice_xtc_mdtraj(
     traj = md.load_xtc(xtc, top=top)
     for sel in selected_idx:
         frame = traj[sel]
-        frame.save_gro(output_format.format(idx=sel))
+        frame.save_gro(output_format.format(walker=walker_idx,idx=sel))
 
 
 def slice_xtc(
         xtc: str,
         top: str,
+        walker_idx: int,
         selected_idx,
         output: str,
         style: str =  "gmx"
@@ -98,6 +100,7 @@ def slice_xtc(
         slice_xtc_mdtraj(
             xtc = xtc,
             top = top,
+            walker_idx=walker_idx,
             selected_idx = selected_idx,
             output_format=output
         )
@@ -106,15 +109,17 @@ def slice_xtc(
 
 def slice_dump_dpdata(
     dump: str,
+    walker_idx,
     selected_idx,
     output_format:str
 ):
     traj = dpdata.System(dump, fmt="lammps/dump")
     for sel in selected_idx:
-        traj.to('lammps/lmp', output_format.format(idx=sel), frame_idx=sel)
+        traj.to('lammps/lmp', output_format.format(walker=walker_idx,idx=sel), frame_idx=sel)
 
 def slice_dump(
     dump: str,
+    walker_idx: int,
     selected_idx,
     output:str,
     style: str = "dpdata"
@@ -122,6 +127,7 @@ def slice_dump(
     if style == "dpdata":
         slice_dump_dpdata(
             dump = dump,
+            walker_idx= walker_idx,
             selected_idx = selected_idx,
             output_format=output
         )

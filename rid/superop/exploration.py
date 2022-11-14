@@ -129,7 +129,8 @@ def _exploration(
             slices=Slices("{{item}}",
                 input_parameter=["task_name", "trust_lvl_1", "trust_lvl_2"],
                 input_artifact=["conf"],
-                output_artifact=["task_path"]
+                output_artifact=["task_path"],
+                output_parameter=["cv_dim"]
             ),
             **prep_template_config,
         ),

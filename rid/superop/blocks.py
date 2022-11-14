@@ -454,8 +454,8 @@ def _iter_block(
             adjust_lvl_op,
             python_packages = upload_python_package,
             slices=Slices("{{item}}",
-                input_parameter=["trust_lvl_1", "trust_lvl_2", "numb_cluster", "init_trust_lvl_1", "init_trust_lvl_2"],
-                output_parameter=["adjust_trust_lvl_1", "adjust_trust_lvl_2"]),
+                input_parameter=["trust_lvl_1", "trust_lvl_2", "numb_cluster", "init_trust_lvl_1", "init_trust_lvl_2"]
+                ),
             **adjust_lvl_template_config,
         ),
         parameters={

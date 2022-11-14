@@ -26,6 +26,7 @@ RUN bash /root/miniconda.sh -b -p /opt/conda
 RUN rm /root/miniconda.sh
 ENV PATH /opt/conda/bin:$PATH
 RUN conda init bash && source /root/.bashrc \
+    && pip install dpdata \
     && conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/  \
     && conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/  \
     && conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/  \

@@ -4,3 +4,4 @@ pydflow
 tensorflow==2.6.2
 google
 mdtraj
+dpdata

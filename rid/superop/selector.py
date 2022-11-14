@@ -59,7 +59,7 @@ class Selector(Steps):
             "selected_conf_tags": OutputParameter(type=List),
         }
         self._output_artifacts = {
-            "culster_selection_index": OutputArtifact(),
+            "cluster_selection_index": OutputArtifact(),
             "selected_confs": OutputArtifact(),
             "selected_cv_init": OutputArtifact(),
             "model_devi": OutputArtifact(),
@@ -140,7 +140,7 @@ def _select(
                 "{{item}}",
                 input_parameter=["cluster_threshold", "task_name"],
                 input_artifact=["plm_out"],
-                output_artifact=["culster_selection_index", "culster_selection_data"],
+                output_artifact=["cluster_selection_index", "cluster_selection_data"],
                 output_parameter=["cluster_threshold", "numb_cluster"]
                 ),
                 
@@ -174,7 +174,7 @@ def _select(
             slices=Slices(
                 "int({{item}})",
                 input_parameter=["task_name", "trust_lvl_1", "trust_lvl_2"],
-                input_artifact=["culster_selection_index", "culster_selection_data", "xtc_traj", "topology"],
+                input_artifact=["cluster_selection_index", "cluster_selection_data", "xtc_traj", "topology"],
                 output_artifact=["selected_confs", "selected_cv_init", "model_devi", "selected_indices"]
             ),
             **run_template_config,
@@ -188,8 +188,8 @@ def _select(
             "task_name": select_steps.inputs.parameters['task_names']
         },
         artifacts={
-            "culster_selection_index": prep_select.outputs.artifacts["culster_selection_index"],
-            "culster_selection_data": prep_select.outputs.artifacts["culster_selection_data"],
+            "cluster_selection_index": prep_select.outputs.artifacts["cluster_selection_index"],
+            "cluster_selection_data": prep_select.outputs.artifacts["cluster_selection_data"],
             "models": select_steps.inputs.artifacts["models"],
             "xtc_traj": select_steps.inputs.artifacts["xtc_traj"],
             "topology": select_steps.inputs.artifacts["topology"]
@@ -205,7 +205,7 @@ def _select(
     select_steps.outputs.parameters["numb_cluster"].value_from_parameter = prep_select.outputs.parameters["numb_cluster"]
     select_steps.outputs.parameters["selected_conf_tags"].value_from_parameter = run_select.outputs.parameters["selected_conf_tags"]
 
-    select_steps.outputs.artifacts["culster_selection_index"]._from = prep_select.outputs.artifacts["culster_selection_index"]
+    select_steps.outputs.artifacts["cluster_selection_index"]._from = prep_select.outputs.artifacts["cluster_selection_index"]
     select_steps.outputs.artifacts["selected_confs"]._from = run_select.outputs.artifacts["selected_confs"]
     select_steps.outputs.artifacts["selected_cv_init"]._from = run_select.outputs.artifacts["selected_cv_init"]
     select_steps.outputs.artifacts["model_devi"]._from = run_select.outputs.artifacts["model_devi"]

@@ -142,9 +142,9 @@ class TestMockedInitBlock(unittest.TestCase):
         self.trust_lvl_1 = [trust_lvl_1]*self.numb_walkers
         self.trust_lvl_2 = [trust_lvl_2]*self.numb_walkers
         self.cluster_threshold = [2.0]*self.numb_walkers
-        self.kappas = [500]*3
-        self.angular_mask = [0]*3
-        self.weights = [1]*3
+        self.kappas = [500.]*3
+        self.angular_mask = [0.]*3
+        self.weights = [1.]*3
         self.numb_cluster_upper = 8
         self.numb_cluster_lower = 4
         self.max_selection = 10

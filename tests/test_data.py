@@ -154,7 +154,7 @@ class TestMockedData(unittest.TestCase):
         if not os.path.exists(self.data_out):
             os.mkdir(self.data_out)
         download_artifact(step.outputs.artifacts["data"],path = self.data_out)
-        os.path.isfile(self.data_out+"/"+self.expected_out)
+        self.assertTrue(os.path.isfile(self.data_out+"/"+self.expected_out))
         with open(self.data_out+"/"+self.expected_out,"r") as f:
             l1 = f.readline()
             self.assertEqual(l1, "this is %s 0\n"%data_old)

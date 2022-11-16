@@ -27,7 +27,7 @@ from rid.constants import (
 
 class Test_MockedRunSelect(unittest.TestCase):
     def setUp(self):
-        self.taskname = "selected"
+        self.taskname = "000"
         self.datapath = "data"
         cls_data = np.loadtxt(Path(self.datapath)/"cls_sel.out")
         np.save(Path(self.datapath)/"cls_sel.out.npy", cls_data)

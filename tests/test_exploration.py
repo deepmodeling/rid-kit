@@ -210,10 +210,10 @@ class TestMockedExploration(unittest.TestCase):
         download_artifact(step.outputs.artifacts["md_log"],path=self.data_out)
         download_artifact(step.outputs.artifacts["trajectory"],path=self.data_out)
         sub_path = "/000/"
-        os.path.isfile(self.data_out+sub_path+gmx_conf_out)
-        os.path.isfile(self.data_out+sub_path+plumed_output_name)
-        os.path.isfile(self.data_out+sub_path+gmx_mdrun_log)
-        os.path.isfile(self.data_out+sub_path+gmx_xtc_name)
+        self.assertTrue(os.path.isfile(self.data_out+sub_path+gmx_conf_out))
+        self.assertTrue(os.path.isfile(self.data_out+sub_path+plumed_output_name))
+        self.assertTrue(os.path.isfile(self.data_out+sub_path+gmx_mdrun_log))
+        self.assertTrue(os.path.isfile(self.data_out+sub_path+gmx_xtc_name))
         with open(self.data_out+sub_path+gmx_conf_out,"r") as f:
             l1 = f.readline()
             self.assertEqual(l1, "This is init conf 0")

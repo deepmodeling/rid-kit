@@ -145,7 +145,7 @@ class TestMockedLabel(unittest.TestCase):
         self.models = upload_artifact(self.init_models)
         self.confs = upload_artifact(self.init_confs)
         self.at = upload_artifact(self.center[1])
-        self.kappas = [500]*3
+        self.kappas = [500.]*3
         self.angular_mask = [0,0,0]
         self.tail = 0.9
         self.conf_tags = [{"conf_000.gro":"000_000"},{"conf_001.gro":"001_001"},{"conf_002.gro":"002_002"}]
@@ -213,8 +213,8 @@ class TestMockedLabel(unittest.TestCase):
         download_artifact(step.outputs.artifacts["forces"],path=self.data_out)
         download_artifact(step.outputs.artifacts["md_log"],path=self.data_out)
         sub_path = "/000_000/"
-        os.path.isfile(self.data_out+sub_path+gmx_mdrun_log)
-        os.path.isfile(self.data_out+sub_path+force_out)
+        self.assertTrue(os.path.isfile(self.data_out+sub_path+gmx_mdrun_log))
+        self.assertTrue(os.path.isfile(self.data_out+sub_path+force_out))
         with open(self.data_out+sub_path+force_out,"r") as f:
             l1 = f.readline()
             self.assertEqual(l1, '1.000000e+00 2.000000e+00\n')

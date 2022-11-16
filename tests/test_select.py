@@ -141,11 +141,11 @@ class TestMockedSelect(unittest.TestCase):
         download_artifact(step.outputs.artifacts["selected_indices"],path=self.data_out)
         download_artifact(step.outputs.artifacts["cluster_selection_index"],path=self.data_out)
         sub_path = "/000/"
-        os.path.isfile(self.data_out+sub_path+sel_gro_name.format(idx=0))
-        os.path.isfile(self.data_out+sub_path+model_devi_name)
-        os.path.isfile(self.data_out+sub_path+cv_init_label)
-        os.path.isfile(self.data_out+sub_path+sel_ndx_name)
-        os.path.isfile(self.data_out+sub_path+cluster_selection_index_name)
-        with open(self.data_out+sub_path+sel_gro_name.format(idx=0),"r") as f:
+        self.assertTrue(os.path.isfile(self.data_out+sub_path+sel_gro_name.format(walker=0,idx=0)))
+        self.assertTrue(os.path.isfile(self.data_out+sub_path+"cls_"+model_devi_name))
+        self.assertTrue(os.path.isfile(self.data_out+sub_path+cv_init_label.format(walker=0,idx=0)))
+        self.assertTrue(os.path.isfile(self.data_out+sub_path+sel_ndx_name))
+        self.assertTrue(os.path.isfile(self.data_out+sub_path+cluster_selection_index_name))
+        with open(self.data_out+sub_path+sel_gro_name.format(walker=0,idx=0),"r") as f:
             l1 = f.readline()
-            self.assertEqual(l1, "This is mocked conf_0.gro")
+            self.assertEqual(l1, "This is mocked conf_000_0.gro")

@@ -1,17 +1,19 @@
 name: rid python package test
 
 on:
+  - push
   - pull_request
 
 jobs:
   Unittest:
     runs-on: ubuntu-latest
     container:
-      image: pkufjhdocker/rid-kit:latest
+      image: pkufjhdocker/rid-test:latest
     steps:
     - uses: actions/checkout@v2
     - name: Run unittest
       run: |
         pip install pydflow
         cd ./tests
-        python -m unittest
+        coverage run -m unittest discover op
+        DFLOW_DEBUG=1 coverage run -m unittest

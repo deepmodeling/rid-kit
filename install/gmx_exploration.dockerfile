@@ -15,23 +15,22 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update\
     && DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common \
     && DEBIAN_FRONTEND=noninteractive add-apt-repository -y ppa:ubuntu-toolchain-r/test \
     && DEBIAN_FRONTEND=noninteractive apt-get update \
-    && echo -e "6\n1\n" | DEBIAN_FRONTEND=noninteractive apt-get install -y wget gcc g++ cmake vim libstdc++6
+    && echo -e "6\n1\n" | DEBIAN_FRONTEND=noninteractive apt-get install -y wget gcc g++ cmake vim libstdc++6 python3-tk
 ENV CC=/usr/bin/gcc
 ENV CXX=/usr/bin/g++
 
 # Install Miniconda package manager.
 RUN wget -O /root/miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-# ADD Miniconda3-latest-Linux-x86_64.sh /root/
+#ADD Miniconda3-latest-Linux-x86_64.sh /root/miniconda.sh
 RUN bash /root/miniconda.sh -b -p /opt/conda
 RUN rm /root/miniconda.sh
 ENV PATH /opt/conda/bin:$PATH
 RUN conda init bash && source /root/.bashrc \
-    && pip install dpdata \
     && conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/  \
     && conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/  \
     && conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/  \
     && conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge  \
-    && conda install python=3.9 libtensorflow_cc=2.6.2=*cuda110* tensorflow=2.6.2=*cuda110* nccl MDAnalysis mdtraj numpy -y
+    && conda install python=3.9 libtensorflow_cc=2.6.2=*cuda110* dpdata nccl mdtraj numpy -y
 
 # Solve library inconsistency
 RUN source activate base && rm ${CONDA_PREFIX}/lib/libtinfo.so* && ln -s /usr/lib/x86_64-linux-gnu/libtinfo.so.6 ${CONDA_PREFIX}/lib/libtinfo.so.6 \

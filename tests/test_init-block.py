@@ -1,18 +1,12 @@
 import os
 import unittest
 import time
-import shutil
-from pathlib import Path
-from rid.utils import set_directory
 
 from dflow import (
     Workflow,
     Step,
     upload_artifact,
     download_artifact
-)
-from dflow.python import (
-    OPIO
 )
 
 try:
@@ -22,12 +16,9 @@ except ModuleNotFoundError:
     pass
 
 from rid.constants import (
-    data_old,
     data_raw,
     walker_tag_fmt,
-    gmx_conf_name,
     tf_model_name,
-    plumed_output_name,
     sel_ndx_name,
     gmx_conf_out,
     gmx_xtc_name,
@@ -36,18 +27,14 @@ from rid.constants import (
 )
 
 from rid.utils import normalize_resources
-from typing import Set, List
 
 from rid.superop.exploration import Exploration
 from rid.superop.label import Label
 from rid.superop.selector import Selector
 from rid.superop.data import DataGenerator
-from rid.superop.blocks import InitBlock, IterBlock
-from rid.op.adjust_trust_level import AdjustTrustLevel
-from rid.op.run_train import TrainModel
+from rid.superop.blocks import InitBlock
 
 from context import (
-    upload_python_packages,
     skip_ut_with_dflow,
     skip_ut_with_dflow_reason,
     default_image,
@@ -57,7 +44,6 @@ from context import (
 from mocked_ops import (
     clear_files,
     clear_dir,
-    make_mocked_init_data,
     make_mocked_init_models,
     make_mocked_init_confs,
     MockedPrepExplore,
@@ -72,6 +58,10 @@ from mocked_ops import (
     MockedMergeData,
     MockedTrain
 )
+
+from dflow.python import upload_packages
+from rid import SRC_ROOT
+upload_packages.append(SRC_ROOT)
 
 default_config = normalize_resources({
         "template_config" : {

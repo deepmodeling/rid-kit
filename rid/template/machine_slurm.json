@@ -2,7 +2,7 @@
     "resources": {
         "local_k8s": {
             "template_config" : {
-                "image": "pkufjhdocker/rid-kit:latest", 
+                "image": "pkufjhdocker/rid-tf-cpu:latest", 
                 "image_pull_policy" : "IfNotPresent"
             }
         },

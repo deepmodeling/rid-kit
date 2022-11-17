@@ -1,8 +1,6 @@
 import os
 import unittest
 import time
-import shutil
-from pathlib import Path
 
 from dflow import (
     Workflow,
@@ -10,9 +8,7 @@ from dflow import (
     upload_artifact,
     download_artifact
 )
-from dflow.python import (
-    OPIO
-)
+
 
 try:
     from context import rid
@@ -21,7 +17,6 @@ except ModuleNotFoundError:
     pass
 
 from rid.constants import (
-    cluster_selection_data_name,
     cluster_selection_index_name,
     model_devi_name,
     sel_gro_name,
@@ -30,12 +25,10 @@ from rid.constants import (
 )
 
 from rid.utils import normalize_resources
-from typing import Set, List
 
 from rid.superop.selector import Selector
 
 from context import (
-    upload_python_packages,
     skip_ut_with_dflow,
     skip_ut_with_dflow_reason,
     default_image,
@@ -43,13 +36,15 @@ from context import (
 )
 
 from mocked_ops import (
-    clear_files,
     clear_dir,
     make_mocked_init_data,
-    make_mocked_init_models,
     MockedPrepSelect,
     MockedRunSelect
 )
+
+from dflow.python import upload_packages
+from rid import SRC_ROOT
+upload_packages.append(SRC_ROOT)
 
 default_config = normalize_resources({
         "template_config" : {
@@ -92,8 +87,7 @@ class TestMockedSelect(unittest.TestCase):
             MockedPrepSelect,
             MockedRunSelect,
             prep_config= default_config,
-            run_config = default_config,
-            upload_python_package = upload_python_packages
+            run_config = default_config
         )
         select_step = Step(
             'select-step',

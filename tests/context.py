@@ -10,9 +10,8 @@ else:
     skip_ut_with_dflow = False
     skip_ut_with_dflow_reason = ''
 
-upload_python_packages = [os.path.join(rid_path, 'rid')]
 # one needs to set proper values for the following variable.
-default_image = 'pkufjhdocker/rid-test:latest'
+default_image = 'pkufjhdocker/rid-tf-cpu:latest'
 default_host = None
 if os.getenv('DFLOW_DEBUG'):
     from dflow import config

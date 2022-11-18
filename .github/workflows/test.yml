@@ -1,26 +1,19 @@
 name: rid python package test
 
 on:
-  - push
   - pull_request
 
 jobs:
   Unittest:
     runs-on: ubuntu-latest
+    container:
+      image: pkufjhdocker/rid-tf-cpu:latest
     steps:
     - uses: actions/checkout@v2
-    - name: Setup package
-      run: |
-          wget -q https://github.com/Dead-fisher/rid-kit/releases/download/v1.0/gromacs-dp-rid-0.0.5-float-gpu-Linux-x86_64.sh > download.log
-          sh gromacs-dp-rid-0.0.5-float-gpu-Linux-x86_64.sh
-          export PATH="$HOME/gromacs-dp-rid/bin:$PATH"
-          which python
-          pip install numpy
-          pip install sklearn
-          pip install dpdispatcher
-          pip install mock
     - name: Run unittest
       run: |
-        export PATH="$HOME/gromacs-dp-rid/bin:$PATH"
+        pip install mock coverage 
+        pip install pydflow
         cd ./tests
-        python -m unittest
+        coverage run -m unittest discover op
+        DFLOW_DEBUG=1 coverage run -m unittest

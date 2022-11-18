@@ -1,0 +1,4 @@
+dih-002-00: TORSION ATOMS=5,7,9,15
+dih-002-01: TORSION ATOMS=7,9,15,17
+dpfe: DEEPFE TRUST_LVL_1=2.0 TRUST_LVL_2=3.0 MODEL=data/model_000.pb,data/model_001.pb,data/model_002.pb ARG=dih-002-00,dih-002-01
+PRINT STRIDE=1 ARG=dih-002-00,dih-002-01 FILE=plm.out

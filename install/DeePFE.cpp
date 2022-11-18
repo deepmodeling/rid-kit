@@ -142,8 +142,13 @@ namespace PLMD {
 	  }
 	}
 
+  Tensor drop_out_rate_tensor (DT_FLOAT, TensorShape({1}));
+  auto drop_out_rate = drop_out_rate_tensor.scalar<VALUETYPE> ();
+  drop_out_rate(0) = 0.;
+
 	std::vector<std::pair<string, Tensor>> input_tensors = {
 	  {"inputs",	coord_tensor}, 
+    {"drop_out_rate", drop_out_rate_tensor}
 	};
 	std::vector<Tensor> output_tensors;
 

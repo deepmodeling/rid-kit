@@ -5,5 +5,6 @@ rid.egg-info
 *.egg
 dist
 build
-.gitignore
 tmp*
+_version.py
+.coverage

@@ -37,14 +37,18 @@ class Test_MockedRunExplore(unittest.TestCase):
         mocked_run.return_value = 0, 0, 1
         op = RunExplore()
         task_path = Path(self.taskname)
-        gmx_config = {"nsteps": 50, "output_freq": 1, "temperature": 300, 
+        gmx_config = {"type":"gmx", "nsteps": 50, "output_freq": 1, "temperature": 300, 
                       "dt": 0.002, "output_mode": "both", "ntmpi": 1, "nt": 8, "max_warning": 0}
         op_in = OPIO(
             {
                 "task_path": task_path,
-                "gmx_config": gmx_config,
+                "exploration_config": gmx_config,
                 "models": None,
-                "forcefield": None
+                "forcefield": None,
+                "index_file": None,
+                "dp_files": None,
+                "cv_file": None,
+                "inputfile": None
             }
             )
         op_out = op.execute(op_in)

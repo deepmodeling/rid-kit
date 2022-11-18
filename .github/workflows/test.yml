@@ -7,11 +7,13 @@ jobs:
   Unittest:
     runs-on: ubuntu-latest
     container:
-      image: pkufjhdocker/rid-kit:latest
+      image: pkufjhdocker/rid-tf-cpu:latest
     steps:
     - uses: actions/checkout@v2
     - name: Run unittest
       run: |
+        pip install mock coverage 
         pip install pydflow
         cd ./tests
-        python -m unittest
+        coverage run -m unittest discover op
+        DFLOW_DEBUG=1 coverage run -m unittest

@@ -1,3 +1,4 @@
+from turtle import update
 from rid.common.gromacs.gmx_constant import mdp_parameters
 from typing import Optional, Dict, List, Union
     
@@ -18,16 +19,6 @@ def make_mdp_from_json(
     content_list.sort()
     mdp_content = "\n".join(content_list)
     return mdp_content
-
-
-def modify_temperature(
-        temperature: Union[str, float, int]
-    ) -> Dict:
-    return {
-        "gen-temp": temperature,
-        "ref-t": f"{temperature} {temperature}"
-    }
-
 
 def modify_output(
         freq: Union[str, int], 
@@ -81,33 +72,15 @@ def modify_define(
         "define": define_string
     }
 
-
-def modify_define(
-        define: Union[str, List]
-    ) -> Dict:
-    if type(define) == List:
-        define_string = " ".join(define)
-    else:
-        define_string = define
-    return {
-        "define": define_string
-    }
-
 def make_md_mdp_string(
-        nsteps: Union[str, int], 
-        output_freq: Union[str, int], 
-        temperature: Union[str, int, float] = 300, 
-        define: Optional[Union[str, List]] = None, 
-        dt: float =0.002, 
-        output_mode: str ="both"
+        gmx_config
     ):
     update_dict = {}
-    update_dict.update({"nsteps": nsteps})
-    update_dict.update({"dt": dt})
-    if define is not None:
-        update_dict.update(modify_define(define))
-    update_dict.update(modify_temperature(temperature))
-    update_dict.update(modify_output(output_freq, output_mode=output_mode))
+    for item in gmx_config:
+        if item not in ["nt", "ntmpi", "max_warning", "output_freq", "output_mode"]:
+            update_dict[item] = gmx_config[item]
+    update_dict.update(modify_output(freq = gmx_config["output_freq"], output_mode=gmx_config["output_mode"]))
+            
     mdp_string = make_mdp_from_json(task="md", inputs=update_dict)
     return mdp_string
 
@@ -123,4 +96,3 @@ def make_md_mdp_from_config(
 def check_basic_argument(md_parameters_dict: Dict):
     assert "nsteps" in md_parameters_dict.keys()
     assert "output_freq" in md_parameters_dict.keys()
-    assert "temperature" in md_parameters_dict.keys()

@@ -9,7 +9,7 @@ from dflow.python import (
     Artifact
 )
 from rid.utils import load_json
-from rid.constants import model_tag_fmt, init_conf_name, walker_tag_fmt
+from rid.constants import model_tag_fmt, init_conf_name, init_input_name, walker_tag_fmt
 
 
 logging.basicConfig(
@@ -69,7 +69,7 @@ class PrepRiD(OP):
                 "walker_tags": List,
                 "model_tags": List,
                 
-                "exploration_gmx_config": Dict,
+                "exploration_config": Dict,
                 "cv_config": Dict,
                 "trust_lvl_1": List[float],
                 "trust_lvl_2": List[float],
@@ -83,7 +83,7 @@ class PrepRiD(OP):
                 "dt": float,
                 "output_freq": float,
                 "slice_mode": str,
-                "label_gmx_config": Dict,
+                "label_config": Dict,
                 "kappas": List,
                 "train_config": Dict
             }
@@ -117,7 +117,7 @@ class PrepRiD(OP):
             - `walker_tags`: (`List`) Tag formmat for parallel walkers.
             - `model_tags`: (`List`) Tag formmat for neural network models.
             
-            - `exploration_gmx_config`: (`Dict`) Configuration of Gromacs simulations in exploration steps.
+            - `exploration_config`: (`Dict`) Configuration of simulations in exploration steps.
             - `cv_config`: (`Dict`) Configuration to create CV in PLUMED2 style.
             - `trust_lvl_1`: (`List[float]`) Trust level 1, or e0.
             - `trust_lvl_2`: (`List[float]`) Trust level 2, or e1.
@@ -133,7 +133,7 @@ class PrepRiD(OP):
             - `dt`: (`float`) Time interval of exploration MD simulations. Gromacs `trjconv` commands will need this parameters 
                 to slice trajectories by `-dump` tag, see `selection` steps for detail.
             - `slice_mode`: (`str`) Mode to slice trajectories. Either `gmx` or `mdtraj`.
-            - `label_gmx_config`: (`Dict`) Configuration of Gromacs simulations in labeling steps.
+            - `label_config`: (`Dict`) Configuration of simulations in labeling steps.
             - `kappas`: (`List`) Force constants of harmonic restraints to perform restrained MD simulations.
             - `train_config`: (`Dict`) Configuration to train neural networks, including training strategy and network structures.
         """
@@ -152,17 +152,17 @@ class PrepRiD(OP):
         for idx in range(numb_models):
             model_tags.append(model_tag_fmt.format(idx=idx))
         
-        exploration_gmx_config = jdata.pop("ExploreMDConfig")
-        dt = exploration_gmx_config["dt"]
-        output_freq = exploration_gmx_config["output_freq"]
+        exploration_config = jdata.pop("ExploreMDConfig")
+        dt = exploration_config["dt"]
+        output_freq = exploration_config["output_freq"]
         cv_config = jdata.pop("CV")
         angular_mask = cv_config.pop("angular_mask")
         weights = cv_config.pop("weights")
         
         selection_config = jdata.pop("SelectorConfig")
 
-        label_md_config = jdata.pop("LabelMDConfig")
-        kappas = label_md_config.pop("kappas")
+        label_config = jdata.pop("LabelMDConfig")
+        kappas = label_config.pop("kappas")
         
         trust_lvl_1 = jdata.pop("trust_lvl_1")
         trust_lvl_2 = jdata.pop("trust_lvl_2")
@@ -181,7 +181,7 @@ class PrepRiD(OP):
                 "walker_tags": walker_tags,
                 "model_tags": model_tags,
 
-                "exploration_gmx_config": exploration_gmx_config,
+                "exploration_config": exploration_config,
                 "cv_config": cv_config,
                 "trust_lvl_1": trust_lvl_1_list,
                 "trust_lvl_2": trust_lvl_2_list,
@@ -195,7 +195,7 @@ class PrepRiD(OP):
                 "dt": dt,
                 "output_freq": output_freq,
                 "slice_mode": selection_config.pop("slice_mode"),
-                "label_gmx_config": label_md_config,
+                "label_config": label_config,
                 "kappas": kappas,
                 "train_config": train_config
             }

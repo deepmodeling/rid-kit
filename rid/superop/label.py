@@ -33,7 +33,7 @@ class Label(Steps):
     ):
 
         self._input_parameters = {
-            "gmx_config": InputParameter(type=Dict),
+            "label_config": InputParameter(type=Dict),
             "cv_config": InputParameter(type=Dict),
             "kappas": InputParameter(type=List[float]),
             "angular_mask": InputParameter(type=List),
@@ -42,11 +42,15 @@ class Label(Steps):
             "block_tag" : InputParameter(type=str, value="")
         }        
         self._input_artifacts = {
-            "topology": InputArtifact(),
+            "topology" : InputArtifact(optional=True),
             "models" : InputArtifact(optional=True),
             "forcefield" : InputArtifact(optional=True),
+            "inputfile": InputArtifact(optional=True),
             "confs": InputArtifact(),
-            "at": InputArtifact()
+            "at": InputArtifact(),
+            "index_file": InputArtifact(optional=True),
+            "dp_files": InputArtifact(optional=True),
+            "cv_file": InputArtifact(optional=True)
         }
         self._output_parameters = {
         }
@@ -163,7 +167,7 @@ def _label(
             **prep_template_config,
         ),
         parameters={
-            "gmx_config": label_steps.inputs.parameters['gmx_config'],
+            "label_config": label_steps.inputs.parameters['label_config'],
             "cv_config": label_steps.inputs.parameters['cv_config'],
             "task_name": check_label_inputs.outputs.parameters['conf_tags'],
             "kappas": label_steps.inputs.parameters['kappas']
@@ -171,7 +175,8 @@ def _label(
         artifacts={
             "topology": label_steps.inputs.artifacts['topology'],
             "conf": label_steps.inputs.artifacts['confs'],
-            "at": label_steps.inputs.artifacts['at']
+            "at": label_steps.inputs.artifacts['at'],
+            "cv_file": label_steps.inputs.artifacts['cv_file']
         },
         key = step_keys['prep_label']+"-{{item}}",
         executor = prep_executor,
@@ -192,11 +197,15 @@ def _label(
             **run_template_config,
         ),
         parameters={
-            "gmx_config": label_steps.inputs.parameters["gmx_config"]
+            "label_config": label_steps.inputs.parameters["label_config"]
         },
         artifacts={
             "forcefield": label_steps.inputs.artifacts['forcefield'],
-            "task_path": prep_label.outputs.artifacts["task_path"]
+            "task_path": prep_label.outputs.artifacts["task_path"],
+            "index_file": label_steps.inputs.artifacts['index_file'],
+            "dp_files": label_steps.inputs.artifacts['dp_files'],
+            "cv_file": label_steps.inputs.artifacts['cv_file'],
+            "inputfile": label_steps.inputs.artifacts['inputfile']
         },
         key = step_keys['run_label']+"-{{item}}",
         executor = run_executor,

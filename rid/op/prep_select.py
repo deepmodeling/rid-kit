@@ -11,8 +11,8 @@ from pathlib import Path
 from rid.select.cluster import Cluster
 from rid.utils import save_txt, set_directory
 from rid.constants import (
-    culster_selection_data_name, 
-    culster_selection_index_name
+    cluster_selection_data_name, 
+    cluster_selection_index_name
 )
 import numpy as np
 
@@ -52,8 +52,8 @@ class PrepSelect(OP):
             {
                 "numb_cluster": int,
                 "cluster_threshold": float,
-                "culster_selection_index": Artifact(Path),
-                "culster_selection_data": Artifact(Path)
+                "cluster_selection_index": Artifact(Path),
+                "cluster_selection_data": Artifact(Path)
             }
         )
 
@@ -88,8 +88,8 @@ class PrepSelect(OP):
         
             - `numb_cluster`: (`int`) Number of clusters.
             - `cluster_threshold`: (`float`) Cluster threshold of agglomerative clustering algorithm. 
-            - `culster_selection_index`: (`Artifact(Path)`) Indice of chosen representive frames of clusters in trajectories.
-            - `culster_selection_data`: (`Artifact(Path)`) Collective variable values of chosen representive frames of clusters.
+            - `cluster_selection_index`: (`Artifact(Path)`) Indice of chosen representive frames of clusters in trajectories.
+            - `cluster_selection_data`: (`Artifact(Path)`) Collective variable values of chosen representive frames of clusters.
         """
 
         # the first column of plm_out is time index
@@ -110,14 +110,14 @@ class PrepSelect(OP):
         task_path = Path(op_in["task_name"])
         task_path.mkdir(exist_ok=True, parents=True)
         with set_directory(task_path):
-            np.save(culster_selection_index_name, cls_sel_idx)
-            np.save(culster_selection_data_name, selected_data)
+            np.save(cluster_selection_index_name, cls_sel_idx)
+            np.save(cluster_selection_data_name, selected_data)
         
         op_out = OPIO({
                 "cluster_threshold": threshold,
                 "numb_cluster": numb_cluster,
-                "culster_selection_index": task_path.joinpath(culster_selection_index_name),
-                "culster_selection_data": task_path.joinpath(culster_selection_data_name)
+                "cluster_selection_index": task_path.joinpath(cluster_selection_index_name),
+                "cluster_selection_data": task_path.joinpath(cluster_selection_data_name)
             })
         return op_out
 

@@ -2,12 +2,13 @@
 argo_namespace = "argo"
 walker_tag_fmt = "{idx:03d}"
 init_conf_name = "conf_{idx:03d}.gro"
+init_input_name = "input_{idx:03d}.lammps"
 explore_task_pattern = "{:03d}"
 explore_task_file = "explore_{walker:03d}.pkl"
-culster_selection_data_name = "cls_sel.out.npy"
-culster_selection_index_name = "cls_sel.ndx.npy"
+cluster_selection_data_name = "cls_sel.out.npy"
+cluster_selection_index_name = "cls_sel.ndx.npy"
 sel_ndx_name = "sel.ndx"
-cv_init_label = "cv_init_{idx:d}.out"
+cv_init_label = "cv_init_{walker:03d}_{idx:d}.out"
 model_devi_name = "model_devi.txt"
 label_task_pattern = "{:03d}"
 force_out = "forces.out"
@@ -26,23 +27,34 @@ center_out_name = "centers.out"
 # Gromacs file names
 gmx_conf_name = "conf.gro"
 gmx_top_name = "topol.top"
+gmx_idx_name = "index.ndx"
 gmx_mdp_name = "grompp.mdp"
 gmx_tpr_name = "topol.tpr"
 gmx_grompp_log = "gmx_grompp.log"
 gmx_mdrun_log = "md.log"
 restraint_md_mdp_name = "grompp_restraint.mdp"
-trr_name = "traj.trr"
-xtc_name = "traj_comp.xtc"
-sel_gro_name = "conf_{idx:d}.gro"
+gmx_trr_name = "traj.trr"
+gmx_xtc_name = "traj_comp.xtc"
+sel_gro_name = "conf_{walker:03d}_{idx:d}.gro"
 sel_gro_name_gmx = "conf_.gro"
 gmx_conf_out = "confout.gro"
+
+# Lammps file names
+lmp_conf_name = "conf.lmp"
+lmp_input_name = "input.lammps"
+lmp_mdrun_log = "log.lammps"
+sel_lmp_name = "conf_{walker:03d}_{idx:d}.lmp"
+lmp_conf_out = "confout.lmp"
 
 
 # Tensorflow files
 tf_model_name = "model_{tag}.pb"
+dp_model_name = "dp.pb"
 model_tag_fmt = "{idx:03d}"
 N_grid = 100
 
+# Dp config file
+dp_config_name = "dp_config"
 
 # Units
 kbT = (8.617343E-5) * 300

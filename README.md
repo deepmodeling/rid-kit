@@ -3,6 +3,7 @@
 - [Main procedure of RiD](#main-procedure-of-rid)
 - [Use Rid-kit](#use-rid-kit)
 - [Installation of enviroment](#installation-of-enviroment)
+- [Installation of DeepMD potential](#installation-of-dp)
 - [Configure simulations](#configure-simulations)
 - [Troubleshooting](#troubleshooting)
 
@@ -41,12 +42,16 @@ A more detailed description of RiD is published now, please see:
 
 A quick-start on using Rid-kit can be found as follows:
 
-- [Tutorial](examples/tutorial.ipynb)
+- [Tutorial](/docs/source/tutorial.ipynb)
 
 # Enviroment settings
 
 Installation of the computation enviroment can be found in
 - [Installation](docs/source/install.md)
+
+# Installation-of-dp
+Installation of the DeepMD potential support can be found in
+- [Installation of dp](docs/source/install_dp.md)
   
 # Configure simulations
 - [configure simulations](docs/source/rid_configuration.md)

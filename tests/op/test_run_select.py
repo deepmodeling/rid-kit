@@ -27,7 +27,7 @@ from rid.constants import (
 
 class Test_MockedRunSelect(unittest.TestCase):
     def setUp(self):
-        self.taskname = "selected"
+        self.taskname = "000"
         self.datapath = "data"
         cls_data = np.loadtxt(Path(self.datapath)/"cls_sel.out")
         np.save(Path(self.datapath)/"cls_sel.out.npy", cls_data)
@@ -60,8 +60,8 @@ class Test_MockedRunSelect(unittest.TestCase):
         op_in1 = OPIO(
             {
                 "task_name": self.taskname,
-                "culster_selection_index": cluster_indx,
-                "culster_selection_data": cluster_data,
+                "cluster_selection_index": cluster_indx,
+                "cluster_selection_data": cluster_data,
                 "models": None,
                 "trust_lvl_1": 0.02,
                 "trust_lvl_2": 0.03,
@@ -75,8 +75,8 @@ class Test_MockedRunSelect(unittest.TestCase):
         op_in2 = OPIO(
             {
                 "task_name": self.taskname,
-                "culster_selection_index": cluster_indx,
-                "culster_selection_data": cluster_data,
+                "cluster_selection_index": cluster_indx,
+                "cluster_selection_data": cluster_data,
                 "models": None,
                 "trust_lvl_1": 0.02,
                 "trust_lvl_2": 0.03,
@@ -90,8 +90,8 @@ class Test_MockedRunSelect(unittest.TestCase):
         op_in3 = OPIO(
             {
                 "task_name": self.taskname,
-                "culster_selection_index": cluster_indx,
-                "culster_selection_data": cluster_data,
+                "cluster_selection_index": cluster_indx,
+                "cluster_selection_data": cluster_data,
                 "models": [model_path1, model_path2, model_path3],
                 "trust_lvl_1": 0.02,
                 "trust_lvl_2": 0.03,
@@ -105,8 +105,8 @@ class Test_MockedRunSelect(unittest.TestCase):
         op_in4 = OPIO(
             {
                 "task_name": self.taskname,
-                "culster_selection_index": cluster_indx,
-                "culster_selection_data": cluster_data,
+                "cluster_selection_index": cluster_indx,
+                "cluster_selection_data": cluster_data,
                 "models": None,
                 "trust_lvl_1": 0.02,
                 "trust_lvl_2": 0.03,

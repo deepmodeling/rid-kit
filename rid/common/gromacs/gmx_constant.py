@@ -1,5 +1,3 @@
-
-
 # Gromacs command
 gmx_prep_cmd = "gmx grompp"
 gmx_run_cmd = "gmx mdrun"

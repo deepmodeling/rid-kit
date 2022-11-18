@@ -8,10 +8,10 @@ from dflow.python import (
     Artifact,
     Parameter
 )
-from rid.utils import load_txt, save_txt, set_directory
-from rid.constants import sel_gro_name, cv_init_label, model_devi_name, model_devi_precision, sel_ndx_name
+from rid.utils import save_txt, set_directory
+from rid.constants import sel_gro_name, sel_lmp_name, cv_init_label, model_devi_name, model_devi_precision, sel_ndx_name
 from rid.select.conf_select import select_from_devi
-from rid.common.mol import slice_xtc
+from rid.common.mol import slice_xtc, slice_dump
 from rid.select.model_devi import make_std
 
 
@@ -19,7 +19,7 @@ class RunSelect(OP):
 
     """
     `RunSelect` calculates model deviations for each chosen representive cluster frames from `PrepSelect` and select 
-    ones with low uncertainty from them.
+    ones with high uncertainty from them.
     As RiD-kit is based on `Gromacs`, please provide trajectories in `.xtc` format (single-point precision) and NN models in 
     `.pb` format. 
     Warning: We highly recommend use `slice_mode = "gmx"` due to the inconsistent format convention of `mdtraj` that may lead to topology
@@ -32,8 +32,8 @@ class RunSelect(OP):
         return OPIOSign(
             {
                 "task_name": str,
-                "culster_selection_index": Artifact(Path),
-                "culster_selection_data": Artifact(Path),
+                "cluster_selection_index": Artifact(Path),
+                "cluster_selection_data": Artifact(Path),
                 "models": Artifact(List[Path], optional=True),
                 "trust_lvl_1": float,
                 "trust_lvl_2": float,
@@ -71,8 +71,8 @@ class RunSelect(OP):
             Input dict with components:
 
             - `task_name`: str,
-            - `culster_selection_index`: Artifact(Path),
-            - `culster_selection_data`: Artifact(Path),
+            - `cluster_selection_index`: Artifact(Path),
+            - `cluster_selection_data`: Artifact(Path),
             - `models`: Artifact(List[Path], optional=True),
             - `trust_lvl_1`: float,
             - `trust_lvl_2`: float,
@@ -91,12 +91,13 @@ class RunSelect(OP):
             - `selected_indices`: (`Artifact(Path)`) Indices of selected conformation files (`selected_confs`) in trajectories.
         """
 
-        cls_sel_idx = np.load(op_in["culster_selection_index"])
-        cls_sel_data = np.load(op_in["culster_selection_data"])
+        cls_sel_idx = np.load(op_in["cluster_selection_index"])
+        cls_sel_data = np.load(op_in["cluster_selection_data"])
 
         task_path = Path(op_in["task_name"])
         task_path.mkdir(exist_ok=True, parents=True)
 
+        walker_idx = int(op_in["task_name"])
         with set_directory(task_path):
             if op_in["models"] is None:
                 save_txt("cls_"+model_devi_name, [], fmt=model_devi_precision)
@@ -113,24 +114,30 @@ class RunSelect(OP):
                 for ii, sel in enumerate(sel_idx):
                     time = sel * op_in["dt"] * op_in["output_freq"]
                     slice_xtc(xtc=op_in["xtc_traj"], top=op_in["topology"],
-                            selected_idx=time, output=sel_gro_name.format(idx=sel), style="gmx")
+                            walker_idx=walker_idx,selected_idx=time, output=sel_gro_name.format(walker=walker_idx,idx=sel), style="gmx")
             elif op_in["slice_mode"] == "mdtraj":
                 slice_xtc(xtc=op_in["xtc_traj"], top=op_in["topology"],
-                        selected_idx=sel_idx, output=sel_gro_name, style="mdtraj")
+                        walker_idx = walker_idx, selected_idx=sel_idx, output=sel_gro_name, style="mdtraj")
+            elif op_in["slice_mode"] == "dpdata":
+                slice_dump(dump=op_in["xtc_traj"],walker_idx = walker_idx,selected_idx=sel_idx, output=sel_lmp_name, style="dpdata")
             else:
                 raise RuntimeError("Unknown Style for Slicing Trajectory.")
-            gro_list = []
+            conf_list = []
             cv_init_list = []
             conf_tags = {}
             for ii, sel in enumerate(sel_idx):
-                gro_list.append(task_path.joinpath(sel_gro_name.format(idx=sel)))
-                save_txt(cv_init_label.format(idx=sel), sel_data[ii])
-                cv_init_list.append(task_path.joinpath(cv_init_label.format(idx=sel)))
-                conf_tags[sel_gro_name.format(idx=sel)] = f"{op_in['task_name']}_{sel}"
+                if op_in["slice_mode"] == "dpdata":
+                    conf_list.append(task_path.joinpath(sel_lmp_name.format(walker=walker_idx,idx=sel)))
+                    conf_tags[sel_lmp_name.format(walker = walker_idx,idx=sel)] = f"{op_in['task_name']}_{sel}"
+                elif op_in["slice_mode"] == "gmx" or op_in["slice_mode"] == "mdtraj" :
+                    conf_list.append(task_path.joinpath(sel_gro_name.format(walker=walker_idx,idx=sel)))
+                    conf_tags[sel_gro_name.format(walker = walker_idx,idx=sel)] = f"{op_in['task_name']}_{sel}"
+                save_txt(cv_init_label.format(walker=walker_idx,idx=sel), sel_data[ii])
+                cv_init_list.append(task_path.joinpath(cv_init_label.format(walker=walker_idx,idx=sel)))
             
         op_out = OPIO(
             {
-               "selected_confs": gro_list,
+               "selected_confs": conf_list,
                "selected_cv_init": cv_init_list,
                "model_devi": task_path.joinpath("cls_"+model_devi_name),
                "selected_indices": task_path.joinpath(sel_ndx_name),

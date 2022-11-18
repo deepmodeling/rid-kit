@@ -38,7 +38,7 @@ class ReinforcedDynamicsLoop(Steps):
             "trust_lvl_2": InputParameter(type=List[float]),
             "init_trust_lvl_1" : InputParameter(type=List[float]),
             "init_trust_lvl_2": InputParameter(type=List[float]),
-            "exploration_gmx_config" : InputParameter(type=Dict),
+            "exploration_config" : InputParameter(type=Dict),
             "cv_config" : InputParameter(type=Dict),
             "cluster_threshold": InputParameter(type=float, value=1.0),
             "angular_mask": InputParameter(type=Optional[Union[np.ndarray, List]]),
@@ -48,9 +48,8 @@ class ReinforcedDynamicsLoop(Steps):
             "dt": InputParameter(type=float, value=0.02),
             "output_freq": InputParameter(type=float, value=2500),
             "slice_mode": InputParameter(type=str, value="gmx"),
-            "label_gmx_config": InputParameter(type=Dict),
+            "label_config": InputParameter(type=Dict),
             "kappas": InputParameter(type=List[float]),
-            "angular_mask": InputParameter(type=List),
             "tail": InputParameter(type=float, value=0.9),
             "train_config": InputParameter(type=Dict),
             "adjust_amplifier": InputParameter(type=float, value=1.5),
@@ -59,9 +58,13 @@ class ReinforcedDynamicsLoop(Steps):
         self._input_artifacts={
             "models" : InputArtifact(optional=True),
             "forcefield" : InputArtifact(optional=True),
-            "topology" : InputArtifact(),
+            "topology" : InputArtifact(optional=True),
+            "inputfile": InputArtifact(optional=True),
             "confs" : InputArtifact(),
             "data_old": InputArtifact(),
+            "index_file": InputArtifact(optional=True),
+            "dp_files": InputArtifact(optional=True),
+            "cv_file": InputArtifact(optional=True)
         }
         self._output_parameters={
         }
@@ -155,7 +158,7 @@ def _loop (
             "block_tag": recorder_step.outputs.parameters["block_tag"],
             "walker_tags": steps.inputs.parameters["walker_tags"],
             "model_tags": steps.inputs.parameters["model_tags"],
-            "exploration_gmx_config": steps.inputs.parameters["exploration_gmx_config"],
+            "exploration_config": steps.inputs.parameters["exploration_config"],
             "cv_config": steps.inputs.parameters["cv_config"],
             "trust_lvl_1" : steps.inputs.parameters["trust_lvl_1"],
             "trust_lvl_2": steps.inputs.parameters["trust_lvl_2"],
@@ -169,7 +172,7 @@ def _loop (
             "dt": steps.inputs.parameters["dt"],
             "output_freq": steps.inputs.parameters["output_freq"],
             "slice_mode": steps.inputs.parameters["slice_mode"],
-            "label_gmx_config": steps.inputs.parameters["label_gmx_config"],
+            "label_config": steps.inputs.parameters["label_config"],
             "kappas": steps.inputs.parameters["kappas"],
             "train_config": steps.inputs.parameters["train_config"]
         },
@@ -177,8 +180,12 @@ def _loop (
             "models": steps.inputs.artifacts["models"],
             "forcefield" : steps.inputs.artifacts['forcefield'],
             "topology": steps.inputs.artifacts["topology"],
+            "inputfile": steps.inputs.artifacts["inputfile"],
             "confs": steps.inputs.artifacts["confs"],
-            "data_old": steps.inputs.artifacts["data_old"]
+            "data_old": steps.inputs.artifacts["data_old"],
+            "index_file": steps.inputs.artifacts["index_file"],
+            "dp_files": steps.inputs.artifacts["dp_files"],
+            "cv_file": steps.inputs.artifacts["cv_file"]
         },
         key = step_keys['block'],
     )
@@ -193,7 +200,7 @@ def _loop (
             "block_tag": recorder_step.outputs.parameters["block_tag"],
             "walker_tags": steps.inputs.parameters["walker_tags"],
             "model_tags": steps.inputs.parameters["model_tags"],
-            "exploration_gmx_config": steps.inputs.parameters["exploration_gmx_config"],
+            "exploration_config": steps.inputs.parameters["exploration_config"],
             "cv_config": steps.inputs.parameters["cv_config"],
             "trust_lvl_1": block_step.outputs.parameters["adjust_trust_lvl_1"],
             "trust_lvl_2": block_step.outputs.parameters["adjust_trust_lvl_2"],
@@ -207,7 +214,7 @@ def _loop (
             "dt": steps.inputs.parameters["dt"],
             "output_freq": steps.inputs.parameters["output_freq"],
             "slice_mode": steps.inputs.parameters["slice_mode"],
-            "label_gmx_config": steps.inputs.parameters["label_gmx_config"],
+            "label_config": steps.inputs.parameters["label_config"],
             "kappas": steps.inputs.parameters["kappas"],
             "train_config": steps.inputs.parameters["train_config"]
         },
@@ -215,8 +222,12 @@ def _loop (
             "models":  block_step.outputs.artifacts["models"],
             "forcefield" : steps.inputs.artifacts['forcefield'],
             "topology": steps.inputs.artifacts["topology"],
+            "inputfile": steps.inputs.artifacts["inputfile"],
             "confs": block_step.outputs.artifacts["conf_outs"],
-            "data_old": block_step.outputs.artifacts["data"]
+            "data_old": block_step.outputs.artifacts["data"],
+            "index_file": steps.inputs.artifacts["index_file"],
+            "dp_files": steps.inputs.artifacts["dp_files"],
+            "cv_file": steps.inputs.artifacts["cv_file"]
         },
         when = "%s < %s" % (recorder_step.outputs.parameters['next_iteration'], steps.inputs.parameters["numb_iters"]),
     )
@@ -264,9 +275,13 @@ class ReinforcedDynamics(Steps):
         self._input_artifacts={
             "models": InputArtifact(optional=True),
             "forcefield": InputArtifact(optional=True),
-            "topology": InputArtifact(),
+            "topology": InputArtifact(optional=True),
+            "inputfile": InputArtifact(optional=True),
             "confs": InputArtifact(),
             "rid_config": InputArtifact(),
+            "index_file": InputArtifact(optional=True),
+            "dp_files": InputArtifact(optional=True),
+            "cv_file": InputArtifact(optional=True)
         }
         self._output_parameters={
         }
@@ -385,7 +400,7 @@ def _rid(
             "block_tag": recorder_step.outputs.parameters["block_tag"],
             "walker_tags": prep_rid.outputs.parameters["walker_tags"],
             "model_tags": prep_rid.outputs.parameters["model_tags"],
-            "exploration_gmx_config": prep_rid.outputs.parameters["exploration_gmx_config"],
+            "exploration_config": prep_rid.outputs.parameters["exploration_config"],
             "cv_config": prep_rid.outputs.parameters["cv_config"],
             "trust_lvl_1" : prep_rid.outputs.parameters["trust_lvl_1"],
             "trust_lvl_2": prep_rid.outputs.parameters["trust_lvl_2"],
@@ -398,7 +413,7 @@ def _rid(
             "dt": prep_rid.outputs.parameters["dt"],
             "output_freq": prep_rid.outputs.parameters["output_freq"],
             "slice_mode": prep_rid.outputs.parameters["slice_mode"],
-            "label_gmx_config": prep_rid.outputs.parameters["label_gmx_config"],
+            "label_config": prep_rid.outputs.parameters["label_config"],
             "kappas": prep_rid.outputs.parameters["kappas"],
             "train_config": prep_rid.outputs.parameters["train_config"]
         },
@@ -406,7 +421,11 @@ def _rid(
             "models": steps.inputs.artifacts["models"],
             "forcefield" : steps.inputs.artifacts['forcefield'],
             "topology": steps.inputs.artifacts["topology"],
-            "confs": prep_rid.outputs.artifacts["confs"]
+            "inputfile": steps.inputs.artifacts["inputfile"],
+            "confs": prep_rid.outputs.artifacts["confs"],
+            "index_file": steps.inputs.artifacts["index_file"],
+            "dp_files": steps.inputs.artifacts["dp_files"],
+            "cv_file": steps.inputs.artifacts["cv_file"]
         },
         key = "%s-init-block"%recorder_step.outputs.parameters["block_tag"]
     )
@@ -426,7 +445,7 @@ def _rid(
             "block_tag": recorder_step.outputs.parameters["block_tag"],
             "walker_tags": prep_rid.outputs.parameters["walker_tags"],
             "model_tags": prep_rid.outputs.parameters["model_tags"],
-            "exploration_gmx_config": prep_rid.outputs.parameters["exploration_gmx_config"],
+            "exploration_config": prep_rid.outputs.parameters["exploration_config"],
             "cv_config": prep_rid.outputs.parameters["cv_config"],
             "trust_lvl_1" : prep_rid.outputs.parameters["trust_lvl_1"],
             "trust_lvl_2": prep_rid.outputs.parameters["trust_lvl_2"],
@@ -440,7 +459,7 @@ def _rid(
             "dt": prep_rid.outputs.parameters["dt"],
             "output_freq": prep_rid.outputs.parameters["output_freq"],
             "slice_mode": prep_rid.outputs.parameters["slice_mode"],
-            "label_gmx_config": prep_rid.outputs.parameters["label_gmx_config"],
+            "label_config": prep_rid.outputs.parameters["label_config"],
             "kappas": prep_rid.outputs.parameters["kappas"],
             "train_config": prep_rid.outputs.parameters["train_config"]
         },
@@ -448,16 +467,41 @@ def _rid(
             "models":  init_block.outputs.artifacts["models"],
             "forcefield" : steps.inputs.artifacts['forcefield'],
             "topology": steps.inputs.artifacts["topology"],
+            "inputfile": steps.inputs.artifacts["inputfile"],
             "confs": init_block.outputs.artifacts["conf_outs"],
-            "data_old": init_block.outputs.artifacts["data"]
+            "data_old": init_block.outputs.artifacts["data"],
+            "index_file": steps.inputs.artifacts["index_file"],
+            "dp_files": steps.inputs.artifacts["dp_files"],
+            "cv_file": steps.inputs.artifacts["cv_file"]
         },
+        when = "%s < %s" % (recorder_step.outputs.parameters['next_iteration'], prep_rid.outputs.parameters["numb_iters"]),
         key = "rid-loop",
     )
     steps.add(loop_step)
 
-    steps.outputs.artifacts["exploration_trajectory"]._from = loop_step.outputs.artifacts["exploration_trajectory"]
-    steps.outputs.artifacts["models"]._from = loop_step.outputs.artifacts["models"]
-    steps.outputs.artifacts["data"]._from = loop_step.outputs.artifacts["data"]
-    steps.outputs.artifacts["conf_outs"]._from = loop_step.outputs.artifacts["conf_outs"]
+    steps.outputs.artifacts['exploration_trajectory'].from_expression = \
+        if_expression(
+            _if = (recorder_step.outputs.parameters['next_iteration'] >= prep_rid.outputs.parameters["numb_iters"]),
+            _then = init_block.outputs.artifacts['exploration_trajectory'],
+            _else = loop_step.outputs.artifacts['exploration_trajectory'],
+        )
+    steps.outputs.artifacts['conf_outs'].from_expression = \
+        if_expression(
+            _if = (recorder_step.outputs.parameters['next_iteration'] >= prep_rid.outputs.parameters["numb_iters"]),
+            _then = init_block.outputs.artifacts['conf_outs'],
+            _else = loop_step.outputs.artifacts['conf_outs'],
+        )
+    steps.outputs.artifacts['models'].from_expression = \
+        if_expression(
+            _if = (recorder_step.outputs.parameters['next_iteration'] >= prep_rid.outputs.parameters["numb_iters"]),
+            _then = init_block.outputs.artifacts['models'],
+            _else = loop_step.outputs.artifacts['models'],
+        )
+    steps.outputs.artifacts['data'].from_expression = \
+        if_expression(
+            _if = (recorder_step.outputs.parameters['next_iteration'] >= prep_rid.outputs.parameters["numb_iters"]),
+            _then = init_block.outputs.artifacts['data'],
+            _else = loop_step.outputs.artifacts['data'],
+        )
     
     return steps

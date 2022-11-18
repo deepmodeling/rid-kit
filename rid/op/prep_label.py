@@ -101,9 +101,10 @@ class PrepLabel(OP):
     def get_input_sign(cls):
         return OPIOSign(
             {
-                "topology": Artifact(Path),
+                "topology": Artifact(Path, optional=True),
                 "conf": Artifact(Path),
-                "gmx_config": Dict,
+                "cv_file": Artifact(List[Path], optional=True),
+                "label_config": Dict,
                 "cv_config": Dict,
                 "task_name": str,
                 "kappas": List[float],
@@ -134,7 +135,7 @@ class PrepLabel(OP):
         
             - `topology`: (`Artifact(Path)`) Topology files (.top) for Restrained MD simulations.
             - `conf`: (`Artifact(Path)`) Conformation files (.gro) for Restrained MD simulations.
-            - `gmx_config`: (`Dict`) Configuration in `Dict` format for Gromacs run. Must contains:
+            - `label_config`: (`Dict`) Configuration in `Dict` format for Gromacs run. Must contains:
                 `dt`, `steps`, `temperature`, `output_freq`.
             - `cv_config`: (`Dict`) Configuration for CV creation.
             - `kappas`: (`List[float]`) Force constants of harmonic restraints.
@@ -148,20 +149,24 @@ class PrepLabel(OP):
             - `task_path`: (`Artifact(Path)`) A directory containing files for Restrained MD.
         """
 
+        cv_file = []
+        selected_resid = None
         if op_in["cv_config"]["mode"] == "torsion":
-            cv_file = None
             selected_resid = op_in["cv_config"]["selected_resid"]
         elif op_in["cv_config"]["mode"] == "custom":
-            cv_file = op_in["cv_config"]["cv_file"]
-            selected_resid = None
+            print("custom!!!")
+            cv_file = op_in["cv_file"]
         at = load_txt(op_in["at"])
- 
+        
+        #print("what is cv", cv_file)
+        
         gmx_task_builder = RestrainedMDTaskBuilder(
             conf = op_in["conf"],
             topology = op_in["topology"],
-            gmx_config = op_in["gmx_config"],
+            label_config = op_in["label_config"],
             cv_file = cv_file,
             selected_resid = selected_resid,
+            sampler_type = op_in["label_config"]["type"],
             kappa = op_in["kappas"],
             at = at,
             plumed_output = plumed_output_name,

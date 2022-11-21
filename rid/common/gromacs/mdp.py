@@ -77,7 +77,7 @@ def make_md_mdp_string(
     ):
     update_dict = {}
     for item in gmx_config:
-        if item not in ["nt", "ntmpi", "max_warning", "output_freq", "output_mode"]:
+        if item not in ["nt", "ntmpi", "max_warning", "output_freq", "output_mode","type","dp_model"]:
             update_dict[item] = gmx_config[item]
     update_dict.update(modify_output(freq = gmx_config["output_freq"], output_mode=gmx_config["output_mode"]))
             

@@ -120,6 +120,12 @@ def main_parser() -> argparse.ArgumentParser:
     parser_rerun.add_argument(
         "--machine", "-m", help="Machine configuration.", dest="machine"
     )
+    parser_rerun.add_argument(
+        "--iteration", "-t", help="restart from t-th iteration.", default = None, dest="iteration"
+    )
+    parser_rerun.add_argument(
+        "--pod", "-p", help="restart from the pod.", default = None, dest="pod"
+    )
     
     # Explore
     parser_exp = subparsers.add_parser(
@@ -255,6 +261,8 @@ def main():
             topology = top_file,
             rid_config = args.config,
             machine_config = args.machine,
+            iteration = args.iteration,
+            pod = args.pod,
             models = models,
             forcefield = forcefield,
             index_file = index_file,

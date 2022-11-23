@@ -24,6 +24,8 @@ def resubmit_rid(
         topology: Optional[str],
         rid_config: str,
         machine_config: str,
+        iteration: Optional[str] = None,
+        pod: Optional[str] = None,
         models: Optional[Union[str, List[str]]] = None,
         index_file: Optional[str] = None,
         dp_files: Optional[List[str]] = None,
@@ -162,11 +164,26 @@ def resubmit_rid(
     all_steps = old_workflow.query_step()
 
     succeeded_steps = []
+    restart_flag = 1
     for step in all_steps:
         if step["type"] == "Pod":
             if step["phase"] == "Succeeded":
-                if step["key"] != "prepare-rid":
-                    succeeded_steps.append(step)
+                if step["key"] != "prepare-rid" and step["key"] != "init-recorder":
+                    pod_key = step["key"]
+                    if pod_key is not None:
+                        pod_key_list = pod_key.split("-")
+                        pod_iter = int(pod_key_list[1])
+                        pod_step = "-".join(pod_key_list[2:-1])
+                        if iteration is not None:
+                            if pod is not None:
+                                if pod_iter == int(iteration) and pod_step == pod:
+                                    restart_flag = 0
+                            else:
+                                if pod_iter == int(iteration):
+                                    restart_flag = 0
+                    
+                    if restart_flag == 1:
+                        succeeded_steps.append(step)
     wf = Workflow("reinforced-dynamics", pod_gc_strategy="OnPodSuccess", parallelism=30)
     wf.add(rid_steps)
     wf.submit(reuse_step=succeeded_steps)

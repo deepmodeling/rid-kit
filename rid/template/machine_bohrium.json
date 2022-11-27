@@ -1,11 +1,5 @@
 {
     "resources": {
-        "local_k8s": {
-            "template_config" : {
-                "image": "pkufjhdocker/rid-tf-cpu:latest", 
-                "image_pull_policy" : "IfNotPresent"
-            }
-        },
         "bohrium1": {
             "executor":{
             "machine_dict":{
@@ -21,12 +15,11 @@
                         "job_type": "container",
                         "log_file": "tmp_log",
                         "grouped":true,
-                        "job_name": "test_rid",
+                        "job_name": "rid",
                         "disk_size": 100,
-                        "_instance_group_id": 4,
-                        "scass_type":"c8_m32_1 * NVIDIA V100",
+                        "scass_type":"c12_m92_1 * NVIDIA V100",
                         "platform": "ali",
-                        "image_name":"pkufjhdocker/rid-gmx-exploration:latest",
+                        "image_name":"registry.dp.tech/public/pkufjhdocker/rid-gmx-exploration:stable",
                         "on_demand":0
                         }
                 }
@@ -57,10 +50,9 @@
                         "grouped":true,
                         "job_name": "test_rid",
                         "disk_size": 100,
-                        "_instance_group_id": 4,
-                        "scass_type":"c8_m32_1 * NVIDIA V100",
+                        "scass_type":"c12_m92_1 * NVIDIA V100",
                         "platform": "ali",
-                        "image_name":"pkufjhdocker/rid-gmx-plumed:latest",
+                        "image_name":"registry.dp.tech/public/pkufjhdocker/rid-gmx-plumed:stable",
                         "on_demand":0
                         }
                 }
@@ -89,12 +81,77 @@
                         "job_type": "container",
                         "log_file": "tmp_log",
                         "grouped":true,
-                        "job_name": "test_rid",
+                        "job_name": "rid",
                         "disk_size": 100,
-                        "_instance_group_id": 4,
-                        "scass_type":"c8_m32_1 * NVIDIA V100",
+                        "scass_type":"c12_m92_1 * NVIDIA V100",
                         "platform": "ali",
-                        "image_name":"pkufjhdocker/rid-tf-cpu:latest",
+                        "image_name":"registry.dp.tech/public/pkufjhdocker/rid-tf-cpu:stable",
+                        "on_demand":0
+                        }
+                }
+            },
+            "resources_dict":{
+                "number_node": 1,
+                "cpu_per_node": 8,
+                "gpu_per_node": 1,
+                "queue_name": "GPU",
+                "group_size": 1
+            }
+        }
+        },
+        "bohrium4": {
+            "executor":{
+            "machine_dict":{
+                "batch_type": "DpCloudServer",
+                "context_type": "DpCloudServerContext",
+                "local_root" : "./",
+                "remote_profile":{
+                    "email": "",
+                    "password": "",
+                    "program_id": "",
+                    "input_data":{
+                        "api_version":2,
+                        "job_type": "container",
+                        "log_file": "tmp_log",
+                        "grouped":true,
+                        "job_name": "rid",
+                        "disk_size": 100,
+                        "scass_type":"c12_m92_1 * NVIDIA V100",
+                        "platform": "ali",
+                        "image_name":"registry.dp.tech/public/pkufjhdocker/rid-gmx-tf:stable",
+                        "on_demand":0
+                        }
+                }
+            },
+            "resources_dict":{
+                "number_node": 1,
+                "cpu_per_node": 8,
+                "gpu_per_node": 1,
+                "queue_name": "GPU",
+                "group_size": 1
+            }
+        }
+        },
+        "bohrium5": {
+            "executor":{
+            "machine_dict":{
+                "batch_type": "DpCloudServer",
+                "context_type": "DpCloudServerContext",
+                "local_root" : "./",
+                "remote_profile":{
+                    "email": "",
+                    "password": "",
+                    "program_id": "",
+                    "input_data":{
+                        "api_version":2,
+                        "job_type": "container",
+                        "log_file": "tmp_log",
+                        "grouped":true,
+                        "job_name": "rid",
+                        "disk_size": 100,
+                        "scass_type":"c12_m92_1 * NVIDIA V100",
+                        "platform": "ali",
+                        "image_name":"registry.dp.tech/public/pkufjhdocker/rid-tf-gpu:stable",
                         "on_demand":0
                         }
                 }
@@ -111,14 +168,14 @@
     },
 
     "tasks": {
-        "prep_exploration_config": "local_k8s",
+        "prep_exploration_config": "bohrium3",
         "run_exploration_config": "bohrium1",
-        "prep_label_config": "local_k8s",
+        "prep_label_config": "bohrium3",
         "run_label_config": "bohrium2",
-        "prep_select_config": "local_k8s",
-        "run_select_config": "bohrium3",
-        "prep_data_config": "local_k8s",
-        "run_train_config": "bohrium3",
-        "workflow_steps_config": "local_k8s"
+        "prep_select_config": "bohrium3",
+        "run_select_config": "bohrium4",
+        "prep_data_config": "bohrium3",
+        "run_train_config": "bohrium5",
+        "workflow_steps_config": "bohrium3"
     }
 }

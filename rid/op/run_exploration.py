@@ -39,8 +39,8 @@ logger = logging.getLogger(__name__)
 class RunExplore(OP):
 
     """Run (biased or brute-force) MD simulations with files provided by `PrepExplore` OP.
-    RiD-kit emploies Gromacs as MD engine with PLUMED2 plugin (with or without MPI-implement). Make sure work environment 
-    has properly installed Gromacs with patched PLUMED2. Also, PLUMED2 need an additional `DeePFE.cpp` patch to use bias potential of RiD.
+    RiD-kit emploies Gromacs/Lammps as MD engine with PLUMED2 plugin (with or without MPI-implement). Make sure work environment 
+    has properly installed Gromacs/Lammps with patched PLUMED2. Also, PLUMED2 need an additional `DeePFE.cpp` patch to use bias potential of RiD.
     See `install` in the home page for details.
     """
 

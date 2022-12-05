@@ -16,10 +16,10 @@ from rid.task.builder import EnhcMDTaskBuilder
 
 class PrepExplore(OP):
 
-    r"""Prepare files for exploration tasks.
-    Currently, RiD is based on Gromacs with PLUMED2 plugin. Input files must contain .gro for conformations,
-    .top for topology (with pre-defined force fields) and corresponding configuration in Dict formats while `models` 
-    (graph files, .pb) are optional. Exploration step would run biased MD sampling with neural network models or 
+    r"""
+    Prepare files for exploration tasks.
+    Currently, RiD is based on Gromacs/Lammps with PLUMED2 plugin. Provide .gro files and .top files if running Gromacs and .lmp files if running Lammps.
+    Exploration step would run biased MD sampling with neural network models or 
     brute force MD sampling without neural network model provided.
 
     With models provided, the bias forces will be the average value of outputs of these models and tuned by a switching function.

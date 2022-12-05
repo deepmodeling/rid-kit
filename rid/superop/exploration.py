@@ -21,6 +21,10 @@ from rid.utils import init_executor
 
 
 class Exploration(Steps):
+    
+    r"""" Exploration SuperOP.
+    This SuperOP combines PrepExplore OP and RunExplore OP.
+    """
     def __init__(
         self,
         name: str,

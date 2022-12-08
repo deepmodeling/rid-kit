@@ -94,7 +94,7 @@ class PrepLabel(OP):
     r"""Prepare files for Label steps.
     
     Labels of RiD are mean forces, which are calculated by restrained MD algorithm.
-    Restrained MD simulations are performed by Gromacs with PLUMED2 plugin, so input files are in Gromacs format.
+    Restrained MD simulations are performed by Gromacs/Lammps with PLUMED2 plugin, so input files are in Gromacs/Lammps format.
     """
 
     @classmethod

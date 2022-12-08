@@ -28,6 +28,10 @@ from rid.utils import init_executor
 
 
 class InitBlock(Steps):
+    
+    r"""Initial Block SuperOP
+    This SuperOP is the first iteration of the rid-kit cycle.
+    """
     def __init__(
         self,
         name: str,
@@ -269,6 +273,10 @@ def _first_run_block(
 
 
 class IterBlock(Steps):
+    
+    r"""Iterative Block SuperOP.
+    This SuperOP is the iterations after the inital iteration of the rid-kit cycle.
+    """
     def __init__(
         self,
         name: str,

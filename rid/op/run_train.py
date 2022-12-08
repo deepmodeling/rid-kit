@@ -34,7 +34,8 @@ class TrainModel(OP):
     def get_output_sign(cls):
         return OPIOSign(
             {
-                "model": Artifact(Path)
+                "model": Artifact(Path),
+                "train_log": Artifact(Path)
             }
         )
 
@@ -84,13 +85,15 @@ class TrainModel(OP):
             data_path=str(op_in["data"])
         )
         out_put_name = tf_model_name.format(tag=op_in["model_tag"])
+        train_log_name = "log"
         freeze_model(
             model_folder=".",
             output=out_put_name
         )
         op_out = OPIO(
             {
-                "model": Path(out_put_name)
+                "model": Path(out_put_name),
+                "train_log": Path(train_log_name)
             }
         )
         return op_out

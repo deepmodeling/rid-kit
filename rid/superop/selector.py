@@ -22,6 +22,10 @@ from rid.utils import init_executor
 
 
 class Selector(Steps):
+    
+    r""" Selector SuperOP.
+    This SuperOP combines PrepSelect OP and RunSelect OP.    
+    """
     def __init__(
         self,
         name: str,

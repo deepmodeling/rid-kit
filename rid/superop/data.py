@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict
 from copy import deepcopy
 from dflow import (
     InputParameter,
@@ -17,6 +17,10 @@ from rid.utils import init_executor
 
 
 class DataGenerator(Steps):
+    
+    r""" Date generator SuperOP.
+    This SuperpOP combines CollectData OP and MergeData OP to process data for training.
+    """
     def __init__(
         self,
         name: str,

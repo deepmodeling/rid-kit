@@ -20,6 +20,10 @@ from rid.utils import init_executor
 
 
 class Label(Steps):
+    
+    r"""" Label SuperOP.
+    This SuperOP combines CheckLabelInputs OP, PrepLabel OP and RunLabel OP.   
+    """
     def __init__(
         self,
         name: str,

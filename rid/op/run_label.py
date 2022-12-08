@@ -16,8 +16,7 @@ from rid.constants import (
         plumed_input_name,
         plumed_output_name,
         gmx_mdrun_log,
-        lmp_mdrun_log,
-        lmp_input_name
+        lmp_mdrun_log
     )
 from rid.utils import run_command, set_directory, list_to_string
 from rid.common.sampler.command import get_grompp_cmd, get_mdrun_cmd
@@ -35,8 +34,8 @@ class RunLabel(OP):
 
     """
     In `RunLabel`, labeling processes are achieved by restrained MD simulations 
-    wehre harmonnic restraints are exerted on collective variables.
-    `RunLabel` is able to run in a standard Gromacs-PLUMED2 env.
+    where harmonnic restraints are exerted on collective variables.
+    `RunLabel` is able to run in a standard Gromacs-PLUMED2 or Lammps-PLUMED2 env.
     """
 
     @classmethod

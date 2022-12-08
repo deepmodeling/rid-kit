@@ -2,7 +2,7 @@
     "resources": {
         "bohrium1": {
             "executor":{
-            "image": "registry.dp.tech/deepmodeling/dpdispatcher:latest",
+            "image": "dptechnology/dpdispatcher:latest",
             "machine_dict":{
                 "batch_type": "DpCloudServer",
                 "context_type": "DpCloudServerContext",
@@ -29,7 +29,7 @@
         },
         "bohrium2": {
             "executor":{
-            "image": "registry.dp.tech/deepmodeling/dpdispatcher:latest",
+            "image": "dptechnology/dpdispatcher:latest",
             "machine_dict":{
                 "batch_type": "DpCloudServer",
                 "context_type": "DpCloudServerContext",
@@ -56,7 +56,7 @@
         },
         "bohrium3": {
             "executor":{
-            "image": "registry.dp.tech/deepmodeling/dpdispatcher:latest",
+            "image": "dptechnology/dpdispatcher:latest",
             "machine_dict":{
                 "batch_type": "DpCloudServer",
                 "context_type": "DpCloudServerContext",
@@ -83,7 +83,7 @@
         },
         "bohrium4": {
             "executor":{
-            "image": "registry.dp.tech/deepmodeling/dpdispatcher:latest",
+            "image": "dptechnology/dpdispatcher:latest",
             "machine_dict":{
                 "batch_type": "DpCloudServer",
                 "context_type": "DpCloudServerContext",
@@ -110,7 +110,7 @@
         },
         "bohrium5": {
             "executor":{
-            "image": "registry.dp.tech/deepmodeling/dpdispatcher:latest",
+            "image": "dptechnology/dpdispatcher:latest",
             "machine_dict":{
                 "batch_type": "DpCloudServer",
                 "context_type": "DpCloudServerContext",

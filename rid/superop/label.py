@@ -33,7 +33,8 @@ class Label(Steps):
         post_op: OP,
         prep_config: Dict,
         run_config: Dict,
-        upload_python_package = None
+        upload_python_package = None,
+        retry_times = None
     ):
 
         self._input_parameters = {
@@ -93,6 +94,7 @@ class Label(Steps):
             run_config = run_config,
             post_config = prep_config,
             upload_python_package = upload_python_package,
+            retry_times = retry_times
         )            
     
     @property
@@ -127,6 +129,7 @@ def _label(
         run_config : Dict,
         post_config : Dict,
         upload_python_package : str = None,
+        retry_times: int = None
     ):
     prep_config = deepcopy(prep_config)
     run_config = deepcopy(run_config)
@@ -145,6 +148,7 @@ def _label(
         template=PythonOPTemplate(
             check_label_input_op,
             python_packages = upload_python_package,
+            retry_on_transient_error = retry_times,
             **prep_template_config,
         ),
         parameters={
@@ -164,6 +168,7 @@ def _label(
         template=PythonOPTemplate(
             prep_label_op,
             python_packages = upload_python_package,
+            retry_on_transient_error = retry_times,
             slices=Slices("{{item}}",
                 input_parameter=["task_name"],
                 input_artifact=["conf", "at"],
@@ -195,6 +200,7 @@ def _label(
         template=PythonOPTemplate(
             run_label_op,
             python_packages = upload_python_package,
+            retry_on_transient_error = retry_times,
             slices=Slices("{{item}}",
                 input_artifact=["task_path"],
                 output_artifact=["plm_out", "md_log"]),
@@ -223,6 +229,7 @@ def _label(
         template=PythonOPTemplate(
             post_label_op,
             python_packages = upload_python_package,
+            retry_on_transient_error = retry_times,
             slices=Slices("{{item}}",
                 input_parameter=["task_name"],
                 input_artifact=["plm_out", "at"],

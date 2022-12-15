@@ -51,7 +51,8 @@ def prep_rid_op(
         PrepExplore,
         RunExplore,
         prep_exploration_config,
-        run_exploration_config)
+        run_exploration_config,
+        retry_times=3)
 
     label_op = Label(
         "label",
@@ -60,20 +61,23 @@ def prep_rid_op(
         RunLabel,
         CalcMF,
         prep_label_config,
-        run_label_config)
+        run_label_config,
+        retry_times=3)
 
     select_op = Selector(
         "select",
         PrepSelect,
         RunSelect,
         prep_select_config,
-        run_select_config)
+        run_select_config,
+        retry_times=3)
 
     data_op = DataGenerator(
         "gen-data",
         CollectData,
         MergeData,
-        prep_data_config)
+        prep_data_config,
+        retry_times=3)
 
     init_block_op = InitBlock(
         "init-block",
@@ -83,6 +87,7 @@ def prep_rid_op(
         data_op,
         TrainModel,
         run_train_config,
+        retry_times=3
     )
 
     block_op = IterBlock(
@@ -94,7 +99,8 @@ def prep_rid_op(
         AdjustTrustLevel,
         TrainModel,
         workflow_steps_config,
-        run_train_config)
+        run_train_config,
+        retry_times=3)
     
     rid_op = ReinforcedDynamics(
         "reinforced-dynamics",

@@ -27,7 +27,8 @@ class DataGenerator(Steps):
         collect_op: OP,
         merge_op: OP,
         run_config: Dict,
-        upload_python_package = None
+        upload_python_package = None,
+        retry_times = None
     ):
         self._input_parameters = {
             "block_tag" : InputParameter(type=str, value="")
@@ -60,6 +61,7 @@ class DataGenerator(Steps):
             merge_op,
             run_config = run_config,
             upload_python_package = upload_python_package,
+            retry_times = retry_times
         )            
     
     @property
@@ -89,6 +91,7 @@ def _gen_data(
         merge_op : OP,
         run_config : Dict,
         upload_python_package : str = None,
+        retry_times: int = None
     ):
     run_config = deepcopy(run_config)
     run_template_config = run_config.pop('template_config')
@@ -99,6 +102,7 @@ def _gen_data(
         template=PythonOPTemplate(
             collect_op,
             python_packages = upload_python_package,
+            retry_on_transient_error = retry_times,
             **run_template_config,
         ),
         parameters={},
@@ -117,6 +121,7 @@ def _gen_data(
         template=PythonOPTemplate(
             merge_op,
             python_packages = upload_python_package,
+            retry_on_transient_error = retry_times,
             **run_template_config,
         ),
         parameters={},

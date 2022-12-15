@@ -41,7 +41,8 @@ class InitBlock(Steps):
         data_op: OP,
         train_op: OP,
         train_config: Dict,
-        upload_python_package = None
+        upload_python_package = None,
+        retry_times = None
     ):
 
         self._input_parameters = {
@@ -108,6 +109,7 @@ class InitBlock(Steps):
             train_op,
             train_config,
             upload_python_package = upload_python_package,
+            retry_times = retry_times
         )            
     
     @property
@@ -140,6 +142,7 @@ def _first_run_block(
         train_op: OP,
         train_config : Dict,
         upload_python_package : str = None,
+        retry_times: int = None
     ):
     exploration = Step(
         "Exploration",
@@ -241,6 +244,7 @@ def _first_run_block(
         template=PythonOPTemplate(
             train_op,
             python_packages = upload_python_package,
+            retry_on_transient_error = retry_times,
             slices=Slices("{{item}}",
                 input_parameter=["model_tag"],
                 output_artifact=["model"]),
@@ -288,7 +292,8 @@ class IterBlock(Steps):
         train_op: OP,  
         adjust_lvl_config: Dict,
         train_config: Dict,
-        upload_python_package = None
+        upload_python_package = None,
+        retry_times = None
     ):
 
         self._input_parameters = {
@@ -364,6 +369,7 @@ class IterBlock(Steps):
             adjust_lvl_config,
             train_config,
             upload_python_package = upload_python_package,
+            retry_times = retry_times
         )            
     
     @property
@@ -398,6 +404,7 @@ def _iter_block(
         adjust_lvl_config : Dict,
         train_config : Dict,
         upload_python_package : str = None,
+        retry_times: int = None
     ):
 
     exploration = Step(
@@ -461,6 +468,7 @@ def _iter_block(
         template=PythonOPTemplate(
             adjust_lvl_op,
             python_packages = upload_python_package,
+            retry_on_transient_error = retry_times,
             slices=Slices("{{item}}",
                 input_parameter=["trust_lvl_1", "trust_lvl_2", "numb_cluster", "init_trust_lvl_1", "init_trust_lvl_2"],
                 output_parameter=["adjust_trust_lvl_1", "adjust_trust_lvl_2"]
@@ -532,6 +540,7 @@ def _iter_block(
         template=PythonOPTemplate(
             train_op,
             python_packages = upload_python_package,
+            retry_on_transient_error = retry_times,
             slices=Slices("{{item}}",
                 input_parameter=["model_tag"],
                 output_artifact=["model"]),

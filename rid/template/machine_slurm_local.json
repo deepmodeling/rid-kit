@@ -8,6 +8,9 @@
             }
         },
         "remote_slurm": {
+            "template_config":{
+                "requests" : {"ephemeral-storage": "1Gi"}
+            },
             "executor":{
             "image": "dptechnology/dpdispatcher:latest",
             "machine_dict":{

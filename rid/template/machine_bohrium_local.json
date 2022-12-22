@@ -8,6 +8,9 @@
             }
         },
         "bohrium1": {
+            "template_config":{
+                "requests" : {"ephemeral-storage": "1Gi"}
+            },
             "executor":{
             "image": "dptechnology/dpdispatcher:latest",
             "machine_dict":{
@@ -35,6 +38,9 @@
         }
         },
         "bohrium2": {
+            "template_config":{
+                "requests" : {"ephemeral-storage": "1Gi"}
+            },
             "executor":{
             "image": "dptechnology/dpdispatcher:latest",
             "machine_dict":{
@@ -62,6 +68,9 @@
         }
         },
         "bohrium3": {
+            "template_config":{
+                "requests" : {"ephemeral-storage": "1Gi"}
+            },
             "executor":{
             "image": "dptechnology/dpdispatcher:latest",
             "machine_dict":{
@@ -89,6 +98,9 @@
         }
         },
         "bohrium4": {
+            "template_config":{
+                "requests" : {"ephemeral-storage": "1Gi"}
+            },
             "executor":{
             "image": "dptechnology/dpdispatcher:latest",
             "machine_dict":{

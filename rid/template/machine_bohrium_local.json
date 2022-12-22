@@ -3,7 +3,8 @@
         "local_k8s": {
             "template_config" : {
                 "image": "pkufjhdocker/rid-tf-cpu:latest", 
-                "image_pull_policy" : "IfNotPresent"
+                "image_pull_policy" : "IfNotPresent",
+                "requests" : {"ephemeral-storage": "1Gi"}
             }
         },
         "bohrium1": {

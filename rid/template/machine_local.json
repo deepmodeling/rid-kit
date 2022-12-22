@@ -3,31 +3,36 @@
         "local_k8s_1": {
             "template_config" : {
                 "image": "pkufjhdocker/rid-gmx-exploration:latest", 
-                "image_pull_policy" : "IfNotPresent"
+                "image_pull_policy" : "IfNotPresent",
+                "requests" : {"ephemeral-storage": "1Gi"}
             }
         },
         "local_k8s_2": {
             "template_config" : {
                 "image": "pkufjhdocker/rid-gmx-plumed:latest", 
-                "image_pull_policy" : "IfNotPresent"
+                "image_pull_policy" : "IfNotPresent",
+                "requests" : {"ephemeral-storage": "1Gi"}
             }
         },
         "local_k8s_3": {
             "template_config" : {
                 "image": "pkufjhdocker/rid-tf-cpu:latest", 
-                "image_pull_policy" : "IfNotPresent"
+                "image_pull_policy" : "IfNotPresent",
+                "requests" : {"ephemeral-storage": "1Gi"}
             }
         },
         "local_k8s_4": {
             "template_config" : {
                 "image": "pkufjhdocker/rid-gmx-tf:latest", 
-                "image_pull_policy" : "IfNotPresent"
+                "image_pull_policy" : "IfNotPresent",
+                "requests" : {"ephemeral-storage": "1Gi"}
             }
         },
         "local_k8s_5": {
             "template_config" : {
                 "image": "pkufjhdocker/rid-tf-gpu:latest", 
-                "image_pull_policy" : "IfNotPresent"
+                "image_pull_policy" : "IfNotPresent",
+                "requests" : {"ephemeral-storage": "1Gi"}
             }
         }
     },

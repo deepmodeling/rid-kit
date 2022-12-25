@@ -84,9 +84,8 @@ class PrepExplore(OP):
             - `trust_lvl_1`: (`float`) Trust level 1.
             - `trust_lvl_2`: (`float`) Trust level 2.
             - `topology`: (`Artifact(Path)`) Topology files (.top) for Gromacs simulations.
-            - `conf`: (`Artifact(Path)`) Conformation files (.gro) for Gromacs simulations.
-            - `exploration_config`: (`Dict`) Configuration in `Dict` format for Gromacs run. Must contains:
-                `dt`, `steps`, `temperature`, `output_freq`.
+            - `conf`: (`Artifact(Path)`) Conformation files (.gro, .lmp) for Gromacs/Lammps simulations.
+            - `exploration_config`: (`Dict`) Configuration in `Dict` format for Gromacs/Lammps run.
             - `cv_config`: (`Dict`) Configuration for CV creation.
             - `task_name`: (`str`) Task name used to make sub-dir for tasks.
            

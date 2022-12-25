@@ -83,8 +83,8 @@ class RunExplore(OP):
         op_in : dict
             Input dict with components:
 
-            - `task_path`: (`Artifact(Path)`) A directory path containing files for Gromacs MD simulations.
-            - `exploration_config`: (`Dict`) Configuration of Gromacs simulations in exploration steps.
+            - `task_path`: (`Artifact(Path)`) A directory path containing files for Gromacs/Lammps MD simulations.
+            - `exploration_config`: (`Dict`) Configuration of Gromacs/Lammps simulations in exploration steps.
             - `models`: (`Artifact(List[Path])`) Optional. Neural network model files (`.pb`) used to bias the simulation. 
                 Run brute force MD simulations if not provided.
           
@@ -93,7 +93,7 @@ class RunExplore(OP):
             Output dict with components:
         
             - `plm_out`: (`Artifact(Path)`) Outputs of CV values (`plumed.out` by default) from exploration steps.
-            - `md_log`: (`Artifact(Path)`) Log files of Gromacs `mdrun` commands.
+            - `md_log`: (`Artifact(Path)`) Log files of Gromacs/lammps `mdrun` commands.
             - `trajectory`: (`Artifact(Path)`) Trajectory files (`.xtc`). The output frequency is defined in `exploration_config`.
             - `conf_out`: (`Artifact(Path)`) Final frames of conformations in simulations.
         """

@@ -74,15 +74,15 @@ class RunLabel(OP):
         op_in : dict
             Input dict with components:
 
-            - `task_path`: (`Artifact(Path)`) A directory path containing files for Gromacs MD simulations.
-            - `label_config`: (`Dict`) Configuration of Gromacs simulations in label steps.
+            - `task_path`: (`Artifact(Path)`) A directory path containing files for Gromacs/Lammps MD simulations.
+            - `label_config`: (`Dict`) Configuration of Gromacs/Lammps simulations in label steps.
           
         Returns
         -------
             Output dict with components:
         
             - `plm_out`: (`Artifact(Path)`) Outputs of CV values (`plumed.out` by default) from label steps.
-            - `md_log`: (`Artifact(Path)`) Log files of Gromacs `mdrun` commands.
+            - `md_log`: (`Artifact(Path)`) Log files of Gromacs/Lammps `mdrun` commands.
         """
         
         if op_in["index_file"] is None:

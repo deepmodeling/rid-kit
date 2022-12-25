@@ -134,9 +134,8 @@ class PrepLabel(OP):
             Input dict with components:
         
             - `topology`: (`Artifact(Path)`) Topology files (.top) for Restrained MD simulations.
-            - `conf`: (`Artifact(Path)`) Conformation files (.gro) for Restrained MD simulations.
-            - `label_config`: (`Dict`) Configuration in `Dict` format for Gromacs run. Must contains:
-                `dt`, `steps`, `temperature`, `output_freq`.
+            - `conf`: (`Artifact(Path)`) Conformation files (.gro, .lmp) for Restrained MD simulations.
+            - `label_config`: (`Dict`) Configuration in `Dict` format for Gromacs/Lammps run.
             - `cv_config`: (`Dict`) Configuration for CV creation.
             - `kappas`: (`List[float]`) Force constants of harmonic restraints.
             - `at`: (`Artifact(Path)`) Files containing initial CV values, or CV centers.

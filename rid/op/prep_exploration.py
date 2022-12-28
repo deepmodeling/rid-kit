@@ -98,10 +98,12 @@ class PrepExplore(OP):
         """
         cv_file = []
         selected_resid = None
+        selected_atomid = None
         if op_in["cv_config"]["mode"] == "torsion":
             selected_resid = op_in["cv_config"]["selected_resid"]
+        elif op_in["cv_config"]["mode"] == "distance":
+            selected_atomid = op_in["cv_config"]["selected_atomid"]
         elif op_in["cv_config"]["mode"] == "custom":
-            #print("custom!!!")
             cv_file = op_in["cv_file"]
         if op_in["models"] is None:
             models = []
@@ -116,6 +118,7 @@ class PrepExplore(OP):
             exploration_config = op_in["exploration_config"],
             cv_file=cv_file,
             selected_resid = selected_resid,
+            selected_atomid = selected_atomid,
             sampler_type = op_in["exploration_config"]["type"],
             trust_lvl_1 = op_in["trust_lvl_1"],
             trust_lvl_2 = op_in["trust_lvl_2"],

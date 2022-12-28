@@ -63,7 +63,6 @@ class InitBlock(Steps):
             "output_freq": InputParameter(type=float, value=2500),
             "slice_mode": InputParameter(type=str, value="gmx"),
             "label_config": InputParameter(type=Dict),
-            "kappas": InputParameter(type=List[float]),
             "tail": InputParameter(type=float, value=0.9),
             "train_config": InputParameter(type=Dict)
         }        
@@ -202,10 +201,8 @@ def _first_run_block(
         "Label",
         template=label_op,
         parameters={
-            "angular_mask": block_steps.inputs.parameters['angular_mask'],
             "label_config": block_steps.inputs.parameters['label_config'],
             "cv_config": block_steps.inputs.parameters['cv_config'],
-            "kappas": block_steps.inputs.parameters['kappas'],
             "tail": block_steps.inputs.parameters['tail'],
             "conf_tags" : selection.outputs.parameters['selected_conf_tags'],
             "block_tag" : block_steps.inputs.parameters['block_tag'],
@@ -315,7 +312,6 @@ class IterBlock(Steps):
             "output_freq": InputParameter(type=float, value=2500),
             "slice_mode": InputParameter(type=str, value="gmx"),
             "label_config": InputParameter(type=Dict),
-            "kappas": InputParameter(type=List[float]),
             "tail": InputParameter(type=float, value=0.9),
             "train_config": InputParameter(type=Dict),
             "adjust_amplifier": InputParameter(type=float, value=1.5),
@@ -497,10 +493,8 @@ def _iter_block(
         "Label",
         template=label_op,
         parameters={
-            "angular_mask": block_steps.inputs.parameters['angular_mask'],
             "label_config": block_steps.inputs.parameters['label_config'],
             "cv_config": block_steps.inputs.parameters['cv_config'],
-            "kappas": block_steps.inputs.parameters['kappas'],
             "tail": block_steps.inputs.parameters['tail'],
             "conf_tags" : selection.outputs.parameters['selected_conf_tags'],
             "block_tag" : block_steps.inputs.parameters['block_tag'],

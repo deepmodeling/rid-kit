@@ -38,6 +38,8 @@ gmx_xtc_name = "traj_comp.xtc"
 sel_gro_name = "conf_{walker:03d}_{idx:d}.gro"
 sel_gro_name_gmx = "conf_.gro"
 gmx_conf_out = "confout.gro"
+gmx_coord_name = "coord.xvg"
+gmx_force_name = "force.xvg"
 
 # Lammps file names
 lmp_conf_name = "conf.lmp"

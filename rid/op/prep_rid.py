@@ -162,7 +162,10 @@ class PrepRiD(OP):
         selection_config = jdata.pop("SelectorConfig")
 
         label_config = jdata.pop("LabelMDConfig")
-        kappas = label_config.pop("kappas")
+        if "kappas" in label_config:
+            kappas = label_config.pop("kappas")
+        else:
+            kappas = []
         
         trust_lvl_1 = jdata.pop("trust_lvl_1")
         trust_lvl_2 = jdata.pop("trust_lvl_2")

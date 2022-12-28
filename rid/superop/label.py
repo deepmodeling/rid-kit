@@ -33,6 +33,7 @@ class Label(Steps):
         post_op: OP,
         prep_config: Dict,
         run_config: Dict,
+        post_config: Dict,
         upload_python_package = None,
         retry_times = None
     ):
@@ -40,8 +41,6 @@ class Label(Steps):
         self._input_parameters = {
             "label_config": InputParameter(type=Dict),
             "cv_config": InputParameter(type=Dict),
-            "kappas": InputParameter(type=List[float]),
-            "angular_mask": InputParameter(type=List),
             "tail": InputParameter(type=float, value=0.9),
             "conf_tags": InputParameter(type=List),
             "block_tag" : InputParameter(type=str, value="")
@@ -52,7 +51,7 @@ class Label(Steps):
             "forcefield" : InputArtifact(optional=True),
             "inputfile": InputArtifact(optional=True),
             "confs": InputArtifact(),
-            "at": InputArtifact(),
+            "at": InputArtifact(optional=True),
             "index_file": InputArtifact(optional=True),
             "dp_files": InputArtifact(optional=True),
             "cv_file": InputArtifact(optional=True)
@@ -92,7 +91,7 @@ class Label(Steps):
             post_op,
             prep_config = prep_config,
             run_config = run_config,
-            post_config = prep_config,
+            post_config = post_config,
             upload_python_package = upload_python_package,
             retry_times = retry_times
         )            
@@ -178,8 +177,7 @@ def _label(
         parameters={
             "label_config": label_steps.inputs.parameters['label_config'],
             "cv_config": label_steps.inputs.parameters['cv_config'],
-            "task_name": check_label_inputs.outputs.parameters['conf_tags'],
-            "kappas": label_steps.inputs.parameters['kappas']
+            "task_name": check_label_inputs.outputs.parameters['conf_tags']
         },
         artifacts={
             "topology": label_steps.inputs.artifacts['topology'],
@@ -203,7 +201,7 @@ def _label(
             retry_on_transient_error = retry_times,
             slices=Slices("{{item}}",
                 input_artifact=["task_path"],
-                output_artifact=["plm_out", "md_log"]),
+                output_artifact=["plm_out", "md_log","trr_traj"]),
             **run_template_config,
         ),
         parameters={
@@ -232,18 +230,20 @@ def _label(
             retry_on_transient_error = retry_times,
             slices=Slices("{{item}}",
                 input_parameter=["task_name"],
-                input_artifact=["plm_out", "at"],
-                output_artifact=["forces"]),
+                input_artifact=["conf","plm_out", "trr_traj","at"],
+                output_artifact=["forces","frame_coords", "frame_forces"]),
             **post_template_config,
         ),
         parameters={
             "task_name": check_label_inputs.outputs.parameters['conf_tags'],
-            "kappas": label_steps.inputs.parameters['kappas'],
             "tail": label_steps.inputs.parameters['tail'],
-            "angular_mask": label_steps.inputs.parameters['angular_mask']
+            "label_config": label_steps.inputs.parameters["label_config"],
+            "cv_config": label_steps.inputs.parameters['cv_config'],
         },
         artifacts={
+            "conf": label_steps.inputs.artifacts["confs"],
             "plm_out": run_label.outputs.artifacts["plm_out"],
+            "trr_traj": run_label.outputs.artifacts["trr_traj"],
             "at": label_steps.inputs.artifacts['at']
         },
         key = step_keys['post_label']+"-{{item}}",

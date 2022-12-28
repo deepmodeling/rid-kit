@@ -16,7 +16,8 @@ from rid.constants import (
         plumed_input_name,
         plumed_output_name,
         gmx_mdrun_log,
-        lmp_mdrun_log
+        lmp_mdrun_log,
+        gmx_trr_name
     )
 from rid.utils import run_command, set_directory, list_to_string
 from rid.common.sampler.command import get_grompp_cmd, get_mdrun_cmd
@@ -57,6 +58,7 @@ class RunLabel(OP):
         return OPIOSign(
             {
                 "plm_out": Artifact(Path),
+                "trr_traj": Artifact(Path, optional=True),
                 "md_log": Artifact(Path)
             }
         )
@@ -143,15 +145,19 @@ class RunLabel(OP):
                 return_code, out, err = run_command(run_cmd)
                 assert return_code == 0, err
                 logger.info(err)
-    
+
+        trr_traj = None
         if op_in["label_config"]["type"] == "gmx":
             mdrun_log = gmx_mdrun_log
+            if op_in["label_config"]["method"] == "constrained":
+                trr_traj = op_in["task_path"].joinpath(gmx_trr_name)
         elif op_in["label_config"]["type"] == "lmp":
             mdrun_log = lmp_mdrun_log
             
         op_out = OPIO(
             {
                 "plm_out": op_in["task_path"].joinpath(plumed_output_name),
+                "trr_traj": trr_traj,
                 "md_log": op_in["task_path"].joinpath(mdrun_log)
             }
         )

@@ -45,11 +45,13 @@ def resubmit_rid(
         run_exploration_config = normalized_resources[tasks["run_exploration_config"]],
         prep_label_config = normalized_resources[tasks["prep_label_config"]],
         run_label_config = normalized_resources[tasks["run_label_config"]],
+        post_label_config = normalized_resources[tasks["post_label_config"]],
         prep_select_config = normalized_resources[tasks["prep_select_config"]],
         run_select_config = normalized_resources[tasks["run_select_config"]],
         prep_data_config = normalized_resources[tasks["prep_data_config"]],
         run_train_config = normalized_resources[tasks["run_train_config"]],
-        workflow_steps_config = normalized_resources[tasks["workflow_steps_config"]]
+        workflow_steps_config = normalized_resources[tasks["workflow_steps_config"]],
+        retry_times=None
     )
 
     if isinstance(confs, str):

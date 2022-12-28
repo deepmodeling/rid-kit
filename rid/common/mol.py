@@ -24,6 +24,12 @@ def _zip_dict(resi_indices, atom_indices):
         dihedral_dict[resi_idx] = atom_indices[idx].tolist()
     return dihedral_dict
 
+def distance(r1,r2):
+    d = 0
+    for index in range(3):
+        d += (r1[index] - r2[index])**2
+    d = np.sqrt(d)
+    return d
 
 def get_dihedral_info(file_path: str):
     traj = md.load(file_path)
@@ -66,6 +72,20 @@ def get_dihedral_from_resid(file_path: str, selected_resid: List[int]) -> Dict:
     logger.info(f"{num_cv} CVs have been created.")
     return selected_dihedral_angle
 
+def get_distance_from_atomid(file_path: str, selected_atomid: List[int]) -> Dict:
+    if len(selected_atomid) == 0:
+        return {}
+    top = dpdata.System(file_path, fmt="gromacs/gro")
+    selected_distance = {}
+    for sid in selected_atomid:
+        assert len(sid) == 2, "No valid distance list created."
+        atom_a = top["coords"][0][sid[0]-1]
+        atom_b = top["coords"][0][sid[1]-1]
+        d_cv = distance(atom_a, atom_b)/10
+        selected_distance["%s %s"%(sid[0],sid[1])] = d_cv
+    num_cv = len(selected_distance.keys())
+    logger.info(f"{num_cv} CVs have been created.")
+    return selected_distance
 
 def slice_xtc_mdtraj(
         xtc: str,

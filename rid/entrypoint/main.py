@@ -23,6 +23,7 @@ except ImportError:
 
 from .submit import submit_rid
 from .resubmit import resubmit_rid
+from .label import label_rid
 from .info import information
 from .server import forward_ports
 from .cli import rid_ls, rid_rm
@@ -131,6 +132,22 @@ def main_parser() -> argparse.ArgumentParser:
     parser_exp = subparsers.add_parser(
         "mdrun",
         help="Submit RiD workflow",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser_exp.add_argument(
+        "--mol", "-i", help="Initial conformation files.", dest="mol",
+    )
+    parser_exp.add_argument(
+        "--config", "-c", help="RiD configuration.", dest="config"
+    )
+    parser_exp.add_argument(
+        "--machine", "-m", help="Machine configuration.", dest="machine"
+    )
+    
+    # Label
+    parser_exp = subparsers.add_parser(
+        "label",
+        help="labeling MD workflow",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser_exp.add_argument(
@@ -273,6 +290,21 @@ def main():
     elif args.command == "explore":
         logger.info("RiD Exploration.")
         return None
+    elif args.command == "label":
+        logger.info("Labeling MD ...")
+        confs, top_file, models, forcefield, index_file, dp_files, otherfiles = parse_submit(args)
+        label_rid(
+            confs = confs,
+            topology = top_file,
+            rid_config = args.config,
+            machine_config = args.machine,
+            models = models,
+            forcefield = forcefield,
+            index_file = index_file,
+            dp_files = dp_files,
+            otherfiles = otherfiles
+        )
+        log_ui()
     elif args.command == "port-forward":
         forward_ports()
     elif args.command == "ls":

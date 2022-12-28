@@ -107,7 +107,7 @@ class PrepLabel(OP):
                 "label_config": Dict,
                 "cv_config": Dict,
                 "task_name": str,
-                "at": Artifact(Path)
+                "at": Artifact(Path, optional=True)
             }
         )
 
@@ -155,11 +155,11 @@ class PrepLabel(OP):
             selected_atomid = op_in["cv_config"]["selected_atomid"]
         elif op_in["cv_config"]["mode"] == "custom":
             cv_file = op_in["cv_file"]
-        at = load_txt(op_in["at"])
         
         #print("what is cv", cv_file)
         if op_in["label_config"]["method"] == "restrained":
-                gmx_task_builder = RestrainedMDTaskBuilder(
+            at = load_txt(op_in["at"])
+            gmx_task_builder = RestrainedMDTaskBuilder(
                 conf = op_in["conf"],
                 topology = op_in["topology"],
                 label_config = op_in["label_config"],
@@ -172,14 +172,13 @@ class PrepLabel(OP):
                 cv_mode = op_in["cv_config"]["mode"]
             )
         elif op_in["label_config"]["method"] == "constrained":
-                gmx_task_builder = ConstrainedMDTaskBuilder(
+            gmx_task_builder = ConstrainedMDTaskBuilder(
                 conf = op_in["conf"],
                 topology = op_in["topology"],
                 label_config = op_in["label_config"],
                 cv_file = cv_file,
                 selected_atomid = selected_atomid,
                 sampler_type = op_in["label_config"]["type"],
-                at = at,
                 plumed_output = plumed_output_name,
                 cv_mode = op_in["cv_config"]["mode"]
             )

@@ -262,7 +262,6 @@ def make_constraint_plumed(
         conf: Optional[str] = None,
         cv_file: Optional[List[str]] = None,
         selected_atomid: Optional[List[int]] = None,
-        at: Union[int, float, Sequence, np.ndarray] = 1.0,
         stride: int = 100,
         output: str = "plm.out",
         mode: str = "distance"    

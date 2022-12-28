@@ -161,7 +161,6 @@ class ConstrainedMDTaskBuilder(TaskBuilder):
         cv_file: Optional[List[str]] = None,
         selected_atomid: Optional[List[int]] = None,
         sampler_type: str = "gmx",
-        at: Union[int, float, List[Union[int, float]]] = 1.0,
         plumed_output: str = "plm.out",
         cv_mode: str = "distance"
     ):
@@ -175,7 +174,6 @@ class ConstrainedMDTaskBuilder(TaskBuilder):
         self.plumed_output = plumed_output
         self.cv_mode = cv_mode
         self.sampler_type = sampler_type
-        self.at = at
         self.task = Task()
     
     def build(self) -> Task:
@@ -193,7 +191,7 @@ class ConstrainedMDTaskBuilder(TaskBuilder):
         return self.task
      
     def build_gmx(self):
-        return build_gmx_constraint_dict(self.conf, self.topology, self.label_config, self.at, self.selected_atomid)
+        return build_gmx_constraint_dict(self.conf, self.topology, self.label_config, self.selected_atomid)
     
     def build_lmp(self):
         return build_lmp_dict(self.conf)
@@ -201,7 +199,7 @@ class ConstrainedMDTaskBuilder(TaskBuilder):
     def build_plumed(self):
         return build_plumed_constraint_dict(
             conf=self.conf, cv_file=self.cv_file, selected_atomid=self.selected_atomid,
-            at=self.at, stride=self.stride, output=self.plumed_output, mode=self.cv_mode
+            stride=self.stride, output=self.plumed_output, mode=self.cv_mode
         )
 
 def build_gmx_dict(
@@ -220,17 +218,18 @@ def build_gmx_constraint_dict(
         conf: str,
         topology: str,
         gmx_config: Dict,
-        at: Union[int, float, List[Union[int, float]]] = 1.0,
         selected_atomid: Optional[List[int]] = None
     ):
     gmx_task_files = {}
     gmx_task_files[gmx_conf_name] = (read_txt(conf), "w")
+    cv_info = get_distance_from_atomid(conf, selected_atomid)
     with open(topology, "a") as f:
         f.write("\n")
         f.write("[ constraints ]\n")
         f.write("; atom1 atom2    funct   dis\n")
         for dis_id in range(len(selected_atomid)):
-            f.write("%s %s 2 %s\n"%(selected_atomid[dis_id][0], selected_atomid[dis_id][1],at[dis_id]))
+            f.write("%s %s 2 %s\n"%(selected_atomid[dis_id][0], selected_atomid[dis_id][1],\
+                cv_info["%s %s"%(selected_atomid[dis_id][0],selected_atomid[dis_id][1])]))
     gmx_task_files[gmx_top_name]  = (read_txt(topology), "w")
     mdp_string = make_md_mdp_string(gmx_config)
     gmx_task_files[gmx_mdp_name]  = (mdp_string, "w")
@@ -289,7 +288,6 @@ def build_plumed_constraint_dict(
         conf: Optional[str] = None,
         cv_file: Optional[str] = None,
         selected_atomid: Optional[List[int]] = None,
-        at: Union[int, float, Sequence, np.ndarray] = 1.0,
         stride: int = 100,
         output: str = "plm.out",
         mode: str = "distance"    
@@ -297,8 +295,7 @@ def build_plumed_constraint_dict(
     plumed_task_files = {}
     plm_content = make_constraint_plumed(
         conf=conf, cv_file=cv_file, selected_atomid=selected_atomid,
-        at=at, stride=stride,
-        output=output, mode=mode
+        stride=stride, output=output, mode=mode
     )
     plumed_task_files[plumed_input_name] = (plm_content, "w")
     return plumed_task_files

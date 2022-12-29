@@ -133,7 +133,9 @@ class RunLabel(OP):
                         os.symlink(file, file.name)
             
             if op_in["dp_files"] is not None:
-                os.environ["GMX_DEEPMD_INPUT_JSON"] = "./input.json"
+                for dp_file in op_in["dp_files"]:
+                    if (dp_file.name).endswith("json"):
+                        os.environ["GMX_DEEPMD_INPUT_JSON"] = dp_file.name
                 
             if grompp_cmd is not None:
                 logger.info(list_to_string(grompp_cmd, " "))

@@ -84,7 +84,6 @@ class PrepRiD(OP):
                 "output_freq": float,
                 "slice_mode": str,
                 "label_config": Dict,
-                "kappas": List,
                 "train_config": Dict
             }
         )
@@ -156,16 +155,12 @@ class PrepRiD(OP):
         dt = exploration_config["dt"]
         output_freq = exploration_config["output_freq"]
         cv_config = jdata.pop("CV")
-        angular_mask = cv_config.pop("angular_mask")
-        weights = cv_config.pop("weights")
+        angular_mask = cv_config["angular_mask"]
+        weights = cv_config["weights"]
         
         selection_config = jdata.pop("SelectorConfig")
 
         label_config = jdata.pop("LabelMDConfig")
-        if "kappas" in label_config:
-            kappas = label_config.pop("kappas")
-        else:
-            kappas = []
         
         trust_lvl_1 = jdata.pop("trust_lvl_1")
         trust_lvl_2 = jdata.pop("trust_lvl_2")
@@ -199,7 +194,6 @@ class PrepRiD(OP):
                 "output_freq": output_freq,
                 "slice_mode": selection_config.pop("slice_mode"),
                 "label_config": label_config,
-                "kappas": kappas,
                 "train_config": train_config
             }
         )

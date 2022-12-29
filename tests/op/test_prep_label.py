@@ -65,9 +65,9 @@ class Test_PrepLabel(unittest.TestCase):
         conf_path = data/"conf.gro"
         top_path = data/"topol.top"
         center_path = data/"centers.out"
-        gmx_config = {"type":"gmx","nsteps": 50, "output_freq": 1, "temperature": 300, 
+        gmx_config = {"type":"gmx","nsteps": 50,"method":"restrained", "output_freq": 1, "temperature": 300, "kappas": [500,500],
                       "dt": 0.002, "output_mode": "both", "ntmpi": 1, "nt": 8, "max_warning": 0}
-        cv_config1 = {"mode": "torsion", "selected_resid": [1, 2], "cv_file": []}
+        cv_config1 = {"mode": "torsion", "selected_resid": [1, 2], "angular_mask": [1,1],"cv_file": []}
         cv_config2 = {"mode": "custom", "selected_resid": None, "cv_file": ["data/plumed.dat"]}
 
         op_in1 = OPIO(
@@ -78,7 +78,6 @@ class Test_PrepLabel(unittest.TestCase):
                 "cv_file": None,
                 "cv_config": cv_config1,
                 "task_name": self.taskname,
-                "kappas": [500,500],
                 "at": center_path
             }
         )
@@ -90,7 +89,6 @@ class Test_PrepLabel(unittest.TestCase):
                 "cv_file": [data/"plumed.dat"],
                 "cv_config": cv_config2,
                 "task_name": self.taskname,
-                "kappas": [500,500],
                 "at": center_path
             }
         )

@@ -162,7 +162,8 @@ class TestMockedLabel(unittest.TestCase):
             MockedRunLabel,
             MockedCalcMF,
             prep_config = default_config,
-            run_config = default_config
+            run_config = default_config,
+            post_config = default_config
         )
         labeling_step = Step(
             'label-step',
@@ -170,8 +171,6 @@ class TestMockedLabel(unittest.TestCase):
             parameters = {
                 "label_config" : self.label_config,
                 "cv_config" : self.cv_config,
-                "kappas": self.kappas,
-                "angular_mask": self.angular_mask,
                 "tail": self.tail,
                 "conf_tags": self.conf_tags,
                 "block_tag" : self.block_tag

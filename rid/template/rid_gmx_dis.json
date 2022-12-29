@@ -8,9 +8,9 @@
     
     "CV": {
         "mode": "distance",
-        "selected_atomid": [[1,2],[5,6]],
-        "angular_mask": [ 0, 0 ],
-        "weights": [ 1, 1 ],
+        "selected_atomid": [[2,5],[5,7]],
+        "angular_mask": [0,0],
+        "weights": [1,1],
         "cv_file":[""]
     },
 
@@ -60,13 +60,12 @@
         "rcoulomb-switch": 0,
         "epsilon-r":1,
         "epsilon-rf":80,
-        "dt": 0.002,
+        "dt": 0.001,
         "fourierspacing": "0.12",
-        "output_mode": "single",
+        "output_mode": "both",
         "ntmpi": 1,
         "nt": 8,
-        "max_warning": 2,
-        "kappas": [ 500, 500 ]
+        "max_warning": 2
     },
 
     "Train": {

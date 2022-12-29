@@ -44,7 +44,7 @@ git checkout dflow
 pip install .
 ```
 ## Run an example
-Run a example of Ala-dipeptide using dihedral as CVs(change to your own Bohrium account information)
+Run a example of Ala-dipeptide using dihedral as CVs (change to your own Bohrium account information)
 ```
 rid submit -i /tests/data/000 -c /rid/template/rid_gmx_dih.json -m /rid/template/machine_bohrium_local.json
 ```
@@ -52,22 +52,27 @@ You can also run the example on a Slurm machine (But you need to configure a con
 ```
 rid submit -i /tests/data/000 -c /rid/template/rid_gmx_dih.json -m /rid/template/machine_slurm_local.json
 ```
+You can also run the example using distance as CVs (This will use constrained md as the mean force calculator)
+```
+rid submit -i /tests/data/000 -c /rid/template/rid_gmx_dis.json -m /rid/template/machine_bohrium_local.json
+```
+Note that if you want to use constrained MD as the mean force calculator, apart from setting `method` to be `constrained` in the `label_config`, you should add `[ constraint ]` line in your input `topology` file, since gromacs specifies constraints information for each `[ moleculartype ]`.
 
 # Main procedure of RiD
 
 RiD will run in iterations. Every iteration contains tasks below:
 
 1. Biased MD;
-2. Restrained MD;
+2. Restrained/Constrained MD;
 3. Training neural network.
 
 ## Biased MD
 
 Just like Metadynamics, RiD will sample based on a bias potential given by NN models. An uncertainty indicator will direct the process of adding bias potential.
 
-## Restrained MD
+## Restrained/Constrained MD
 
-This procedure will calculate the mean force based on the sampling results, which can generate data set for training. 
+This procedure will calculate the mean force based on the sampling results of restrained MD or constrained MD, which can generate data set for training. 
 
 ## Neural network training
 

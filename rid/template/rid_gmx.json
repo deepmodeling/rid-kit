@@ -16,6 +16,7 @@
 
   "ExploreMDConfig": {
       "nsteps": 50000,
+      "temperature": 300,
       "type": "gmx",
       "output_freq": 500,
       "ref-t": "300 300",
@@ -46,6 +47,8 @@
 
   "LabelMDConfig": {
       "nsteps": 50000,
+      "method": "restrained",
+      "temperature": 300,
       "type": "gmx",
       "output_freq": 100,
       "ref-t": "300 300",

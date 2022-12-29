@@ -56,7 +56,10 @@ You can also run the example using distance as CVs (This will use constrained md
 ```
 rid submit -i /tests/data/000 -c /rid/template/rid_gmx_dis.json -m /rid/template/machine_bohrium_local.json
 ```
-Note that if you want to use constrained MD as the mean force calculator, apart from setting `method` to be `constrained` in the `label_config`, you should add `[ constraint ]` line in your input `topology` file, since gromacs specifies constraints information for each `[ moleculartype ]`.
+
+Note that if you want to use constrained MD as the mean force calculator, apart from setting `method` to be `constrained` in the `label_config`, you should add `[ constraint ]` line corresponding to the `[ moleculartype ]` in your input `topology` file yourself, since gromacs specifies constraints information for each `[ moleculartype ]`.
+
+Also note that, since gromacs only supports constrained MD for `distance CV`, the constrained MD simulation in rid-kit only supports `distance CV` at this moment.
 
 # Main procedure of RiD
 

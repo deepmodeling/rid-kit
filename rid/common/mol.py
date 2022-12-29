@@ -75,13 +75,11 @@ def get_dihedral_from_resid(file_path: str, selected_resid: List[int]) -> Dict:
 def get_distance_from_atomid(file_path: str, selected_atomid: List[int]) -> Dict:
     if len(selected_atomid) == 0:
         return {}
-    top = dpdata.System(file_path, fmt="gromacs/gro")
+    top = md.load(file_path)
     selected_distance = {}
     for sid in selected_atomid:
         assert len(sid) == 2, "No valid distance list created."
-        atom_a = top["coords"][0][sid[0]-1]
-        atom_b = top["coords"][0][sid[1]-1]
-        d_cv = distance(atom_a, atom_b)/10
+        d_cv = md.compute_distances(top,atom_pairs=np.array([sid[0]-1,sid[1]-1]).reshape(-1,2),periodic=True)[0][0]
         selected_distance["%s %s"%(sid[0],sid[1])] = d_cv
     num_cv = len(selected_distance.keys())
     logger.info(f"{num_cv} CVs have been created.")

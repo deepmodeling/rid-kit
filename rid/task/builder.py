@@ -223,14 +223,17 @@ def build_gmx_constraint_dict(
     gmx_task_files = {}
     gmx_task_files[gmx_conf_name] = (read_txt(conf), "w")
     cv_info = get_distance_from_atomid(conf, selected_atomid)
-    with open(topology, "a") as f:
-        f.write("\n")
-        f.write("[ constraints ]\n")
-        f.write("; atom1 atom2    funct   dis\n")
-        for dis_id in range(len(selected_atomid)):
-            f.write("%s %s 2 %s\n"%(selected_atomid[dis_id][0], selected_atomid[dis_id][1],\
-                cv_info["%s %s"%(selected_atomid[dis_id][0],selected_atomid[dis_id][1])]))
-    gmx_task_files[gmx_top_name]  = (read_txt(topology), "w")
+    ret = ""
+    with open(topology, "r") as f:
+        for line in f.readlines():
+            ret += line
+            if "constraints" in line:
+                print("constrained md operating normally!\n")
+                ret += "; atom1 atom2    funct   dis\n"
+                for dis_id in range(len(selected_atomid)):
+                    ret += "%s %s 2 %s\n"%(selected_atomid[dis_id][0], selected_atomid[dis_id][1],\
+                        cv_info["%s %s"%(selected_atomid[dis_id][0],selected_atomid[dis_id][1])])        
+    gmx_task_files[gmx_top_name]  = (ret, "w")
     mdp_string = make_md_mdp_string(gmx_config)
     gmx_task_files[gmx_mdp_name]  = (mdp_string, "w")
     return gmx_task_files

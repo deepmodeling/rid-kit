@@ -109,7 +109,8 @@ class RestrainedMDTaskBuilder(TaskBuilder):
         kappa: Union[int, float, List[Union[int, float]]] = 0.5,
         at: Union[int, float, List[Union[int, float]]] = 1.0,
         plumed_output: str = "plm.out",
-        cv_mode: str = "torsion"
+        cv_mode: str = "torsion",
+        method: str = "restrained"
     ):
         super().__init__()
         self.conf = conf
@@ -123,6 +124,7 @@ class RestrainedMDTaskBuilder(TaskBuilder):
         self.sampler_type = sampler_type
         self.kappa = kappa
         self.at = at
+        self.method = method
         self.task = Task()
     
     def build(self) -> Task:
@@ -149,7 +151,7 @@ class RestrainedMDTaskBuilder(TaskBuilder):
         return build_plumed_restraint_dict(
             conf=self.conf, cv_file=self.cv_file, selected_resid=self.selected_resid,
             kappa=self.kappa, at=self.at,
-            stride=self.stride, output=self.plumed_output, mode=self.cv_mode
+            stride=self.stride, output=self.plumed_output, mode=self.cv_mode, method = self.method
         )
 
 class ConstrainedMDTaskBuilder(TaskBuilder):
@@ -162,7 +164,8 @@ class ConstrainedMDTaskBuilder(TaskBuilder):
         selected_atomid: Optional[List[int]] = None,
         sampler_type: str = "gmx",
         plumed_output: str = "plm.out",
-        cv_mode: str = "distance"
+        cv_mode: str = "distance",
+        method: str = "constrained"
     ):
         super().__init__()
         self.conf = conf
@@ -173,6 +176,7 @@ class ConstrainedMDTaskBuilder(TaskBuilder):
         self.selected_atomid = selected_atomid
         self.plumed_output = plumed_output
         self.cv_mode = cv_mode
+        self.method = method
         self.sampler_type = sampler_type
         self.task = Task()
     
@@ -199,7 +203,7 @@ class ConstrainedMDTaskBuilder(TaskBuilder):
     def build_plumed(self):
         return build_plumed_constraint_dict(
             conf=self.conf, cv_file=self.cv_file, selected_atomid=self.selected_atomid,
-            stride=self.stride, output=self.plumed_output, mode=self.cv_mode
+            stride=self.stride, output=self.plumed_output, mode=self.cv_mode, method=self.method
         )
 
 def build_gmx_dict(
@@ -273,13 +277,14 @@ def build_plumed_restraint_dict(
         at: Union[int, float, Sequence, np.ndarray] = 1.0,
         stride: int = 100,
         output: str = "plm.out",
-        mode: str = "torsion"    
+        mode: str = "torsion",
+        method: str = "restrained"    
     ):
     plumed_task_files = {}
     plm_content = make_restraint_plumed(
         conf=conf, cv_file=cv_file, selected_resid=selected_resid,
         kappa=kappa, at=at, stride=stride,
-        output=output, mode=mode
+        output=output, mode=mode, method = method
     )
     plumed_task_files[plumed_input_name] = (plm_content, "w")
     return plumed_task_files
@@ -290,12 +295,13 @@ def build_plumed_constraint_dict(
         selected_atomid: Optional[List[int]] = None,
         stride: int = 100,
         output: str = "plm.out",
-        mode: str = "distance"    
+        mode: str = "distance",    
+        method: str = "constrained"
     ):
     plumed_task_files = {}
     plm_content = make_constraint_plumed(
         conf=conf, cv_file=cv_file, selected_atomid=selected_atomid,
-        stride=stride, output=output, mode=mode
+        stride=stride, output=output, mode=mode, method=method
     )
     plumed_task_files[plumed_input_name] = (plm_content, "w")
     return plumed_task_files

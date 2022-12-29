@@ -154,6 +154,7 @@ class PrepLabel(OP):
         elif op_in["cv_config"]["mode"] == "distance":
             selected_atomid = op_in["cv_config"]["selected_atomid"]
         elif op_in["cv_config"]["mode"] == "custom":
+            selected_atomid = op_in["cv_config"]["selected_atomid"]
             cv_file = op_in["cv_file"]
         
         #print("what is cv", cv_file)
@@ -169,7 +170,8 @@ class PrepLabel(OP):
                 kappa = op_in["label_config"]["kappas"],
                 at = at,
                 plumed_output = plumed_output_name,
-                cv_mode = op_in["cv_config"]["mode"]
+                cv_mode = op_in["cv_config"]["mode"],
+                method = op_in["label_config"]["method"]
             )
         elif op_in["label_config"]["method"] == "constrained":
             gmx_task_builder = ConstrainedMDTaskBuilder(
@@ -180,7 +182,8 @@ class PrepLabel(OP):
                 selected_atomid = selected_atomid,
                 sampler_type = op_in["label_config"]["type"],
                 plumed_output = plumed_output_name,
-                cv_mode = op_in["cv_config"]["mode"]
+                cv_mode = op_in["cv_config"]["mode"],
+                method = op_in["label_config"]["method"]
             )
         gmx_task = gmx_task_builder.build()
         task_path = Path(op_in["task_name"])

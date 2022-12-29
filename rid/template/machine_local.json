@@ -42,6 +42,7 @@
         "run_exploration_config": "local_k8s_1",
         "prep_label_config": "local_k8s_3",
         "run_label_config": "local_k8s_2",
+        "post_label_config": "local_k8s_4",
         "prep_select_config": "local_k8s_3",
         "run_select_config": "local_k8s_4",
         "prep_data_config": "local_k8s_3",

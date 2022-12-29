@@ -157,6 +157,7 @@
         "run_exploration_config": "bohrium1",
         "prep_label_config": "bohrium3",
         "run_label_config": "bohrium2",
+        "post_label_config": "bohrium3",
         "prep_select_config": "bohrium3",
         "run_select_config": "bohrium4",
         "prep_data_config": "bohrium3",

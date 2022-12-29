@@ -1,5 +1,6 @@
 # Table of contents
 - [About Rid-kit](#about-rid-kit)
+- [Quick Start](#quick-start)
 - [Main procedure of RiD](#main-procedure-of-rid)
 - [Use Rid-kit](#use-rid-kit)
 - [Installation of enviroment](#installation-of-enviroment)
@@ -11,6 +12,46 @@
 Rid-kit is a package written in Python, designed to do enhanced sampling using reinforced dynamics. It aims to learn the free energy surface on the fly during MD run, and uses it as the bias potential during the next MD run. Its advantage is the ability to use a large number of CVs (100), thus can be used to simulate conformational changes of big molecules such as in the problem of protein folding.
 
 For more information, check the [documentation](https://rid-kit-dflow.readthedocs.io/en/latest/).
+
+# Quick start
+Rid-kit is based on [dflow](https://github.com/deepmodeling/dflow), so one need a k8s environment to run a workflow.
+The dflow team provide a community version of k8s [deepmodeling k8s](https://workflows.deepmodeling.com/), making the use of Rid-kit very convenient. To use the community version of k8s, one first need to register a Bohrium account in [Bohrium](https://bohrium.dp.tech/login) and learn a few concepts (job, jobgroup, project id) in the Bohrium website documents. Then the use of rid-kit is very easy.
+
+## Set the enviroment variables
+Just set the enviroment variables based on your personal Bohrium account information by
+
+```export DFLOW_HOST=https://workflows.deepmodeling.com
+export DFLOW_K8S_API_SERVER=https://workflows.deepmodeling.com
+export DFLOW_S3_REPO_KEY=oss-bohrium
+export DFLOW_S3_STORAGE_CLIENT=dflow.plugins.bohrium.TiefblueClient
+export BOHRIUM_USERNAME="<bohrium-email>"
+export BOHRIUM_PASSWORD="<bohrium-password>"
+export BOHRIUM_PROJECT_ID="<bohrium-project-id>"
+```
+
+## Install lebesgue
+Install the latest lbg
+```
+pip install lbg
+```
+
+## Install Rid-kit
+Install the latest rid-kit
+```
+git clone git@github.com:PKUfjh/rid-kit.git
+cd rid-kit
+git checkout dflow
+pip install .
+```
+## Run an example
+Run a example of Ala-dipeptide using dihedral as CVs(change to your own Bohrium account information)
+```
+rid submit -i /tests/data/000 -c /rid/template/rid_gmx_dih.json -m /rid/template/machine_bohrium_local.json
+```
+You can also run the example on a Slurm machine (But you need to configure a conda enviroment on the slurm, see below)
+```
+rid submit -i /tests/data/000 -c /rid/template/rid_gmx_dih.json -m /rid/template/machine_slurm_local.json
+```
 
 # Main procedure of RiD
 
@@ -40,7 +81,7 @@ A more detailed description of RiD is published now, please see:
 
 # Use Rid-kit
 
-A quick-start on using Rid-kit can be found as follows:
+A tutorial on using Rid-kit can be found as follows:
 
 - [Tutorial](/docs/source/tutorial.ipynb)
 

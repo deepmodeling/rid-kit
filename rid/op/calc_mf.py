@@ -15,7 +15,7 @@ from rid.constants import (
 from rid.common.gromacs.trjconv import generate_coords, generate_forces
 from rid.utils import load_txt, set_directory
 from rid.tools.estimator import pseudo_inv
-from rid.constants import gmx_coord_name, gmx_force_name
+from rid.constants import gmx_coord_name, gmx_force_name,f_cvt,kb
 import os
 
 
@@ -121,8 +121,8 @@ class CalcMF(OP):
             generate_coords(trr = op_in["trr_traj"], top = op_in["conf"], out_coord=gmx_coord_name)
             generate_forces(trr = op_in["trr_traj"], top = op_in["conf"], out_force=gmx_force_name)
             # Kb to KJ/mol
-            KB = 0.0083148648645
-            T = 372.18045
+            KB = kb*f_cvt
+            T = op_in["label_config"]["temperature"]
             coords = np.loadtxt(gmx_coord_name,comments=["#","@"])
             # coords units nm
             coords = coords[:,1:]

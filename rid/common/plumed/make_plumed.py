@@ -13,8 +13,7 @@ from rid.common.plumed.plumed_constant import (
     distance_def_from_atoms,
     deepfe_def,
     print_def,
-    restraint_def,
-    restraint_prefix
+    restraint_def
 )
 
 
@@ -100,56 +99,26 @@ def make_wholemolecules(atom_index):
             "\n")
 
 
-def user_plumed_def(cv_file, pstride, pfile, method):
+def user_plumed_def(cv_file, pstride, pfile):
     logger.info("Custom CVs are created from plumed files.")
     ret = ""
     cv_names = []
-    ispath = False
     print_content = None
     with open(cv_file, 'r') as fp:
         for line in fp.readlines():
             if ("PRINT" in line) and ("#" not in line):
                 print_content = line + "\n"
+                cv_names = line.split()[2].split("=")[1].split(",")
                 break
             ret += line
-            if method == "restrained":
-                if (":" in line) and ("#" not in line):
-                    cv_type = line.split(":")[1].strip().split(" ")[0]
-                    print("CV type!", cv_type)
-                    if cv_type != "PATH" and not ispath:
-                        cv_names.append(("{}".format(line.split(":")[0])).strip())
-                    elif cv_type == "PATH":
-                        ispath = True
-                        cv_names = []
-                        cv_names.append(("{}.spath".format(line.split(":")[0])).strip())
-                        cv_names.append(("{}.zpath".format(line.split(":")[0])).strip())
-                elif ("LABEL" in line) and ("#" not in line):
-                    cv_type = line.split("LABEL=")[0].strip().split(" ")[0]
-                    print("CV type!", cv_type)
-                    if cv_type != "PATH" and not ispath:
-                        cv_names.append(("{}".format(line.split("LABEL=")[1])).strip())
-                    elif cv_type == "PATH":
-                        ispath = True
-                        cv_names = []
-                        cv_names.append(("{}.spath".format(line.split("LABEL=")[1].strip())))
-                        cv_names.append(("{}.zpath".format(line.split("LABEL=")[1].strip())))
-            elif method == "constrained":
-                cv_names = []
-    if ret == "" and cv_names == []:
+    if ret == "" or cv_names == []:
         raise RuntimeError("Invalid customed plumed files.")
     if print_content is not None:
-        if method == "restrained":
-            assert len(print_content.split(",")) == len(cv_names), "There are {} CVs defined in the plumed file, while {} CVs are printed.".format(len(cv_names), len(print_content.split(",")) )
-            print_content_list = print_content.split()
-            print_content_list[-1] = "FILE={}".format(pfile)
-            print_content_list[1] = "STRIDE={}".format(str(pstride))
-            print_content = " ".join(print_content_list)
-        elif method == "constrained":
-            logger.info("CV numbers is defined by the topology file for constrained md")
-            print_content_list = print_content.split()
-            print_content_list[-1] = "FILE={}".format(pfile)
-            print_content_list[1] = "STRIDE={}".format(str(pstride))
-            print_content = " ".join(print_content_list)
+        assert len(print_content.split(",")) == len(cv_names), "There are {} CVs defined in the plumed file, while {} CVs are printed.".format(len(cv_names), len(print_content.split(",")) )
+        print_content_list = print_content.split()
+        print_content_list[-1] = "FILE={}".format(pfile)
+        print_content_list[1] = "STRIDE={}".format(str(pstride))
+        print_content = " ".join(print_content_list)
     return ret, cv_names, print_content
 
 
@@ -231,7 +200,7 @@ def make_distance_list_from_file(
         file_path: str,
         selected_atomid: List[int]
     ) -> Tuple[List, List]:
-    cv_info = get_distance_from_atomid( file_path, selected_atomid)
+    cv_info = get_distance_from_atomid(file_path, selected_atomid)
     logger.info("Create CVs (distance) from selected atom ids.")
     assert len(cv_info.keys()) > 0, "No valid CVs created."
     return make_distance_list(cv_info)
@@ -244,8 +213,7 @@ def make_restraint_plumed(
         at: Union[int, float, Sequence, np.ndarray] = 1.0,
         stride: int = 100,
         output: str = "plm.out",
-        mode: str = "torsion",
-        method: str = "restrained"    
+        mode: str = "torsion"
     ):
     content_list = []
     if mode == "torsion":
@@ -253,7 +221,7 @@ def make_restraint_plumed(
             make_torsion_list_from_file(conf, selected_resid)
         content_list += cv_content_list
     elif mode == "custom":
-        ret, cv_name_list, _ = user_plumed_def(cv_file[0], stride, output, method)
+        ret, cv_name_list, _ = user_plumed_def(cv_file[0], stride, output)
         content_list.append(ret)
     else:
         raise RuntimeError("Unknown mode for making plumed files.")
@@ -266,7 +234,7 @@ def make_restraint_plumed(
         cv_name_list, kappa, at
     )
     content_list += res_list
-    content_list.append( make_print(cv_name_list, stride, output) )
+    content_list.append(make_print(cv_name_list, stride, output))
     return list_to_string(content_list, split_sign="\n")
 
 def make_constraint_plumed(
@@ -275,8 +243,7 @@ def make_constraint_plumed(
         selected_atomid: Optional[List[int]] = None,
         stride: int = 100,
         output: str = "plm.out",
-        mode: str = "distance",
-        method: str = "constrained"    
+        mode: str = "distance"
     ):
     content_list = []
     if mode == "distance":
@@ -284,15 +251,12 @@ def make_constraint_plumed(
             make_distance_list_from_file(conf, selected_atomid)
         content_list += cv_content_list
     elif mode == "custom":
-        ret, cv_name_list, print_content = user_plumed_def(cv_file[0], stride, output, method)
+        ret, cv_name_list, _ = user_plumed_def(cv_file[0], stride, output)
         content_list.append(ret)
     else:
         raise RuntimeError("Unknown mode for making plumed files.")
 
-    if cv_name_list == []:
-        content_list.append(print_content)
-    else:
-        content_list.append(make_print(cv_name_list, stride, output) )
+    content_list.append(make_print(cv_name_list, stride, output))
     return list_to_string(content_list, split_sign="\n")
 
 def make_deepfe_plumed(

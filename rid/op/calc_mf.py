@@ -122,7 +122,7 @@ class CalcMF(OP):
             generate_forces(trr = op_in["trr_traj"], top = op_in["conf"], out_force=gmx_force_name)
             # Kb to KJ/mol
             KB = kb*f_cvt
-            T = op_in["label_config"]["temperature"]
+            T = float(op_in["label_config"]["temperature"])
             coords = np.loadtxt(gmx_coord_name,comments=["#","@"])
             # coords units nm
             coords = coords[:,1:]

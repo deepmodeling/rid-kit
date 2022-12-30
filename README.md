@@ -6,6 +6,7 @@
 - [Installation of enviroment](#installation-of-enviroment)
 - [Installation of DeepMD potential](#installation-of-dp)
 - [Configure simulations](#configure-simulations)
+- [Configure machine resources](#configure-machine-resources)
 - [Troubleshooting](#troubleshooting)
 
 # About Rid-kit
@@ -104,6 +105,9 @@ Installation of the DeepMD potential support can be found in
   
 # Configure simulations
 - [configure simulations](docs/source/rid_configuration.md)
+
+# Configure machine resources
+- [configure machines](docs/source/rid_machine.md)
 
 # Workflow Synopsis
 

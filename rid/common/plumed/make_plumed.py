@@ -104,6 +104,7 @@ def user_plumed_def(cv_file, pstride, pfile):
     ret = ""
     cv_names = []
     print_content = None
+    print("cv_file name",cv_file)
     with open(cv_file, 'r') as fp:
         for line in fp.readlines():
             if ("PRINT" in line) and ("#" not in line):
@@ -221,7 +222,9 @@ def make_restraint_plumed(
             make_torsion_list_from_file(conf, selected_resid)
         content_list += cv_content_list
     elif mode == "custom":
-        ret, cv_name_list, _ = user_plumed_def(cv_file[0], stride, output)
+        for cv_file_ in cv_file:
+            if not os.path.basename(cv_file_).endswith("pdb"):
+                ret, cv_name_list, _ = user_plumed_def(cv_file, stride, output)
         content_list.append(ret)
     else:
         raise RuntimeError("Unknown mode for making plumed files.")
@@ -251,7 +254,9 @@ def make_constraint_plumed(
             make_distance_list_from_file(conf, selected_atomid)
         content_list += cv_content_list
     elif mode == "custom":
-        ret, cv_name_list, _ = user_plumed_def(cv_file[0], stride, output)
+        for cv_file_ in cv_file:
+            if not os.path.basename(cv_file_).endswith("pdb"):
+                ret, cv_name_list, _ = user_plumed_def(cv_file_, stride, output)
         content_list.append(ret)
     else:
         raise RuntimeError("Unknown mode for making plumed files.")
@@ -281,7 +286,9 @@ def make_deepfe_plumed(
             make_distance_list_from_file(conf, selected_atomid)
         content_list += cv_content_list
     elif mode == "custom":
-        ret, cv_name_list, _ = user_plumed_def(cv_file[0], stride, output)
+        for cv_file_ in cv_file:
+            if not os.path.basename(cv_file_).endswith("pdb"):
+                ret, cv_name_list, _ = user_plumed_def(cv_file_, stride, output)
         content_list.append(ret)
     else:
         raise RuntimeError("Unknown mode for making plumed files.")
@@ -305,7 +312,9 @@ def get_cv_name(
     elif mode == "distance":
         _, cv_name_list = make_distance_list_from_file(conf, selected_atomid)
     elif mode == "custom":
-        _, cv_name_list, _ = user_plumed_def(cv_file[0], stride, "test.out")
+        for cv_file_ in cv_file:
+            if not os.path.basename(cv_file_).endswith("pdb"):
+                _, cv_name_list, _ = user_plumed_def(cv_file_, stride, "test.out")
     else:
         raise RuntimeError("Unknown mode for making plumed files.")
     return cv_name_list

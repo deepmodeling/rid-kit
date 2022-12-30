@@ -64,7 +64,9 @@ In distance mode, `RiD-kit` uses distance between atoms of systems as collective
 ### Custom mode
 
 `RiD-kit` also supports user-defined collective variables.
-Set `"mode": "custom"`. `cv_file`, `angular_mask` and `weights` must not be `none` or empty if you use custom mode.
+Set `"mode": "custom"` to use customed CV of your own design. `cv_file`, `angular_mask` and `weights` must not be `none` or empty if you use custom mode. The CV file is in the PLUMED2 format, you should add your own CV to the `PRINT` line in the CV file.
+
+Note that if you use only one CV file, the CV file name should not end with `".pdb"`. If you use multiple files to define your own CV, the file to define your CV should not end with `".pdb"`, and other files should end with `".pdb"`.
 
 * **`"cv_file"`** `(List[str])` List of Paths to CV files. The files define collective variables in PLUMED2 format. Technically, CV that PLUMED2 supports can be suporrted by `RiD-kit`. 
   

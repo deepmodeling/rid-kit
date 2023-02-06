@@ -220,10 +220,10 @@ namespace PLMD {
       for(unsigned ii=0; ii<getNumberOfArguments(); ++ii) {
 	const double f=trust * avg_f[ii];
 	// cout << "trust " << trust << " orig f " << avg_f[ii] << " real f "  << f << endl;
-	setOutputForce(ii,f);
+	setOutputForce(ii,-f);
 	totf2+=f*f;
       }
-      setBias(ene);
+      setBias(-ene);
       valueForce2->set(totf2);
       valueFstd->set(avg_std_f);
     }

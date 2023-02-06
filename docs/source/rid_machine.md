@@ -7,9 +7,9 @@
 ## Local machine and Bohrium cloud
 To run rid-kit workflow on a local machine or server, you need to build your own `k8s` enviroment by following the tutorials. But this is not recommended since `Rid-kit` workflow requires a lot of computation resources. 
 
-To run rid-kit workflow on `Bohrium coud`, you can either build your own `k8s` enviroment or simply use the community version of `k8s` [deepmodeling k8s](https://workflows.deepmodeling.com/).
+To run rid-kit workflow on `Bohrium cloud`, you can either build your own `k8s` enviroment or simply use the community version of `k8s` [deepmodeling k8s](https://workflows.deepmodeling.com/).
 
-Then the configuration is very easy, just configure different images to different rid-kit workflow steps. `Rid-kit` currently has six different `Docker images` to support different steps, add `registry.dp.tech/public/` if submitting to the `Bohdiurm cloud`.
+Then the configuration is very easy, just configure different images to different rid-kit workflow steps. `Rid-kit` currently has six different `Docker images` to support different steps, add `registry.dp.tech/public/` if submitting to the `Bohrium cloud`.
 
 `(registry.dp.tech/public/)pkufjhdocker/rid-gmx-exploration:stable` to do `run-exploration`. This image has gromacs compiled with plumed-patch, also supports tensorflow c++ interface, used to do neural network potential biased MD.
 

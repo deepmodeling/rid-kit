@@ -1,6 +1,7 @@
 # Table of contents
 - [About Rid-kit](#about-rid-kit)
 - [Quick Start](#quick-start)
+- [Run the workflow without k8s enviroment](#run-the-workflow-without-k8s-environment)
 - [Main procedure of RiD](#main-procedure-of-rid)
 - [Use Rid-kit](#use-rid-kit)
 - [Installation of enviroment](#installation-of-enviroment)

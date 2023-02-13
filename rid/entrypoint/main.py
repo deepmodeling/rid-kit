@@ -7,6 +7,10 @@ from typing import (
 )
 import rid
 
+if os.getenv('DFLOW_DEBUG'):
+    from dflow import config
+    config["mode"] = "debug"
+    
 NUMEXPR_MAX_THREADS = os.getenv("NUMEXPR_MAX_THREADS")
 if NUMEXPR_MAX_THREADS is None:
     NUMEXPR_MAX_THREADS = 8

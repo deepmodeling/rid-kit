@@ -1,0 +1,57 @@
+{
+    "resources": {
+        "local_k8s": {
+            "template_config" : {
+                "image": "pkufjhdocker/rid-tf-cpu:latest", 
+                "image_pull_policy" : "IfNotPresent",
+                "requests" : {"ephemeral-storage": "1Gi"}
+            }
+        },
+        "remote_slurm": {
+            "template_config":{
+                "requests" : {"ephemeral-storage": "1Gi"}
+            },
+            "executor":{
+            "image": "dptechnology/dpdispatcher:latest",
+            "machine_dict":{
+                "batch_type": "Slurm",
+                "context_type": "SSHContext",
+                "local_root" : "./",
+                "remote_root": "",
+                "remote_profile":{
+                    "hostname": "",
+                    "username": "",
+                    "password": "",
+                    "port": "",
+                    "timeout": 20
+                }
+            },
+            "resources_dict":{
+                "number_node": 1,
+                "cpu_per_node": 8,
+                "gpu_per_node": 1,
+                "queue_name": "",
+                "group_size": 1,
+                "custom_flags": [
+                    "#SBATCH --time=120:00:00",
+                    "#SBATCH --exclude=3090-[000,007]"
+                   ],
+                "source_list": ["/path/to/rid.env"]
+            }
+        }
+        }
+    },
+
+    "tasks": {
+        "prep_exploration_config": "local_k8s",
+        "run_exploration_config": "remote_slurm",
+        "prep_label_config": "local_k8s",
+        "run_label_config": "remote_slurm",
+        "post_label_config": "remote_slurm",
+        "prep_select_config": "local_k8s",
+        "run_select_config": "remote_slurm",
+        "prep_data_config": "local_k8s",
+        "run_train_config": "remote_slurm",
+        "workflow_steps_config": "local_k8s"
+    }
+}

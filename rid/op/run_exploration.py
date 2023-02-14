@@ -23,7 +23,7 @@ from rid.constants import (
         lmp_input_name
     )
 from rid.utils import run_command, set_directory, list_to_string
-from rid.common.mol import final_dump
+from rid.common.lammps.command import final_dump
 from rid.common.sampler.command import get_grompp_cmd, get_mdrun_cmd
 
 

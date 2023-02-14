@@ -2,7 +2,7 @@ numpy
 setuptools_scm
 scikit-learn
 pydflow
-tensorflow==2.6.2
+tensorflow==2.8.0
 google
 mdtraj
 dpdata

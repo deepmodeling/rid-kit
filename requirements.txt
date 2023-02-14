@@ -1,4 +1,5 @@
 numpy
+setuptools-scm
 scikit-learn
 pydflow
 tensorflow==2.6.2

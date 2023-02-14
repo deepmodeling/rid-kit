@@ -42,6 +42,7 @@ Install the latest rid-kit
 git clone git@github.com:PKUfjh/rid-kit.git
 cd rid-kit
 git checkout dflow
+pip install setuptools_scm
 pip install .
 ```
 ## Run an example

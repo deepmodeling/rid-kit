@@ -1,5 +1,4 @@
-numpy
-setuptools_scm
+protobuf==3.20.1
 scikit-learn
 pydflow
 tensorflow==2.8.0

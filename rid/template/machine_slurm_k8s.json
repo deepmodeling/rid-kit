@@ -2,7 +2,7 @@
     "resources": {
         "local_k8s": {
             "template_config" : {
-                "image": "pkufjhdocker/rid-tf-cpu:latest", 
+                "image": "registry.dp.tech/public/pkufjhdocker/rid-tf-cpu:stable", 
                 "image_pull_policy" : "IfNotPresent",
                 "requests" : {"ephemeral-storage": "1Gi"}
             }

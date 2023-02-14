@@ -127,12 +127,12 @@ default_config = normalize_resources({
 class TestMockedLabel(unittest.TestCase):
     def setUp(self):
         self.init_models = make_mocked_init_models(4)
-        self.init_confs = make_mocked_init_confs(3)
         self.center = make_mocked_init_data("center", 3)
         label_config = {"type":"gmx"}
         cv_config = {"cv_dim": 3}
         walker_tags = []
         self.numb_walkers = 3
+        self.init_confs = make_mocked_init_confs(self.numb_walkers)
         for ii in range(self.numb_walkers):
             walker_tags.append(walker_tag_fmt.format(idx=ii))
         self.models = upload_artifact(self.init_models)

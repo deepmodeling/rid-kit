@@ -231,7 +231,7 @@ def _label(
             slices=Slices("{{item}}",
                 input_parameter=["task_name"],
                 input_artifact=["conf","plm_out", "trr_traj","at"],
-                output_artifact=["forces","frame_coords", "frame_forces"]),
+                output_artifact=["forces","mf_info"]),
             **post_template_config,
         ),
         parameters={
@@ -242,6 +242,7 @@ def _label(
         },
         artifacts={
             "conf": label_steps.inputs.artifacts["confs"],
+            "topology": label_steps.inputs.artifacts["topology"],
             "plm_out": run_label.outputs.artifacts["plm_out"],
             "trr_traj": run_label.outputs.artifacts["trr_traj"],
             "at": label_steps.inputs.artifacts['at']

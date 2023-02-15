@@ -151,3 +151,25 @@ def slice_dump(
         )
     else:
         raise RuntimeError("Unknown Style for Slicing Trajectory.")
+    
+def phase_factor(r_cv, cv_init, selected_atomid_simple, mass_list):
+    C_m = np.zeros(shape=(len(cv_init), len(cv_init)))
+    C_list = np.zeros(shape=(len(cv_init), len(r_cv)))
+    for index in range(len(cv_init)):
+        atom_id1 = selected_atomid_simple[index][0]
+        atom_id2 = selected_atomid_simple[index][1]
+        C_list[index][atom_id1*3] = (r_cv[atom_id1*3] - r_cv[atom_id2*3])/cv_init[index]
+        C_list[index][atom_id1*3+1] = (r_cv[atom_id1*3+1] - r_cv[atom_id2*3+1])/cv_init[index]
+        C_list[index][atom_id1*3+2] = (r_cv[atom_id1*3+2] - r_cv[atom_id2*3+2])/cv_init[index]
+        C_list[index][atom_id2*3] = -(r_cv[atom_id1*3] - r_cv[atom_id2*3])/cv_init[index]
+        C_list[index][atom_id2*3+1] = -(r_cv[atom_id1*3+1] - r_cv[atom_id2*3+1])/cv_init[index]
+        C_list[index][atom_id2*3+2] = -(r_cv[atom_id1*3+2] - r_cv[atom_id2*3+2])/cv_init[index]
+    
+    Mass = np.diag(mass_list)
+    Mass = np.linalg.inv(Mass)
+    for index_i in range(len(cv_init)):
+        for index_j in range(len(cv_init)):
+            C_m[index_i,index_j] = np.dot(np.dot(C_list[index_i],Mass),C_list[index_j])
+    
+    A = np.linalg.det(C_m)
+    return A

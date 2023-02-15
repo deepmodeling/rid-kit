@@ -13,14 +13,21 @@ from rid.constants import (
         force_out
     )
 from rid.common.gromacs.trjconv import generate_coords, generate_forces
+from rid.common.mol import phase_factor
 from rid.utils import load_txt, set_directory
 from rid.tools.estimator import pseudo_inv
 from rid.constants import gmx_coord_name, gmx_force_name,f_cvt,kb
 import os
+from parmed import gromacs
+import parmed as pmd
 
+if os.path.exists("/gromacs/share/gromacs/top"):
+    gromacs.GROMACS_TOPDIR = "/gromacs/share/gromacs/top"
+elif os.path.exists("/opt/conda/share/gromacs/top"):
+    gromacs.GROMACS_TOPDIR = "/opt/conda/share/gromacs/top"
 
 class CalcMF(OP):
-
+    
     """
     Calculate mean force with the results of restrained MD. 
     
@@ -38,6 +45,7 @@ class CalcMF(OP):
         return OPIOSign(
             {
                 "conf": Artifact(Path),
+                "topology": Artifact(Path,optional=True),
                 "trr_traj": Artifact(Path,optional=True),
                 "task_name": str,
                 "plm_out": Artifact(Path),
@@ -53,8 +61,7 @@ class CalcMF(OP):
         return OPIOSign(
             {
                 "forces": Artifact(Path),
-                "frame_coords": Artifact(Path,optional=True),
-                "frame_forces": Artifact(Path,optional=True)
+                "mf_info": Artifact(Path,optional=True)
             }
         )
 
@@ -131,11 +138,24 @@ class CalcMF(OP):
             forces = forces[:,1:]
             
             mflist = []
+            mflist_phase = []
+            phase_list = []
+            mf_average_phase = []
             selected_atomid = op_in["cv_config"]["selected_atomid"]
             selected_atoms = list(set([item for sublist in selected_atomid for item in sublist]))
             selected_atomid_simple = []
             for atom_pairs in selected_atomid:
                 selected_atomid_simple.append([selected_atoms.index(i) for i in atom_pairs])
+                
+            # calculate mass matrix of the system
+            system = pmd.load_file(os.path.abspath(op_in["topology"]))
+            mass_list = [system.atoms[i].mass for i in range(len(system.atoms))]
+            mass_list_simple = []
+            for atom_id in selected_atoms:
+                atom_id -= 1
+                mass_list_simple.append(mass_list[atom_id])
+                mass_list_simple.append(mass_list[atom_id])
+                mass_list_simple.append(mass_list[atom_id])
             
             # calculate mean force via singular value decomposition(SVD)
             eps = 0.0001
@@ -164,35 +184,69 @@ class CalcMF(OP):
                     B2 = pseudo_inv(r2, centers,selected_atomid_simple)
                     dBdx.append((B1-B2)/(2*eps))
                 dBdx = np.array(dBdx)
+                phase = phase_factor(r_cv, centers, selected_atomid_simple, mass_list_simple)
                 mf = np.matmul(B,f_cv) + KB*T*np.trace(dBdx, axis1=0, axis2=2)
                 
+                phase_list.append(1/(phase**0.5))
                 mflist.append(mf)
+                mflist_phase.append(mf/(phase**0.5))
             
             mflist = np.array(mflist)
+            mflist_phase = np.array(mflist_phase)
             nframes = np.shape(coords)[0]            
             
             start_f = int(nframes * (1-op_in["tail"]))
-            avg_force = np.average(mflist[start_f:, :], axis=0)
-                
+            mid_f = int(nframes * 0.5)
+            mf_avg_without_norm = np.average(mflist_phase[start_f:, :], axis=0)
+            phase_avg = np.average(phase_list[start_f:])
+            mf_avg_without_phase = np.average(mflist[start_f:, :], axis=0)
+            avg_force = mf_avg_without_norm/phase_avg
+            
+            for simu_frames in range(1, nframes,1):
+                start_f = int(simu_frames*(1-0.9))
+                mf_average_phase.append(np.average(mflist_phase[start_f:simu_frames, :], axis=0)/np.average(phase_list[start_f:simu_frames]))
+            
+            # calculate mean force statistics
+            mf_average_phase = np.array(mf_average_phase)
+            mf_difference = avg_force - mf_avg_without_phase
+            mf_std = np.std(mf_average_phase[mid_f:,:], axis=0)
+            
+            # mf_info = np.array([[mf_difference],[mf_std]])
+            
             # std_force = np.std(mf_block, axis = 0)
             task_path = Path(op_in["task_name"])
             task_path.mkdir(exist_ok=True, parents=True)
             np.savetxt(task_path.joinpath(force_out),  np.reshape(avg_force, [1, -1]), fmt='%.10e')
-            np.savetxt(task_path.joinpath(gmx_coord_name), coords, fmt='%.10e')
-            np.savetxt(task_path.joinpath(gmx_force_name), forces, fmt='%.10e')
+            with open(task_path.joinpath("mf_info.out"),"w") as f:
+                f.write("mean force value   ")
+                for mf_ in avg_force:
+                    f.write("%.4f "%mf_)
+                f.write("\n")
+                f.write("diff with phase    ")
+                for mf_diff_ in mf_difference:
+                    f.write("%.4f "%mf_diff_)
+                f.write("\n")
+                f.write("mean force std     ")
+                for mf_std_ in mf_std:
+                    f.write("%.4f "%mf_std_)
+            
+            # np.savetxt(task_path.joinpath(gmx_coord_name), coords, fmt='%.10e')
+            # np.savetxt(task_path.joinpath(gmx_force_name), forces, fmt='%.10e')
 
-        frame_coords = None
-        frame_forces = None
-        if os.path.exists(task_path.joinpath(gmx_coord_name)):
-            frame_coords = task_path.joinpath(gmx_coord_name)
-        if os.path.exists(task_path.joinpath(gmx_force_name)):
-            frame_forces = task_path.joinpath(gmx_force_name)
+        # frame_coords = None
+        # frame_forces = None
+        # if os.path.exists(task_path.joinpath(gmx_coord_name)):
+        #     frame_coords = task_path.joinpath(gmx_coord_name)
+        # if os.path.exists(task_path.joinpath(gmx_force_name)):
+        #     frame_forces = task_path.joinpath(gmx_force_name)
+        mf_info = None
+        if os.path.exists(task_path.joinpath("mf_info.out")):
+            mf_info = task_path.joinpath("mf_info.out")
             
         op_out = OPIO(
             {
                 "forces": task_path.joinpath(force_out),
-                "frame_coords": frame_coords,
-                "frame_forces": frame_forces
+                "mf_info": mf_info
             }
         )
         return op_out

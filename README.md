@@ -21,7 +21,8 @@ Rid-kit is based on [dflow](https://github.com/deepmodeling/dflow), one can deci
 ## Set the enviroment variables
 Just set the enviroment variables based on your personal Bohrium account information by
 
-```export DFLOW_HOST=https://workflows.deepmodeling.com
+```
+export DFLOW_HOST=https://workflows.deepmodeling.com
 export DFLOW_K8S_API_SERVER=https://workflows.deepmodeling.com
 export DFLOW_S3_REPO_KEY=oss-bohrium
 export DFLOW_S3_STORAGE_CLIENT=dflow.plugins.bohrium.TiefblueClient

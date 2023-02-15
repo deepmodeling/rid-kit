@@ -5,3 +5,4 @@ tensorflow==2.8.0
 google
 mdtraj
 dpdata
+parmed

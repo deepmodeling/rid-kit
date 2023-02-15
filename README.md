@@ -30,12 +30,6 @@ export BOHRIUM_PASSWORD="<bohrium-password>"
 export BOHRIUM_PROJECT_ID="<bohrium-project-id>"
 ```
 
-## Install lebesgue
-Install the latest lbg
-```
-pip install lbg
-```
-
 ## Install Rid-kit
 Install the latest rid-kit
 ```

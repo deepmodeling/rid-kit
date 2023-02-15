@@ -6,3 +6,5 @@ google
 mdtraj
 dpdata
 parmed
+dpdispatcher
+lbg

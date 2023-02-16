@@ -221,6 +221,10 @@ def make_restraint_plumed(
         cv_content_list, cv_name_list = \
             make_torsion_list_from_file(conf, selected_resid)
         content_list += cv_content_list
+    elif mode == "distance":
+        cv_content_list, cv_name_list = \
+            make_distance_list_from_file(conf, selected_resid)
+        content_list += cv_content_list
     elif mode == "custom":
         for cv_file_ in cv_file:
             if not os.path.basename(cv_file_).endswith("pdb"):

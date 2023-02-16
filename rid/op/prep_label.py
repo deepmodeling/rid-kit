@@ -163,6 +163,10 @@ class PrepLabel(OP):
         #print("what is cv", cv_file)
         if op_in["label_config"]["method"] == "restrained":
             at = load_txt(op_in["at"])
+            if op_in["cv_config"]["mode"] == "torsion":
+                selected_resid = selected_resid
+            elif op_in["cv_config"]["mode"] == "distance":
+                selected_resid = selected_atomid
             gmx_task_builder = RestrainedMDTaskBuilder(
                 conf = op_in["conf"],
                 topology = op_in["topology"],

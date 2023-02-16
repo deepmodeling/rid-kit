@@ -24,6 +24,7 @@
 
     "ExploreMDConfig": {
         "type": "gmx",
+        "temperature": 300,
         "dp_model": ["dp.000.pb"],
         "nsteps": 2000,
         "ref-t": "300 300",
@@ -53,6 +54,8 @@
 
     "LabelMDConfig": {
         "type": "gmx",
+        "method": "constrained",
+        "temperature": 300,
         "dp_model": ["dp.000.pb"],
         "nsteps": 1000,
         "ref-t": "300 300",

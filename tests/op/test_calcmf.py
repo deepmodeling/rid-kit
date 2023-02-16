@@ -32,14 +32,19 @@ class Test_Calcmf(unittest.TestCase):
     def test(self):
         op = CalcMF()
         data = Path(self.datapath)
+        conf_path = data/"conf.gro"
+        cv_config1 = {"mode": "torsion", "selected_resid": [1, 2], "angular_mask": [1,1],"cv_file": []}
+        gmx_config = {"type":"gmx","nsteps": 50,"method":"restrained", "output_freq": 1, "temperature": 300, "kappas": [500,500],
+                      "dt": 0.002, "output_mode": "both", "ntmpi": 1, "nt": 8, "max_warning": 0}
         op_in = OPIO(
             {
+                "conf": conf_path,
                 "task_name": "force",
                 "plm_out": data/plumed_output_name,
-                "kappas": [500,500],
                 "at": data/"centers.out",
                 "tail": 0.9,
-                "angular_mask": [1, 1],
+                "cv_config": cv_config1,
+                "label_config": gmx_config
             }
         )
         op_out = op.execute(op_in)

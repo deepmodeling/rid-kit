@@ -7,6 +7,10 @@ from typing import (
 )
 import rid
 
+if os.getenv('DFLOW_DEBUG'):
+    from dflow import config
+    config["mode"] = "debug"
+    
 NUMEXPR_MAX_THREADS = os.getenv("NUMEXPR_MAX_THREADS")
 if NUMEXPR_MAX_THREADS is None:
     NUMEXPR_MAX_THREADS = 8
@@ -23,6 +27,8 @@ except ImportError:
 
 from .submit import submit_rid
 from .resubmit import resubmit_rid
+from .label import label_rid
+from .relabel import relabel_rid
 from .info import information
 from .server import forward_ports
 from .cli import rid_ls, rid_rm
@@ -105,7 +111,7 @@ def main_parser() -> argparse.ArgumentParser:
     # resubmit
     parser_rerun = subparsers.add_parser(
         "resubmit",
-        help="Submit RiD workflow",
+        help="Resubmit RiD workflow",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser_rerun.add_argument(
@@ -140,6 +146,41 @@ def main_parser() -> argparse.ArgumentParser:
         "--config", "-c", help="RiD configuration.", dest="config"
     )
     parser_exp.add_argument(
+        "--machine", "-m", help="Machine configuration.", dest="machine"
+    )
+    
+    # Label
+    parser_label = subparsers.add_parser(
+        "label",
+        help="labeling MD workflow",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser_label.add_argument(
+        "--mol", "-i", help="Initial conformation files.", dest="mol",
+    )
+    parser_label.add_argument(
+        "--config", "-c", help="RiD configuration.", dest="config"
+    )
+    parser_label.add_argument(
+        "--machine", "-m", help="Machine configuration.", dest="machine"
+    )
+    
+    # Relabel
+    parser_relabel = subparsers.add_parser(
+        "relabel",
+        help="Resubmit labeling MD workflow",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser_relabel.add_argument(
+        "WORKFLOW_ID", help="Workflow ID."
+    )
+    parser_relabel.add_argument(
+        "--mol", "-i", help="Initial conformation files.", dest="mol",
+    )
+    parser_relabel.add_argument(
+        "--config", "-c", help="RiD configuration.", dest="config"
+    )
+    parser_relabel.add_argument(
         "--machine", "-m", help="Machine configuration.", dest="machine"
     )
     
@@ -273,6 +314,37 @@ def main():
     elif args.command == "explore":
         logger.info("RiD Exploration.")
         return None
+    elif args.command == "label":
+        logger.info("Labeling MD ...")
+        confs, top_file, models, forcefield, index_file, dp_files, otherfiles = parse_submit(args)
+        label_rid(
+            confs = confs,
+            topology = top_file,
+            rid_config = args.config,
+            machine_config = args.machine,
+            models = models,
+            forcefield = forcefield,
+            index_file = index_file,
+            dp_files = dp_files,
+            otherfiles = otherfiles
+        )
+        log_ui()
+    elif args.command == "relabel":
+        logger.info("Labeling MD ...")
+        confs, top_file, models, forcefield, index_file, dp_files, otherfiles = parse_submit(args)
+        relabel_rid(
+            workflow_id=args.WORKFLOW_ID,
+            confs = confs,
+            topology = top_file,
+            rid_config = args.config,
+            machine_config = args.machine,
+            models = models,
+            forcefield = forcefield,
+            index_file = index_file,
+            dp_files = dp_files,
+            otherfiles = otherfiles
+        )
+        log_ui()
     elif args.command == "port-forward":
         forward_ports()
     elif args.command == "ls":

@@ -39,11 +39,13 @@ def prep_rid_op(
     run_exploration_config,
     prep_label_config,
     run_label_config,
+    post_label_config,
     prep_select_config,
     run_select_config,
     prep_data_config,
     run_train_config,
-    workflow_steps_config
+    workflow_steps_config,
+    retry_times
     ):
 
     exploration_op = Exploration(
@@ -51,7 +53,8 @@ def prep_rid_op(
         PrepExplore,
         RunExplore,
         prep_exploration_config,
-        run_exploration_config)
+        run_exploration_config,
+        retry_times=retry_times)
 
     label_op = Label(
         "label",
@@ -60,20 +63,24 @@ def prep_rid_op(
         RunLabel,
         CalcMF,
         prep_label_config,
-        run_label_config)
+        run_label_config,
+        post_label_config,
+        retry_times=retry_times)
 
     select_op = Selector(
         "select",
         PrepSelect,
         RunSelect,
         prep_select_config,
-        run_select_config)
+        run_select_config,
+        retry_times=retry_times)
 
     data_op = DataGenerator(
         "gen-data",
         CollectData,
         MergeData,
-        prep_data_config)
+        prep_data_config,
+        retry_times=retry_times)
 
     init_block_op = InitBlock(
         "init-block",
@@ -83,6 +90,7 @@ def prep_rid_op(
         data_op,
         TrainModel,
         run_train_config,
+        retry_times=retry_times
     )
 
     block_op = IterBlock(
@@ -94,7 +102,8 @@ def prep_rid_op(
         AdjustTrustLevel,
         TrainModel,
         workflow_steps_config,
-        run_train_config)
+        run_train_config,
+        retry_times=retry_times)
     
     rid_op = ReinforcedDynamics(
         "reinforced-dynamics",
@@ -103,7 +112,6 @@ def prep_rid_op(
         workflow_steps_config
     )
     return rid_op
-
 
 def submit_rid(
         confs: Union[str, List[str]],
@@ -129,11 +137,13 @@ def submit_rid(
         run_exploration_config = normalized_resources[tasks["run_exploration_config"]],
         prep_label_config = normalized_resources[tasks["prep_label_config"]],
         run_label_config = normalized_resources[tasks["run_label_config"]],
+        post_label_config = normalized_resources[tasks["post_label_config"]],
         prep_select_config = normalized_resources[tasks["prep_select_config"]],
         run_select_config = normalized_resources[tasks["run_select_config"]],
         prep_data_config = normalized_resources[tasks["prep_data_config"]],
         run_train_config = normalized_resources[tasks["run_train_config"]],
-        workflow_steps_config = normalized_resources[tasks["workflow_steps_config"]]
+        workflow_steps_config = normalized_resources[tasks["workflow_steps_config"]],
+        retry_times=3
     )
 
     if isinstance(confs, str):

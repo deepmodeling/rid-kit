@@ -5,14 +5,15 @@ import logging
 import numpy as np
 from typing import List, Union, Tuple, Dict, Optional, Sequence
 from rid.utils import list_to_string
-from rid.common.mol import get_dihedral_from_resid
+from rid.common.mol import get_dihedral_from_resid, get_distance_from_atomid
 from rid.common.plumed.plumed_constant import (
     dihedral_name,
+    distance_name,
     dihedral_def_from_atoms,
+    distance_def_from_atoms,
     deepfe_def,
     print_def,
-    restraint_def,
-    restraint_prefix
+    restraint_def
 )
 
 
@@ -102,35 +103,16 @@ def user_plumed_def(cv_file, pstride, pfile):
     logger.info("Custom CVs are created from plumed files.")
     ret = ""
     cv_names = []
-    ispath = False
     print_content = None
+    print("cv_file name",cv_file)
     with open(cv_file, 'r') as fp:
         for line in fp.readlines():
             if ("PRINT" in line) and ("#" not in line):
                 print_content = line + "\n"
+                cv_names = line.split()[2].split("=")[1].split(",")
                 break
-            ret += line + "\n"
-            if (":" in line) and ("#" not in line):
-                cv_type = line.split(":")[1].strip().split(" ")[0]
-                print("CV type!", cv_type)
-                if cv_type != "PATH" and not ispath:
-                    cv_names.append(("{}".format(line.split(":")[0])).strip())
-                elif cv_type == "PATH":
-                    ispath = True
-                    cv_names = []
-                    cv_names.append(("{}.spath".format(line.split(":")[0])).strip())
-                    cv_names.append(("{}.zpath".format(line.split(":")[0])).strip())
-            elif ("LABEL" in line) and ("#" not in line):
-                cv_type = line.split("LABEL=")[0].strip().split(" ")[0]
-                print("CV type!", cv_type)
-                if cv_type != "PATH" and not ispath:
-                    cv_names.append(("{}".format(line.split("LABEL=")[1])).strip())
-                elif cv_type == "PATH":
-                    ispath = True
-                    cv_names = []
-                    cv_names.append(("{}.spath".format(line.split("LABEL=")[1].strip())))
-                    cv_names.append(("{}.zpath".format(line.split("LABEL=")[1].strip())))
-    if ret == "" or cv_names == "":
+            ret += line
+    if ret == "" or cv_names == []:
         raise RuntimeError("Invalid customed plumed files.")
     if print_content is not None:
         assert len(print_content.split(",")) == len(cv_names), "There are {} CVs defined in the plumed file, while {} CVs are printed.".format(len(cv_names), len(print_content.split(",")) )
@@ -152,6 +134,16 @@ def make_torsion(
         a3 = atom_list[2], a4 = atom_list[3],
     )
 
+def make_distance(
+        name: str,
+        atom_list: List[Union[int, str]]
+    ) -> str:
+    assert len(atom_list) == 2, f"Make sure distance defined by 2 atoms, not {len(atom_list)}."
+    return distance_def_from_atoms.format(
+        name = name,
+        a1 = atom_list[0], a2 = atom_list[1]
+    )
+
 
 def make_torsion_name(resid: int, angid: int):
     return dihedral_name.format(
@@ -159,6 +151,11 @@ def make_torsion_name(resid: int, angid: int):
         angid = angid
     )
 
+def make_distance_name(atomids: list):
+    return distance_name.format(
+    atomid1 = int(atomids[0]),
+    atomid2 = int(atomids[1])
+    )
 
 def make_torsion_list(
         dihedral_info: Dict,
@@ -175,6 +172,21 @@ def make_torsion_list(
             ))
     return torsion_list, torsion_name_list
 
+def make_distance_list(
+        distance_info: Dict,
+    ) -> Tuple[List, List]:
+    distance_list = []
+    distance_name_list = []
+    for atomids in distance_info.keys():
+        dis = distance_info[atomids]
+        atom_list = atomids.split(" ")
+        distance_name = make_distance_name(atomids=atom_list)
+        distance_name_list.append(distance_name)
+        distance_list.append(make_distance(
+            name = distance_name,
+            atom_list=atom_list)
+        )
+    return distance_list, distance_name_list
 
 def make_torsion_list_from_file(
         file_path: str,
@@ -185,6 +197,14 @@ def make_torsion_list_from_file(
     assert len(cv_info.keys()) > 0, "No valid CVs created."
     return make_torsion_list(cv_info)
 
+def make_distance_list_from_file(
+        file_path: str,
+        selected_atomid: List[int]
+    ) -> Tuple[List, List]:
+    cv_info = get_distance_from_atomid(file_path, selected_atomid)
+    logger.info("Create CVs (distance) from selected atom ids.")
+    assert len(cv_info.keys()) > 0, "No valid CVs created."
+    return make_distance_list(cv_info)
 
 def make_restraint_plumed(
         conf: Optional[str] = None,
@@ -194,15 +214,21 @@ def make_restraint_plumed(
         at: Union[int, float, Sequence, np.ndarray] = 1.0,
         stride: int = 100,
         output: str = "plm.out",
-        mode: str = "torsion"    
+        mode: str = "torsion"
     ):
     content_list = []
     if mode == "torsion":
         cv_content_list, cv_name_list = \
             make_torsion_list_from_file(conf, selected_resid)
         content_list += cv_content_list
+    elif mode == "distance":
+        cv_content_list, cv_name_list = \
+            make_distance_list_from_file(conf, selected_resid)
+        content_list += cv_content_list
     elif mode == "custom":
-        ret, cv_name_list, _ = user_plumed_def(cv_file[0], stride, output)
+        for cv_file_ in cv_file:
+            if not os.path.basename(cv_file_).endswith("pdb"):
+                ret, cv_name_list, _ = user_plumed_def(cv_file, stride, output)
         content_list.append(ret)
     else:
         raise RuntimeError("Unknown mode for making plumed files.")
@@ -215,14 +241,38 @@ def make_restraint_plumed(
         cv_name_list, kappa, at
     )
     content_list += res_list
-    content_list.append( make_print(cv_name_list, stride, output) )
+    content_list.append(make_print(cv_name_list, stride, output))
     return list_to_string(content_list, split_sign="\n")
 
+def make_constraint_plumed(
+        conf: Optional[str] = None,
+        cv_file: Optional[List[str]] = None,
+        selected_atomid: Optional[List[int]] = None,
+        stride: int = 100,
+        output: str = "plm.out",
+        mode: str = "distance"
+    ):
+    content_list = []
+    if mode == "distance":
+        cv_content_list, cv_name_list = \
+            make_distance_list_from_file(conf, selected_atomid)
+        content_list += cv_content_list
+    elif mode == "custom":
+        for cv_file_ in cv_file:
+            if not os.path.basename(cv_file_).endswith("pdb"):
+                ret, cv_name_list, _ = user_plumed_def(cv_file_, stride, output)
+        content_list.append(ret)
+    else:
+        raise RuntimeError("Unknown mode for making plumed files.")
+
+    content_list.append(make_print(cv_name_list, stride, output))
+    return list_to_string(content_list, split_sign="\n")
 
 def make_deepfe_plumed(
         conf: Optional[str] = None,
         cv_file: Optional[List[str]] = None,
         selected_resid: Optional[List[int]] = None,
+        selected_atomid: Optional[List[int]] = None,
         trust_lvl_1: float = 1.0,
         trust_lvl_2: float = 2.0,
         model_list: List[str] = ["graph.pb"],
@@ -235,8 +285,14 @@ def make_deepfe_plumed(
         cv_content_list, cv_name_list = \
             make_torsion_list_from_file(conf, selected_resid)
         content_list += cv_content_list
+    elif mode == "distance":
+        cv_content_list, cv_name_list = \
+            make_distance_list_from_file(conf, selected_atomid)
+        content_list += cv_content_list
     elif mode == "custom":
-        ret, cv_name_list, _ = user_plumed_def(cv_file[0], stride, output)
+        for cv_file_ in cv_file:
+            if not os.path.basename(cv_file_).endswith("pdb"):
+                ret, cv_name_list, _ = user_plumed_def(cv_file_, stride, output)
         content_list.append(ret)
     else:
         raise RuntimeError("Unknown mode for making plumed files.")
@@ -250,14 +306,19 @@ def get_cv_name(
         conf: Optional[str] = None,
         cv_file: Optional[List[str]] = None,
         selected_resid: Optional[List[int]] = None,
+        selected_atomid: Optional[List[int]] = None,
         stride: int = 100,
         mode: str = "torsion"
     ):
     if mode == "torsion":
         _, cv_name_list = \
             make_torsion_list_from_file(conf, selected_resid)
+    elif mode == "distance":
+        _, cv_name_list = make_distance_list_from_file(conf, selected_atomid)
     elif mode == "custom":
-        _, cv_name_list, _ = user_plumed_def(cv_file[0], stride, "test.out")
+        for cv_file_ in cv_file:
+            if not os.path.basename(cv_file_).endswith("pdb"):
+                _, cv_name_list, _ = user_plumed_def(cv_file_, stride, "test.out")
     else:
         raise RuntimeError("Unknown mode for making plumed files.")
     return cv_name_list

@@ -127,12 +127,12 @@ default_config = normalize_resources({
 class TestMockedLabel(unittest.TestCase):
     def setUp(self):
         self.init_models = make_mocked_init_models(4)
-        self.init_confs = make_mocked_init_confs(3)
         self.center = make_mocked_init_data("center", 3)
         label_config = {"type":"gmx"}
         cv_config = {"cv_dim": 3}
         walker_tags = []
         self.numb_walkers = 3
+        self.init_confs = make_mocked_init_confs(self.numb_walkers)
         for ii in range(self.numb_walkers):
             walker_tags.append(walker_tag_fmt.format(idx=ii))
         self.models = upload_artifact(self.init_models)
@@ -162,7 +162,8 @@ class TestMockedLabel(unittest.TestCase):
             MockedRunLabel,
             MockedCalcMF,
             prep_config = default_config,
-            run_config = default_config
+            run_config = default_config,
+            post_config = default_config
         )
         labeling_step = Step(
             'label-step',
@@ -170,8 +171,6 @@ class TestMockedLabel(unittest.TestCase):
             parameters = {
                 "label_config" : self.label_config,
                 "cv_config" : self.cv_config,
-                "kappas": self.kappas,
-                "angular_mask": self.angular_mask,
                 "tail": self.tail,
                 "conf_tags": self.conf_tags,
                 "block_tag" : self.block_tag

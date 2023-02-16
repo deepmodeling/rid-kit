@@ -395,8 +395,9 @@ class Model(object):
         energy_ = self._final_layer(
             layer, 1, activation_fn=None, name='energy', reuse=reuse, init=init)
         energy = tf.identity(energy_, name='o_energy')
-        forces = - tf.reshape(tf.stack(tf.gradients(energy, cvs)),
-                              [-1, self.cv_dim], name='o_forces')
+        energy_grad = tf.reshape(tf.stack(tf.gradients(energy, cvs)),
+                              [-1, self.cv_dim], name='energy_grad')
+        forces = tf.identity(-energy_grad, name='o_forces')
         force_dif = forces_hat - forces
         forces_norm = tf.reshape(tf.reduce_sum(
             forces * forces, axis=1), [-1, 1])

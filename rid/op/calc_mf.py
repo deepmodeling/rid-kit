@@ -6,17 +6,28 @@ from dflow.python import (
     Parameter
 )
 
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict
 from pathlib import Path
 import numpy as np
 from rid.constants import (
         force_out
     )
-from rid.utils import load_txt
+from rid.common.gromacs.trjconv import generate_coords, generate_forces
+from rid.common.mol import phase_factor
+from rid.utils import load_txt, set_directory
+from rid.tools.estimator import pseudo_inv
+from rid.constants import gmx_coord_name, gmx_force_name,f_cvt,kb
+import os
+from parmed import gromacs
+import parmed as pmd
 
+if os.path.exists("/gromacs/share/gromacs/top"):
+    gromacs.GROMACS_TOPDIR = "/gromacs/share/gromacs/top"
+elif os.path.exists("/opt/conda/share/gromacs/top"):
+    gromacs.GROMACS_TOPDIR = "/opt/conda/share/gromacs/top"
 
 class CalcMF(OP):
-
+    
     """
     Calculate mean force with the results of restrained MD. 
     
@@ -33,12 +44,16 @@ class CalcMF(OP):
     def get_input_sign(cls):
         return OPIOSign(
             {
+                "conf": Artifact(Path),
+                "topology": Artifact(Path,optional=True),
+                "frame_coords": Artifact(Path,optional=True),
+                "frame_forces": Artifact(Path,optional=True),
                 "task_name": str,
                 "plm_out": Artifact(Path),
-                "kappas": List[float],
-                "at": Artifact(Path),
+                "at": Artifact(Path,optional=True),
                 "tail": Parameter(float, default=0.9),
-                "angular_mask": Optional[Union[np.ndarray, List]],
+                "cv_config": Dict,
+                "label_config": Dict
             }
         )
 
@@ -46,7 +61,8 @@ class CalcMF(OP):
     def get_output_sign(cls):
         return OPIOSign(
             {
-                "forces": Artifact(Path)
+                "forces": Artifact(Path),
+                "mf_info": Artifact(Path,optional=True)
             }
         )
 
@@ -68,8 +84,6 @@ class CalcMF(OP):
                 - `kappas`: (`List[float]`) Force constants of harmonic restraints.
                 - `at`: (`Artifact(Path)`) Files containing initial CV values, or CV centers.
                 - `tail`: (`float`) Only the last `tail` of CV values will be used to estimate mean force.
-                - `angular_mask`: (`int`) Mask list for periodic CVs. 1 represents periodic, 0 represents non-periodic.
-                    length of angular_mask equals to the dimension of CVs.
 
         Returns
         -------
@@ -78,37 +92,188 @@ class CalcMF(OP):
                 - `forces`: (`Artifact(Path)`) Files containing mean forces.
 
         """
-        data = load_txt(op_in["plm_out"])
-        data = data[:, 1:]  # removr the first column(time index).
-        centers = load_txt(op_in["at"])
+        if op_in["label_config"]["method"] == "restrained":
+            data = load_txt(op_in["plm_out"])
+            data = data[:, 1:]  # removr the first column(time index).
+            centers = load_txt(op_in["at"])
 
-        nframes = data.shape[0]
-        
-        angular_boolean = (np.array(op_in["angular_mask"], dtype=int) == 1)
-        init_angle = data[0][angular_boolean]
-        for ii in range(1, nframes):
-            current_angle = data[ii][angular_boolean]
-            angular_diff = current_angle - init_angle
-            current_angle[angular_diff < -np.pi] += 2 * np.pi
-            current_angle[angular_diff >= np.pi] -= 2 * np.pi
-            data[ii][angular_boolean] = current_angle
+            nframes = data.shape[0]
+            
+            angular_boolean = (np.array(op_in["cv_config"]["angular_mask"], dtype=int) == 1)
+            init_angle = data[0][angular_boolean]
+            for ii in range(1, nframes):
+                current_angle = data[ii][angular_boolean]
+                angular_diff = current_angle - init_angle
+                current_angle[angular_diff < -np.pi] += 2 * np.pi
+                current_angle[angular_diff >= np.pi] -= 2 * np.pi
+                data[ii][angular_boolean] = current_angle
 
-        start_f = int(nframes * (1-op_in["tail"]))
-        avgins = np.average(data[start_f:, :], axis=0)
+            start_f = int(nframes * (1-op_in["tail"]))
+            avgins = np.average(data[start_f:, :], axis=0)
+            
+            avgins_list = []
+            for simu_frames in range(1, nframes,1):
+                start_f = int(simu_frames*(1-0.9))
+                avgins_ = np.average(data[start_f:simu_frames, :], axis=0)
+                diff_ = avgins_ - centers
+                angular_diff_ = diff_[angular_boolean]
+                angular_diff_[angular_diff_ < -np.pi] += 2 * np.pi
+                angular_diff_[angular_diff_ >  np.pi] -= 2 * np.pi
+                diff_[angular_boolean] = angular_diff_
+                ff_ = np.multiply(op_in["label_config"]["kappas"], diff_)
+                avgins_list.append(ff_)
 
-        diff = avgins - centers
-        angular_diff = diff[angular_boolean]
-        angular_diff[angular_diff < -np.pi] += 2 * np.pi
-        angular_diff[angular_diff >  np.pi] -= 2 * np.pi
-        diff[angular_boolean] = angular_diff
-        ff = np.multiply(op_in["kappas"], diff)
-        
-        task_path = Path(op_in["task_name"])
-        task_path.mkdir(exist_ok=True, parents=True)
-        np.savetxt(task_path.joinpath(force_out),  np.reshape(ff, [1, -1]), fmt='%.10e')
+            avgins_list = np.array(avgins_list)
+            mid_f = int(nframes * 0.5)
+            mf_std = np.std(avgins_list[mid_f:,:], axis=0)
+            
+            diff = avgins - centers
+            angular_diff = diff[angular_boolean]
+            angular_diff[angular_diff < -np.pi] += 2 * np.pi
+            angular_diff[angular_diff >  np.pi] -= 2 * np.pi
+            diff[angular_boolean] = angular_diff
+            ff = np.multiply(op_in["label_config"]["kappas"], diff)
+            
+            task_path = Path(op_in["task_name"])
+            task_path.mkdir(exist_ok=True, parents=True)
+            np.savetxt(task_path.joinpath(force_out),  np.reshape(ff, [1, -1]), fmt='%.10e')
+            
+            with open(task_path.joinpath("mf_info.out"),"w") as f:
+                f.write("mean force value   ")
+                for mf_ in ff:
+                    f.write("%.4f "%mf_)
+                f.write("\n")
+                f.write("mean force std     ")
+                for mf_std_ in mf_std:
+                    f.write("%.4f "%mf_std_)
+                    
+        elif op_in["label_config"]["method"] == "constrained":
+            data = load_txt(op_in["plm_out"])
+            data = data[:, 1:]  # removr the first column(time index).
+            centers = data[0,:]
+            
+            # generate_coords(trr = op_in["trr_traj"], top = op_in["conf"], out_coord=gmx_coord_name)
+            # generate_forces(trr = op_in["trr_traj"], top = op_in["conf"], out_force=gmx_force_name)
+            # Kb to KJ/mol
+            KB = kb*f_cvt
+            T = float(op_in["label_config"]["temperature"])
+            coords = np.loadtxt(op_in["frame_coords"],comments=["#","@"])
+            # coords units nm
+            coords = coords[:,1:]
+            forces = np.loadtxt(op_in["frame_forces"],comments=["#","@"])
+            # forces units to KJ/(mol*nm)
+            forces = forces[:,1:]
+            
+            mflist = []
+            mflist_phase = []
+            phase_list = []
+            mf_average_phase = []
+            selected_atomid = op_in["cv_config"]["selected_atomid"]
+            selected_atoms = list(set([item for sublist in selected_atomid for item in sublist]))
+            selected_atomid_simple = []
+            for atom_pairs in selected_atomid:
+                selected_atomid_simple.append([selected_atoms.index(i) for i in atom_pairs])
+                
+            # calculate mass matrix of the system
+            system = pmd.load_file(os.path.abspath(op_in["topology"]))
+            mass_list = [system.atoms[i].mass for i in range(len(system.atoms))]
+            mass_list_simple = []
+            for atom_id in selected_atoms:
+                atom_id -= 1
+                mass_list_simple.append(mass_list[atom_id])
+                mass_list_simple.append(mass_list[atom_id])
+                mass_list_simple.append(mass_list[atom_id])
+            
+            # calculate mean force via singular value decomposition(SVD)
+            eps = 0.0001
+            for index in range(np.shape(coords)[0]):
+                coordlist = coords[index]
+                forcelist = forces[index]
+                r_cv = []
+                f_cv = []
+                for atom_id in selected_atoms:
+                    atom_id -= 1
+                    r_cv.append(coordlist[atom_id*3])
+                    r_cv.append(coordlist[atom_id*3+1])
+                    r_cv.append(coordlist[atom_id*3+2])
+                    f_cv.append(forcelist[atom_id*3])
+                    f_cv.append(forcelist[atom_id*3+1])
+                    f_cv.append(forcelist[atom_id*3+2])
+                B = pseudo_inv(r_cv, centers, selected_atomid_simple)
+                # print(B.shape)
+                dBdx = []
+                for index in range(len(r_cv)):
+                    r1 = r_cv.copy()
+                    r1[index] += eps
+                    B1 = pseudo_inv(r1,centers,selected_atomid_simple)
+                    r2 = r_cv.copy()
+                    r2[index] -= eps
+                    B2 = pseudo_inv(r2, centers,selected_atomid_simple)
+                    dBdx.append((B1-B2)/(2*eps))
+                dBdx = np.array(dBdx)
+                phase = phase_factor(r_cv, centers, selected_atomid_simple, mass_list_simple)
+                mf = np.matmul(B,f_cv) + KB*T*np.trace(dBdx, axis1=0, axis2=2)
+                
+                phase_list.append(1/(phase**0.5))
+                mflist.append(mf)
+                mflist_phase.append(mf/(phase**0.5))
+            
+            mflist = np.array(mflist)
+            mflist_phase = np.array(mflist_phase)
+            nframes = np.shape(coords)[0]            
+            
+            start_f = int(nframes * (1-op_in["tail"]))
+            mid_f = int(nframes * 0.5)
+            mf_avg_without_norm = np.average(mflist_phase[start_f:, :], axis=0)
+            phase_avg = np.average(phase_list[start_f:])
+            mf_avg_without_phase = np.average(mflist[start_f:, :], axis=0)
+            avg_force = mf_avg_without_norm/phase_avg
+            
+            for simu_frames in range(1, nframes,1):
+                start_f = int(simu_frames*(1-0.9))
+                mf_average_phase.append(np.average(mflist_phase[start_f:simu_frames, :], axis=0)/np.average(phase_list[start_f:simu_frames]))
+            
+            # calculate mean force statistics
+            mf_average_phase = np.array(mf_average_phase)
+            mf_difference = avg_force - mf_avg_without_phase
+            mf_std = np.std(mf_average_phase[mid_f:,:], axis=0)
+            
+            # mf_info = np.array([[mf_difference],[mf_std]])
+            
+            # std_force = np.std(mf_block, axis = 0)
+            task_path = Path(op_in["task_name"])
+            task_path.mkdir(exist_ok=True, parents=True)
+            np.savetxt(task_path.joinpath(force_out),  np.reshape(avg_force, [1, -1]), fmt='%.10e')
+            with open(task_path.joinpath("mf_info.out"),"w") as f:
+                f.write("mean force value   ")
+                for mf_ in avg_force:
+                    f.write("%.4f "%mf_)
+                f.write("\n")
+                f.write("diff with phase    ")
+                for mf_diff_ in mf_difference:
+                    f.write("%.4f "%mf_diff_)
+                f.write("\n")
+                f.write("mean force std     ")
+                for mf_std_ in mf_std:
+                    f.write("%.4f "%mf_std_)
+            
+            # np.savetxt(task_path.joinpath(gmx_coord_name), coords, fmt='%.10e')
+            # np.savetxt(task_path.joinpath(gmx_force_name), forces, fmt='%.10e')
+
+        # frame_coords = None
+        # frame_forces = None
+        # if os.path.exists(task_path.joinpath(gmx_coord_name)):
+        #     frame_coords = task_path.joinpath(gmx_coord_name)
+        # if os.path.exists(task_path.joinpath(gmx_force_name)):
+        #     frame_forces = task_path.joinpath(gmx_force_name)
+        mf_info = None
+        if os.path.exists(task_path.joinpath("mf_info.out")):
+            mf_info = task_path.joinpath("mf_info.out")
+            
         op_out = OPIO(
             {
-                "forces": task_path.joinpath(force_out)
+                "forces": task_path.joinpath(force_out),
+                "mf_info": mf_info
             }
         )
         return op_out

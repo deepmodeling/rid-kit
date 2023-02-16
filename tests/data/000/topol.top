@@ -210,6 +210,8 @@ Protein             3
     9    17    15    16     4 
    15    19    17    18     4 
 
+[ constraints ]
+
 ; Include Position restraint file
 #ifdef POSRES
 #include "posre.itp"

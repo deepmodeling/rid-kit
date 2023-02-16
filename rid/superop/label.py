@@ -33,14 +33,14 @@ class Label(Steps):
         post_op: OP,
         prep_config: Dict,
         run_config: Dict,
-        upload_python_package = None
+        post_config: Dict,
+        upload_python_package = None,
+        retry_times = None
     ):
 
         self._input_parameters = {
             "label_config": InputParameter(type=Dict),
             "cv_config": InputParameter(type=Dict),
-            "kappas": InputParameter(type=List[float]),
-            "angular_mask": InputParameter(type=List),
             "tail": InputParameter(type=float, value=0.9),
             "conf_tags": InputParameter(type=List),
             "block_tag" : InputParameter(type=str, value="")
@@ -51,7 +51,7 @@ class Label(Steps):
             "forcefield" : InputArtifact(optional=True),
             "inputfile": InputArtifact(optional=True),
             "confs": InputArtifact(),
-            "at": InputArtifact(),
+            "at": InputArtifact(optional=True),
             "index_file": InputArtifact(optional=True),
             "dp_files": InputArtifact(optional=True),
             "cv_file": InputArtifact(optional=True)
@@ -91,8 +91,9 @@ class Label(Steps):
             post_op,
             prep_config = prep_config,
             run_config = run_config,
-            post_config = prep_config,
+            post_config = post_config,
             upload_python_package = upload_python_package,
+            retry_times = retry_times
         )            
     
     @property
@@ -127,6 +128,7 @@ def _label(
         run_config : Dict,
         post_config : Dict,
         upload_python_package : str = None,
+        retry_times: int = None
     ):
     prep_config = deepcopy(prep_config)
     run_config = deepcopy(run_config)
@@ -145,6 +147,7 @@ def _label(
         template=PythonOPTemplate(
             check_label_input_op,
             python_packages = upload_python_package,
+            retry_on_transient_error = retry_times,
             **prep_template_config,
         ),
         parameters={
@@ -164,6 +167,7 @@ def _label(
         template=PythonOPTemplate(
             prep_label_op,
             python_packages = upload_python_package,
+            retry_on_transient_error = retry_times,
             slices=Slices("{{item}}",
                 input_parameter=["task_name"],
                 input_artifact=["conf", "at"],
@@ -173,8 +177,7 @@ def _label(
         parameters={
             "label_config": label_steps.inputs.parameters['label_config'],
             "cv_config": label_steps.inputs.parameters['cv_config'],
-            "task_name": check_label_inputs.outputs.parameters['conf_tags'],
-            "kappas": label_steps.inputs.parameters['kappas']
+            "task_name": check_label_inputs.outputs.parameters['conf_tags']
         },
         artifacts={
             "topology": label_steps.inputs.artifacts['topology'],
@@ -195,9 +198,10 @@ def _label(
         template=PythonOPTemplate(
             run_label_op,
             python_packages = upload_python_package,
+            retry_on_transient_error = retry_times,
             slices=Slices("{{item}}",
                 input_artifact=["task_path"],
-                output_artifact=["plm_out", "md_log"]),
+                output_artifact=["plm_out", "md_log","trajectory","frame_coords","frame_forces"]),
             **run_template_config,
         ),
         parameters={
@@ -223,20 +227,25 @@ def _label(
         template=PythonOPTemplate(
             post_label_op,
             python_packages = upload_python_package,
+            retry_on_transient_error = retry_times,
             slices=Slices("{{item}}",
                 input_parameter=["task_name"],
-                input_artifact=["plm_out", "at"],
-                output_artifact=["forces"]),
+                input_artifact=["conf","plm_out", "frame_coords","frame_forces","at"],
+                output_artifact=["forces","mf_info"]),
             **post_template_config,
         ),
         parameters={
             "task_name": check_label_inputs.outputs.parameters['conf_tags'],
-            "kappas": label_steps.inputs.parameters['kappas'],
             "tail": label_steps.inputs.parameters['tail'],
-            "angular_mask": label_steps.inputs.parameters['angular_mask']
+            "label_config": label_steps.inputs.parameters["label_config"],
+            "cv_config": label_steps.inputs.parameters['cv_config'],
         },
         artifacts={
+            "conf": label_steps.inputs.artifacts["confs"],
+            "topology": label_steps.inputs.artifacts["topology"],
             "plm_out": run_label.outputs.artifacts["plm_out"],
+            "frame_coords": run_label.outputs.artifacts["frame_coords"],
+            "frame_forces": run_label.outputs.artifacts["frame_forces"],
             "at": label_steps.inputs.artifacts['at']
         },
         key = step_keys['post_label']+"-{{item}}",

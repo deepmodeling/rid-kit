@@ -38,6 +38,8 @@ gmx_xtc_name = "traj_comp.xtc"
 sel_gro_name = "conf_{walker:03d}_{idx:d}.gro"
 sel_gro_name_gmx = "conf_.gro"
 gmx_conf_out = "confout.gro"
+gmx_coord_name = "coord.xvg"
+gmx_force_name = "force.xvg"
 
 # Lammps file names
 lmp_conf_name = "conf.lmp"
@@ -57,7 +59,8 @@ N_grid = 100
 dp_config_name = "dp_config"
 
 # Units
-kbT = (8.617343E-5) * 300
+kb = 8.617333E-5
+kbT = (8.617333E-5) * 300
 beta = 1.0 / kbT
 f_cvt = 96.485
 inverse_f_cvt = 1 / f_cvt

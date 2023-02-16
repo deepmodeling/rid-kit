@@ -20,10 +20,11 @@ Contents
 .. toctree::
    :maxdepth: 2
 
-   Quick start <tutorial>
+   Tutorial <tutorial>
    Environment settings  <install>
    Installation with DP potential <install_dp>
-   Configure Simulations <rid_configuration>
+   Configure simulations <rid_configuration>
+   Configure machine resources <rid_machine>
    Rid API <api/api>
    Trouble Shooting <troubleshooting/index> 
 

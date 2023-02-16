@@ -23,7 +23,7 @@ from rid.constants import (
         lmp_input_name
     )
 from rid.utils import run_command, set_directory, list_to_string
-from rid.common.mol import final_dump
+from rid.common.lammps.command import final_dump
 from rid.common.sampler.command import get_grompp_cmd, get_mdrun_cmd
 
 
@@ -83,8 +83,8 @@ class RunExplore(OP):
         op_in : dict
             Input dict with components:
 
-            - `task_path`: (`Artifact(Path)`) A directory path containing files for Gromacs MD simulations.
-            - `exploration_config`: (`Dict`) Configuration of Gromacs simulations in exploration steps.
+            - `task_path`: (`Artifact(Path)`) A directory path containing files for Gromacs/Lammps MD simulations.
+            - `exploration_config`: (`Dict`) Configuration of Gromacs/Lammps simulations in exploration steps.
             - `models`: (`Artifact(List[Path])`) Optional. Neural network model files (`.pb`) used to bias the simulation. 
                 Run brute force MD simulations if not provided.
           
@@ -93,7 +93,7 @@ class RunExplore(OP):
             Output dict with components:
         
             - `plm_out`: (`Artifact(Path)`) Outputs of CV values (`plumed.out` by default) from exploration steps.
-            - `md_log`: (`Artifact(Path)`) Log files of Gromacs `mdrun` commands.
+            - `md_log`: (`Artifact(Path)`) Log files of Gromacs/lammps `mdrun` commands.
             - `trajectory`: (`Artifact(Path)`) Trajectory files (`.xtc`). The output frequency is defined in `exploration_config`.
             - `conf_out`: (`Artifact(Path)`) Final frames of conformations in simulations.
         """
@@ -161,7 +161,10 @@ class RunExplore(OP):
                         os.symlink(file, file.name)
             
             if op_in["dp_files"] is not None:
-                os.environ["GMX_DEEPMD_INPUT_JSON"] = "./input.json"
+                for dp_file in op_in["dp_files"]:
+                    if (dp_file.name).endswith("json"):
+                        os.environ["GMX_DEEPMD_INPUT_JSON"] = dp_file.name
+                        
             if grompp_cmd is not None:
                 logger.info(list_to_string(grompp_cmd, " "))
                 return_code, out, err = run_command(grompp_cmd)

@@ -16,6 +16,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update\
 
 # Install python packages
 RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple \
-    && pip install tensorflow dpdata mdtraj scikit-learn numpy
+    && pip install tensorflow dpdata mdtraj scikit-learn numpy parmed
 
 SHELL ["/bin/bash", "-c"]

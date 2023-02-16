@@ -49,7 +49,6 @@ class ReinforcedDynamicsLoop(Steps):
             "output_freq": InputParameter(type=float, value=2500),
             "slice_mode": InputParameter(type=str, value="gmx"),
             "label_config": InputParameter(type=Dict),
-            "kappas": InputParameter(type=List[float]),
             "tail": InputParameter(type=float, value=0.9),
             "train_config": InputParameter(type=Dict),
             "adjust_amplifier": InputParameter(type=float, value=1.5),
@@ -173,7 +172,6 @@ def _loop (
             "output_freq": steps.inputs.parameters["output_freq"],
             "slice_mode": steps.inputs.parameters["slice_mode"],
             "label_config": steps.inputs.parameters["label_config"],
-            "kappas": steps.inputs.parameters["kappas"],
             "train_config": steps.inputs.parameters["train_config"]
         },
         artifacts={
@@ -215,7 +213,6 @@ def _loop (
             "output_freq": steps.inputs.parameters["output_freq"],
             "slice_mode": steps.inputs.parameters["slice_mode"],
             "label_config": steps.inputs.parameters["label_config"],
-            "kappas": steps.inputs.parameters["kappas"],
             "train_config": steps.inputs.parameters["train_config"]
         },
         artifacts={
@@ -414,7 +411,6 @@ def _rid(
             "output_freq": prep_rid.outputs.parameters["output_freq"],
             "slice_mode": prep_rid.outputs.parameters["slice_mode"],
             "label_config": prep_rid.outputs.parameters["label_config"],
-            "kappas": prep_rid.outputs.parameters["kappas"],
             "train_config": prep_rid.outputs.parameters["train_config"]
         },
         artifacts={
@@ -460,7 +456,6 @@ def _rid(
             "output_freq": prep_rid.outputs.parameters["output_freq"],
             "slice_mode": prep_rid.outputs.parameters["slice_mode"],
             "label_config": prep_rid.outputs.parameters["label_config"],
-            "kappas": prep_rid.outputs.parameters["kappas"],
             "train_config": prep_rid.outputs.parameters["train_config"]
         },
         artifacts={

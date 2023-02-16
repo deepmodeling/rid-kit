@@ -2,11 +2,15 @@
     "resources": {
         "local_k8s": {
             "template_config" : {
-                "image": "pkufjhdocker/rid-tf-cpu:latest", 
-                "image_pull_policy" : "IfNotPresent"
+                "image": "registry.dp.tech/public/pkufjhdocker/rid-tf-cpu:stable", 
+                "image_pull_policy" : "IfNotPresent",
+                "requests" : {"ephemeral-storage": "1Gi"}
             }
         },
         "bohrium1": {
+            "template_config":{
+                "requests" : {"ephemeral-storage": "1Gi"}
+            },
             "executor":{
             "image": "dptechnology/dpdispatcher:latest",
             "machine_dict":{
@@ -34,6 +38,9 @@
         }
         },
         "bohrium2": {
+            "template_config":{
+                "requests" : {"ephemeral-storage": "1Gi"}
+            },
             "executor":{
             "image": "dptechnology/dpdispatcher:latest",
             "machine_dict":{
@@ -61,6 +68,9 @@
         }
         },
         "bohrium3": {
+            "template_config":{
+                "requests" : {"ephemeral-storage": "1Gi"}
+            },
             "executor":{
             "image": "dptechnology/dpdispatcher:latest",
             "machine_dict":{
@@ -88,6 +98,9 @@
         }
         },
         "bohrium4": {
+            "template_config":{
+                "requests" : {"ephemeral-storage": "1Gi"}
+            },
             "executor":{
             "image": "dptechnology/dpdispatcher:latest",
             "machine_dict":{
@@ -121,6 +134,7 @@
         "run_exploration_config": "bohrium1",
         "prep_label_config": "local_k8s",
         "run_label_config": "bohrium2",
+        "post_label_config": "bohrium3",
         "prep_select_config": "local_k8s",
         "run_select_config": "bohrium3",
         "prep_data_config": "local_k8s",

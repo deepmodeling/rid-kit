@@ -19,10 +19,7 @@ def init_executor(
         else:
             raise RuntimeError('unknown executor type', etype)    
     elif "machine_dict" in executor_dict:
-        if "private_key_file" in executor_dict:
-            return DispatcherExecutor(**executor_dict)
-        else:
-            return DispatcherExecutor(**executor_dict, private_key_file = os.path.join(os.environ["HOME"], ".ssh", "id_rsa"))
+        return DispatcherExecutor(**executor_dict)
     else:
         raise RuntimeError('unknown executor dict')   
 

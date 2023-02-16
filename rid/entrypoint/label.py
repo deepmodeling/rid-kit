@@ -1,7 +1,9 @@
+from distutils.command.config import dump_file
 import json
 from pathlib import Path
 from typing import List, Union, Optional
 from rid.utils import load_json
+from copy import deepcopy
 import os
 
 from dflow import (
@@ -15,21 +17,21 @@ from rid import SRC_ROOT
 upload_packages.append(SRC_ROOT)
 
 from rid.utils import normalize_resources
-from .submit import prep_rid_op
+from rid.superop.label import Label
+from rid.op.prep_label import PrepLabel, CheckLabelInputs
+from rid.op.run_label import RunLabel
+from rid.op.calc_mf import CalcMF
+from rid.constants import label_task_pattern
 
-
-def resubmit_rid(
-        workflow_id: str,
+def label_rid(
         confs: Union[str, List[str]],
         topology: Optional[str],
         rid_config: str,
         machine_config: str,
-        iteration: Optional[str] = None,
-        pod: Optional[str] = None,
         models: Optional[Union[str, List[str]]] = None,
-        index_file: Optional[str] = None,
-        dp_files: Optional[List[str]] = None,
         forcefield: Optional[str] = None,
+        index_file: Optional[str] = None,
+        dp_files: Optional[List[str]] = [],
         otherfiles: Optional[List[str]] = None
     ):
     with open(machine_config, "r") as mcg:
@@ -40,19 +42,16 @@ def resubmit_rid(
     for resource_type in resources.keys():
         normalized_resources[resource_type] = normalize_resources(resources[resource_type])
 
-    rid_op = prep_rid_op(
-        prep_exploration_config = normalized_resources[tasks["prep_exploration_config"]],
-        run_exploration_config = normalized_resources[tasks["run_exploration_config"]],
-        prep_label_config = normalized_resources[tasks["prep_label_config"]],
-        run_label_config = normalized_resources[tasks["run_label_config"]],
-        post_label_config = normalized_resources[tasks["post_label_config"]],
-        prep_select_config = normalized_resources[tasks["prep_select_config"]],
-        run_select_config = normalized_resources[tasks["run_select_config"]],
-        prep_data_config = normalized_resources[tasks["prep_data_config"]],
-        run_train_config = normalized_resources[tasks["run_train_config"]],
-        workflow_steps_config = normalized_resources[tasks["workflow_steps_config"]],
-        retry_times=None
-    )
+    label_op = Label(
+        "label",
+        CheckLabelInputs,
+        PrepLabel,
+        RunLabel,
+        CalcMF,
+        prep_config = normalized_resources[tasks["prep_label_config"]],
+        run_config = normalized_resources[tasks["run_label_config"]],
+        post_config = normalized_resources[tasks["post_label_config"]],
+        retry_times=3)
 
     if isinstance(confs, str):
         confs_artifact = upload_artifact(Path(confs), archive=None)
@@ -60,13 +59,15 @@ def resubmit_rid(
         confs_artifact = upload_artifact([Path(p) for p in confs], archive=None)
     else:
         raise RuntimeError("Invalid type of `confs`.")
-    
+
     if index_file is None:
         index_file_artifact = None
     else:
         index_file_artifact = upload_artifact(Path(index_file), archive=None)
     
-    jdata = load_json(rid_config)
+    jdata = deepcopy(load_json(rid_config))
+    cv_config = jdata["CV"]
+    label_config = jdata["LabelMDConfig"]
     
     inputfiles = []
     if "inputfile" in jdata["ExploreMDConfig"]:
@@ -144,48 +145,31 @@ def resubmit_rid(
         top_artifact = None
     else:
         top_artifact = upload_artifact(Path(topology), archive=None)
-    rid_config = upload_artifact(Path(rid_config), archive=None)
 
-    rid_steps = Step(
-        "rid-procedure",
-        rid_op,
-        artifacts={
-            "topology": top_artifact,
-            "confs": confs_artifact,
-            "rid_config": rid_config,
-            "models": models_artifact,
-            "forcefield": forcefield_artifact,
-            "index_file": index_file_artifact,
-            "inputfile": inputfile_artifact,
-            "dp_files": dp_files_artifact,
-            "cv_file": cv_file_artifact
-        },
-        parameters={}
+    conf_tags = []
+    for index in range(len(confs)):
+        conf_tags.append({Path(confs[index]).name:label_task_pattern.format(index)})
+        
+    rid_steps = Step("rid-label",
+            label_op,
+            artifacts={
+                "topology": top_artifact,
+                "models": models_artifact,
+                "forcefield": forcefield_artifact,
+                "inputfile": inputfile_artifact,
+                "confs": confs_artifact,
+                "at": None,
+                "index_file": index_file_artifact,
+                "dp_files": dp_files_artifact,
+                "cv_file": cv_file_artifact
+            },
+            parameters={
+                "label_config": label_config,
+                "cv_config": cv_config,
+                "conf_tags": conf_tags,
+                "block_tag" : "000"
+            },
         )
-    old_workflow = Workflow(id=workflow_id)
-    all_steps = old_workflow.query_step()
-
-    succeeded_steps = []
-    restart_flag = 1
-    for step in all_steps:
-        if step["type"] == "Pod":
-            if step["phase"] == "Succeeded":
-                if step["key"] != "prepare-rid" and step["key"] != "init-recorder":
-                    pod_key = step["key"]
-                    if pod_key is not None:
-                        pod_key_list = pod_key.split("-")
-                        pod_iter = int(pod_key_list[1])
-                        pod_step = "-".join(pod_key_list[2:-1])
-                        if iteration is not None:
-                            if pod is not None:
-                                if pod_iter == int(iteration) and pod_step == pod:
-                                    restart_flag = 0
-                            else:
-                                if pod_iter == int(iteration):
-                                    restart_flag = 0
-                    
-                    if restart_flag == 1:
-                        succeeded_steps.append(step)
-    wf = Workflow("reinforced-dynamics", pod_gc_strategy="OnPodSuccess", parallelism=30)
+    wf = Workflow("rid-labeling", pod_gc_strategy="OnPodSuccess", parallelism=30)
     wf.add(rid_steps)
-    wf.submit(reuse_step=succeeded_steps)
+    wf.submit()

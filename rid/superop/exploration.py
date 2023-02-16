@@ -32,7 +32,8 @@ class Exploration(Steps):
         run_op: OP,
         prep_config: Dict,
         run_config: Dict,
-        upload_python_package = None
+        upload_python_package = None,
+        retry_times = None
     ):
         self._input_parameters = {
             "trust_lvl_1" : InputParameter(type=List[float], value=2.0),
@@ -87,6 +88,7 @@ class Exploration(Steps):
             prep_config = prep_config,
             run_config = run_config,
             upload_python_package = upload_python_package,
+            retry_times = retry_times
         )            
     
     @property
@@ -118,6 +120,7 @@ def _exploration(
         prep_config : Dict,
         run_config : Dict,
         upload_python_package : str = None,
+        retry_times: int = None
     ):
     prep_config = deepcopy(prep_config)
     run_config = deepcopy(run_config)
@@ -130,6 +133,7 @@ def _exploration(
         template=PythonOPTemplate(
             prep_exploration_op,
             python_packages = upload_python_package,
+            retry_on_transient_error = retry_times,
             slices=Slices("{{item}}",
                 input_parameter=["task_name", "trust_lvl_1", "trust_lvl_2"],
                 input_artifact=["conf"],
@@ -163,6 +167,7 @@ def _exploration(
         template=PythonOPTemplate(
             run_exploration_op,
             python_packages = upload_python_package,
+            retry_on_transient_error = retry_times,
             slices=Slices("{{item}}",
                 input_artifact=["task_path"],
                 output_artifact=["plm_out", "trajectory", "md_log", "conf_out"]

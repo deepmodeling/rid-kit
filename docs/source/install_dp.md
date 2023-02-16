@@ -13,7 +13,7 @@ The `enviroment` of rid-kit software is a bit complex, it uses `dflow` to manage
 We recommend using conda to manage the python enviroment. 
 Use the command
 ```
-conda create -n rid-dp python=3.9 libtensorflow_cc=2.6.2=*cuda110* tensorflow=2.6.2=*cuda110* nccl mdtraj numpy scikit-learn cmake -c conda-forge
+conda create -n rid-dp python=3.9 libtensorflow_cc=2.6.2=*cuda110* tensorflow=2.6.2=*cuda110* nccl mdtraj numpy scikit-learn cmake dpdata -c conda-forge
 ```
 to get the compiled libtensorflow_cc and other necessary packages.
 After installation, activate the enviroment and set library path

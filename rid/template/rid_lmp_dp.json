@@ -35,6 +35,7 @@
 
     "LabelMDConfig": {
         "type":"lmp",
+        "method": "restrained",
         "inputfile":"input_label.lammps",
         "dp_model":["dp003.pb"],
         "dt": 0.002,

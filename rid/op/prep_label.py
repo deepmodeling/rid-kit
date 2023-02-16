@@ -12,7 +12,7 @@ from pathlib import Path
 from rid.constants import (
         plumed_output_name
     )
-from rid.task.builder import RestrainedMDTaskBuilder
+from rid.task.builder import RestrainedMDTaskBuilder, ConstrainedMDTaskBuilder
 from rid.utils import load_txt
 
 
@@ -107,8 +107,7 @@ class PrepLabel(OP):
                 "label_config": Dict,
                 "cv_config": Dict,
                 "task_name": str,
-                "kappas": List[float],
-                "at": Artifact(Path)
+                "at": Artifact(Path, optional=True)
             }
         )
 
@@ -134,11 +133,9 @@ class PrepLabel(OP):
             Input dict with components:
         
             - `topology`: (`Artifact(Path)`) Topology files (.top) for Restrained MD simulations.
-            - `conf`: (`Artifact(Path)`) Conformation files (.gro) for Restrained MD simulations.
-            - `label_config`: (`Dict`) Configuration in `Dict` format for Gromacs run. Must contains:
-                `dt`, `steps`, `temperature`, `output_freq`.
+            - `conf`: (`Artifact(Path)`) Conformation files (.gro, .lmp) for Restrained MD simulations.
+            - `label_config`: (`Dict`) Configuration in `Dict` format for Gromacs/Lammps run.
             - `cv_config`: (`Dict`) Configuration for CV creation.
-            - `kappas`: (`List[float]`) Force constants of harmonic restraints.
             - `at`: (`Artifact(Path)`) Files containing initial CV values, or CV centers.
             - `task_name`: (`str`) Task name used to make sub-dir for tasks.
            
@@ -151,27 +148,48 @@ class PrepLabel(OP):
 
         cv_file = []
         selected_resid = None
+        selected_atomid = None
         if op_in["cv_config"]["mode"] == "torsion":
             selected_resid = op_in["cv_config"]["selected_resid"]
+        elif op_in["cv_config"]["mode"] == "distance":
+            selected_atomid = op_in["cv_config"]["selected_atomid"]
         elif op_in["cv_config"]["mode"] == "custom":
-            print("custom!!!")
+            if op_in["label_config"]["method"] == "restrained":
+                selected_resid = op_in["cv_config"]["selected_resid"]
+            elif op_in["label_config"]["method"] == "constrained":
+                selected_atomid = op_in["cv_config"]["selected_atomid"]
             cv_file = op_in["cv_file"]
-        at = load_txt(op_in["at"])
         
         #print("what is cv", cv_file)
-        
-        gmx_task_builder = RestrainedMDTaskBuilder(
-            conf = op_in["conf"],
-            topology = op_in["topology"],
-            label_config = op_in["label_config"],
-            cv_file = cv_file,
-            selected_resid = selected_resid,
-            sampler_type = op_in["label_config"]["type"],
-            kappa = op_in["kappas"],
-            at = at,
-            plumed_output = plumed_output_name,
-            cv_mode = op_in["cv_config"]["mode"]
-        )
+        if op_in["label_config"]["method"] == "restrained":
+            at = load_txt(op_in["at"])
+            if op_in["cv_config"]["mode"] == "torsion":
+                selected_resid = selected_resid
+            elif op_in["cv_config"]["mode"] == "distance":
+                selected_resid = selected_atomid
+            gmx_task_builder = RestrainedMDTaskBuilder(
+                conf = op_in["conf"],
+                topology = op_in["topology"],
+                label_config = op_in["label_config"],
+                cv_file = cv_file,
+                selected_resid = selected_resid,
+                sampler_type = op_in["label_config"]["type"],
+                kappa = op_in["label_config"]["kappas"],
+                at = at,
+                plumed_output = plumed_output_name,
+                cv_mode = op_in["cv_config"]["mode"]
+            )
+        elif op_in["label_config"]["method"] == "constrained":
+            gmx_task_builder = ConstrainedMDTaskBuilder(
+                conf = op_in["conf"],
+                topology = op_in["topology"],
+                label_config = op_in["label_config"],
+                cv_file = cv_file,
+                selected_atomid = selected_atomid,
+                sampler_type = op_in["label_config"]["type"],
+                plumed_output = plumed_output_name,
+                cv_mode = op_in["cv_config"]["mode"]
+            )
         gmx_task = gmx_task_builder.build()
         task_path = Path(op_in["task_name"])
         task_path.mkdir(exist_ok=True, parents=True)

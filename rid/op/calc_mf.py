@@ -110,7 +110,23 @@ class CalcMF(OP):
 
             start_f = int(nframes * (1-op_in["tail"]))
             avgins = np.average(data[start_f:, :], axis=0)
+            
+            avgins_list = []
+            for simu_frames in range(1, nframes,1):
+                start_f = int(simu_frames*(1-0.9))
+                avgins_ = np.average(data[start_f:simu_frames, :], axis=0)
+                diff_ = avgins_ - centers
+                angular_diff_ = diff_[angular_boolean]
+                angular_diff_[angular_diff_ < -np.pi] += 2 * np.pi
+                angular_diff_[angular_diff_ >  np.pi] -= 2 * np.pi
+                diff_[angular_boolean] = angular_diff_
+                ff_ = np.multiply(op_in["label_config"]["kappas"], diff_)
+                avgins_list.append(ff_)
 
+            avgins_list = np.array(avgins_list)
+            mid_f = int(nframes * 0.5)
+            mf_std = np.std(avgins_list[mid_f:,:], axis=0)
+            
             diff = avgins - centers
             angular_diff = diff[angular_boolean]
             angular_diff[angular_diff < -np.pi] += 2 * np.pi
@@ -121,6 +137,16 @@ class CalcMF(OP):
             task_path = Path(op_in["task_name"])
             task_path.mkdir(exist_ok=True, parents=True)
             np.savetxt(task_path.joinpath(force_out),  np.reshape(ff, [1, -1]), fmt='%.10e')
+            
+            with open(task_path.joinpath("mf_info.out"),"w") as f:
+                f.write("mean force value   ")
+                for mf_ in ff:
+                    f.write("%.4f "%mf_)
+                f.write("\n")
+                f.write("mean force std     ")
+                for mf_std_ in mf_std:
+                    f.write("%.4f "%mf_std_)
+                    
         elif op_in["label_config"]["method"] == "constrained":
             data = load_txt(op_in["plm_out"])
             data = data[:, 1:]  # removr the first column(time index).

@@ -46,7 +46,8 @@ class CalcMF(OP):
             {
                 "conf": Artifact(Path),
                 "topology": Artifact(Path,optional=True),
-                "trr_traj": Artifact(Path,optional=True),
+                "frame_coords": Artifact(Path,optional=True),
+                "frame_forces": Artifact(Path,optional=True),
                 "task_name": str,
                 "plm_out": Artifact(Path),
                 "at": Artifact(Path,optional=True),
@@ -125,15 +126,15 @@ class CalcMF(OP):
             data = data[:, 1:]  # removr the first column(time index).
             centers = data[0,:]
             
-            generate_coords(trr = op_in["trr_traj"], top = op_in["conf"], out_coord=gmx_coord_name)
-            generate_forces(trr = op_in["trr_traj"], top = op_in["conf"], out_force=gmx_force_name)
+            # generate_coords(trr = op_in["trr_traj"], top = op_in["conf"], out_coord=gmx_coord_name)
+            # generate_forces(trr = op_in["trr_traj"], top = op_in["conf"], out_force=gmx_force_name)
             # Kb to KJ/mol
             KB = kb*f_cvt
             T = float(op_in["label_config"]["temperature"])
-            coords = np.loadtxt(gmx_coord_name,comments=["#","@"])
+            coords = np.loadtxt(op_in["frame_coords"],comments=["#","@"])
             # coords units nm
             coords = coords[:,1:]
-            forces = np.loadtxt(gmx_force_name,comments=["#","@"])
+            forces = np.loadtxt(op_in["frame_forces"],comments=["#","@"])
             # forces units to KJ/(mol*nm)
             forces = forces[:,1:]
             

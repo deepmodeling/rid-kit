@@ -201,7 +201,7 @@ def _label(
             retry_on_transient_error = retry_times,
             slices=Slices("{{item}}",
                 input_artifact=["task_path"],
-                output_artifact=["plm_out", "md_log","trr_traj"]),
+                output_artifact=["plm_out", "md_log","trajectory","frame_coords","frame_forces"]),
             **run_template_config,
         ),
         parameters={
@@ -230,7 +230,7 @@ def _label(
             retry_on_transient_error = retry_times,
             slices=Slices("{{item}}",
                 input_parameter=["task_name"],
-                input_artifact=["conf","plm_out", "trr_traj","at"],
+                input_artifact=["conf","plm_out", "frame_coords","frame_forces","at"],
                 output_artifact=["forces","mf_info"]),
             **post_template_config,
         ),
@@ -244,7 +244,8 @@ def _label(
             "conf": label_steps.inputs.artifacts["confs"],
             "topology": label_steps.inputs.artifacts["topology"],
             "plm_out": run_label.outputs.artifacts["plm_out"],
-            "trr_traj": run_label.outputs.artifacts["trr_traj"],
+            "frame_coords": run_label.outputs.artifacts["frame_coords"],
+            "frame_forces": run_label.outputs.artifacts["frame_forces"],
             "at": label_steps.inputs.artifacts['at']
         },
         key = step_keys['post_label']+"-{{item}}",

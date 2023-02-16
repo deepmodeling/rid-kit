@@ -17,10 +17,16 @@ from rid.constants import (
         plumed_output_name,
         gmx_mdrun_log,
         lmp_mdrun_log,
-        gmx_trr_name
+        gmx_xtc_name,
+        gmx_trr_name,
+        gmx_coord_name,
+        gmx_force_name
     )
+
 from rid.utils import run_command, set_directory, list_to_string
 from rid.common.sampler.command import get_grompp_cmd, get_mdrun_cmd
+from rid.common.gromacs.trjconv import generate_coords, generate_forces
+import numpy as np
 
 logging.basicConfig(
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
@@ -58,7 +64,9 @@ class RunLabel(OP):
         return OPIOSign(
             {
                 "plm_out": Artifact(Path),
-                "trr_traj": Artifact(Path, optional=True),
+                "trajectory": Artifact(Path, optional=True),
+                "frame_coords": Artifact(Path, optional=True),
+                "frame_forces": Artifact(Path, optional=True),
                 "md_log": Artifact(Path)
             }
         )
@@ -147,19 +155,29 @@ class RunLabel(OP):
                 return_code, out, err = run_command(run_cmd)
                 assert return_code == 0, err
                 logger.info(err)
+            
+            if op_in["label_config"]["method"] == "constrained":
+                generate_coords(system = op_in["label_config"]["system"], trr = gmx_trr_name, top = op_in["task_path"].joinpath(gmx_conf_name), out_coord=gmx_coord_name)
+                generate_forces(system = op_in["label_config"]["system"], trr = gmx_trr_name, top = op_in["task_path"].joinpath(gmx_conf_name), out_force=gmx_force_name)
 
-        trr_traj = None
+        frame_coords = None
+        frame_forces = None
         if op_in["label_config"]["type"] == "gmx":
             mdrun_log = gmx_mdrun_log
+            traj_name = gmx_xtc_name
             if op_in["label_config"]["method"] == "constrained":
-                trr_traj = op_in["task_path"].joinpath(gmx_trr_name)
+                frame_coords = op_in["task_path"].joinpath(gmx_coord_name)
+                frame_forces = op_in["task_path"].joinpath(gmx_force_name)
         elif op_in["label_config"]["type"] == "lmp":
             mdrun_log = lmp_mdrun_log
+            traj_name = "out.dump"
             
         op_out = OPIO(
             {
                 "plm_out": op_in["task_path"].joinpath(plumed_output_name),
-                "trr_traj": trr_traj,
+                "trajectory": op_in["task_path"].joinpath(traj_name),
+                "frame_coords": frame_coords,
+                "frame_forces": frame_forces,
                 "md_log": op_in["task_path"].joinpath(mdrun_log)
             }
         )

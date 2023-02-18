@@ -154,25 +154,24 @@ class PrepLabel(OP):
         elif op_in["cv_config"]["mode"] == "distance":
             selected_atomid = op_in["cv_config"]["selected_atomid"]
         elif op_in["cv_config"]["mode"] == "custom":
-            if op_in["label_config"]["method"] == "restrained":
+            if "selected_resid" in op_in["cv_config"]:
                 selected_resid = op_in["cv_config"]["selected_resid"]
-            elif op_in["label_config"]["method"] == "constrained":
+            elif "selected_atomid" in op_in["cv_config"]:
                 selected_atomid = op_in["cv_config"]["selected_atomid"]
             cv_file = op_in["cv_file"]
         
         #print("what is cv", cv_file)
         if op_in["label_config"]["method"] == "restrained":
-            at = load_txt(op_in["at"])
-            if op_in["cv_config"]["mode"] == "torsion":
-                selected_resid = selected_resid
-            elif op_in["cv_config"]["mode"] == "distance":
-                selected_resid = selected_atomid
+            at = 0.0
+            if op_in["at"] is not None:
+                at = load_txt(op_in["at"])
             gmx_task_builder = RestrainedMDTaskBuilder(
                 conf = op_in["conf"],
                 topology = op_in["topology"],
                 label_config = op_in["label_config"],
                 cv_file = cv_file,
                 selected_resid = selected_resid,
+                selected_atomid = selected_atomid,
                 sampler_type = op_in["label_config"]["type"],
                 kappa = op_in["label_config"]["kappas"],
                 at = at,

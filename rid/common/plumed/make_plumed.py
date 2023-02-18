@@ -210,6 +210,7 @@ def make_restraint_plumed(
         conf: Optional[str] = None,
         cv_file: Optional[List[str]] = None,
         selected_resid: Optional[List[int]] = None,
+        selected_atomid: Optional[List[int]] = None,
         kappa: Union[int, float, Sequence, np.ndarray] = 0.5,
         at: Union[int, float, Sequence, np.ndarray] = 1.0,
         stride: int = 100,
@@ -223,12 +224,12 @@ def make_restraint_plumed(
         content_list += cv_content_list
     elif mode == "distance":
         cv_content_list, cv_name_list = \
-            make_distance_list_from_file(conf, selected_resid)
+            make_distance_list_from_file(conf, selected_atomid)
         content_list += cv_content_list
     elif mode == "custom":
         for cv_file_ in cv_file:
             if not os.path.basename(cv_file_).endswith("pdb"):
-                ret, cv_name_list, _ = user_plumed_def(cv_file, stride, output)
+                ret, cv_name_list, _ = user_plumed_def(cv_file_, stride, output)
         content_list.append(ret)
     else:
         raise RuntimeError("Unknown mode for making plumed files.")

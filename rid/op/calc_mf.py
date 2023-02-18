@@ -95,7 +95,7 @@ class CalcMF(OP):
         if op_in["label_config"]["method"] == "restrained":
             data = load_txt(op_in["plm_out"])
             data = data[:, 1:]  # removr the first column(time index).
-            centers = load_txt(op_in["at"])
+            centers = data[0,:]
 
             nframes = data.shape[0]
             

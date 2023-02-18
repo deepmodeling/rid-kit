@@ -105,6 +105,7 @@ class RestrainedMDTaskBuilder(TaskBuilder):
         label_config: Dict,
         cv_file: Optional[List[str]] = None,
         selected_resid: Optional[List[int]] = None,
+        selected_atomid: Optional[List[int]] = None,
         sampler_type: str = "gmx",
         kappa: Union[int, float, List[Union[int, float]]] = 0.5,
         at: Union[int, float, List[Union[int, float]]] = 1.0,
@@ -118,6 +119,7 @@ class RestrainedMDTaskBuilder(TaskBuilder):
         self.stride = self.label_config["output_freq"]
         self.cv_file = cv_file
         self.selected_resid = selected_resid
+        self.selected_atomid = selected_atomid
         self.plumed_output = plumed_output
         self.cv_mode = cv_mode
         self.sampler_type = sampler_type
@@ -148,7 +150,7 @@ class RestrainedMDTaskBuilder(TaskBuilder):
     def build_plumed(self):
         return build_plumed_restraint_dict(
             conf=self.conf, cv_file=self.cv_file, selected_resid=self.selected_resid,
-            kappa=self.kappa, at=self.at,
+            selected_atomid=self.selected_atomid, kappa=self.kappa, at=self.at,
             stride=self.stride, output=self.plumed_output, mode=self.cv_mode
         )
 
@@ -272,6 +274,7 @@ def build_plumed_restraint_dict(
         conf: Optional[str] = None,
         cv_file: Optional[str] = None,
         selected_resid: Optional[List[int]] = None,
+        selected_atomid: Optional[List[int]] = None,
         kappa: Union[int, float, Sequence, np.ndarray] = 0.5,
         at: Union[int, float, Sequence, np.ndarray] = 1.0,
         stride: int = 100,
@@ -279,8 +282,13 @@ def build_plumed_restraint_dict(
         mode: str = "torsion"
     ):
     plumed_task_files = {}
+    if selected_atomid is not None:
+        at = []
+        cv_info = get_distance_from_atomid(conf, selected_atomid)
+        for dis_id in range(len(selected_atomid)):
+            at.append(cv_info["%s %s"%(selected_atomid[dis_id][0],selected_atomid[dis_id][1])])
     plm_content = make_restraint_plumed(
-        conf=conf, cv_file=cv_file, selected_resid=selected_resid,
+        conf=conf, cv_file=cv_file, selected_resid=selected_resid,selected_atomid = selected_atomid,
         kappa=kappa, at=at, stride=stride,
         output=output, mode=mode
     )

@@ -22,7 +22,6 @@ from rid.op.run_exploration import RunExplore
 from rid.superop.label import Label
 from rid.op.prep_label import PrepLabel, CheckLabelInputs
 from rid.op.run_label import RunLabel
-from rid.op.calc_mf import CalcMF
 from rid.superop.selector import Selector
 from rid.op.prep_select import PrepSelect
 from rid.op.run_select import RunSelect
@@ -39,7 +38,6 @@ def prep_rid_op(
     run_exploration_config,
     prep_label_config,
     run_label_config,
-    post_label_config,
     prep_select_config,
     run_select_config,
     prep_data_config,
@@ -61,10 +59,8 @@ def prep_rid_op(
         CheckLabelInputs,
         PrepLabel,
         RunLabel,
-        CalcMF,
         prep_label_config,
         run_label_config,
-        post_label_config,
         retry_times=retry_times)
 
     select_op = Selector(
@@ -137,7 +133,6 @@ def submit_rid(
         run_exploration_config = normalized_resources[tasks["run_exploration_config"]],
         prep_label_config = normalized_resources[tasks["prep_label_config"]],
         run_label_config = normalized_resources[tasks["run_label_config"]],
-        post_label_config = normalized_resources[tasks["post_label_config"]],
         prep_select_config = normalized_resources[tasks["prep_select_config"]],
         run_select_config = normalized_resources[tasks["run_select_config"]],
         prep_data_config = normalized_resources[tasks["prep_data_config"]],

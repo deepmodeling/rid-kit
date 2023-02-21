@@ -58,6 +58,9 @@ N_grid = 100
 # Dp config file
 dp_config_name = "dp_config"
 
+# Mean force file name
+mf_fig = "mf_average.png"
+
 # Units
 kb = 8.617333E-5
 kbT = (8.617333E-5) * 300

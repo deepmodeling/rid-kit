@@ -20,7 +20,6 @@ from rid.utils import normalize_resources
 from rid.superop.label import Label
 from rid.op.prep_label import PrepLabel, CheckLabelInputs
 from rid.op.run_label import RunLabel
-from rid.op.calc_mf import CalcMF
 from rid.constants import label_task_pattern
 
 def label_rid(
@@ -47,10 +46,8 @@ def label_rid(
         CheckLabelInputs,
         PrepLabel,
         RunLabel,
-        CalcMF,
         prep_config = normalized_resources[tasks["prep_label_config"]],
         run_config = normalized_resources[tasks["run_label_config"]],
-        post_config = normalized_resources[tasks["post_label_config"]],
         retry_times=3)
 
     if isinstance(confs, str):

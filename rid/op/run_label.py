@@ -167,9 +167,9 @@ class RunLabel(OP):
             if op_in["label_config"]["method"] == "constrained":
                 select_system = "System"
                 if "system" in op_in["label_config"]:
-                    select_system = op_in["label_config"]
-                generate_coords(system = select_system, trr = gmx_trr_name, top = op_in["task_path"].joinpath(gmx_conf_name), out_coord=gmx_coord_name)
-                generate_forces(system = select_system, trr = gmx_trr_name, top = op_in["task_path"].joinpath(gmx_conf_name), out_force=gmx_force_name)
+                    select_system = op_in["label_config"]["system"]
+                generate_coords(system = select_system, trr = gmx_trr_name, top = op_in["task_path"].joinpath(gmx_conf_name), index = op_in["index_file"], out_coord=gmx_coord_name)
+                generate_forces(system = select_system, trr = gmx_trr_name, top = op_in["task_path"].joinpath(gmx_conf_name), index = op_in["index_file"], out_force=gmx_force_name)
 
         frame_coords = None
         frame_forces = None

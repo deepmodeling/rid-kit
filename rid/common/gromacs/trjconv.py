@@ -22,12 +22,12 @@ def generate_coords(
     system: str = "System",
     index: Optional[str] = None
 ):
-    echo_string = "echo -e '%s\n' | "%system
+    echo_string = "echo '%s\n' | "%system
     cmd_list = gmx_traj_cmd.split(" ")
     cmd_list += ["-f", str(trr)]
     cmd_list += ["-s", str(top)]
     if index is not None:
-        cmd_list += ["-n", index]
+        cmd_list += ["-n", str(index)]
     cmd_list += ["-ox", out_coord]
     os.system(echo_string+list_to_string(cmd_list, " "))
     
@@ -38,12 +38,12 @@ def generate_forces(
     system: str = "System",
     index: Optional[str] = None
 ):
-    echo_string = "echo -e '%s\n' | "%system
+    echo_string = "echo '%s\n' | "%system
     cmd_list = gmx_traj_cmd.split(" ")
     cmd_list += ["-f", str(trr)]
     cmd_list += ["-s", str(top)]
     if index is not None:
-        cmd_list += ["-n", index]
+        cmd_list += ["-n", str(index)]
     cmd_list += ["-of", out_force]
     os.system(echo_string+list_to_string(cmd_list, " "))
 

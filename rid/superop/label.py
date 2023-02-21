@@ -213,6 +213,7 @@ def _label(
         key = step_keys['run_label']+"-{{item}}",
         executor = run_executor,
         with_param=argo_range(argo_len(check_label_inputs.outputs.parameters['conf_tags'])),
+        continue_on_success_ratio = 0.75,
         **run_config,
     )
     label_steps.add(run_label)

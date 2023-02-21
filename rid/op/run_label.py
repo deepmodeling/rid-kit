@@ -70,6 +70,7 @@ class RunLabel(OP):
     def get_output_sign(cls):
         return OPIOSign(
             {
+                "plm_out": Artifact(Path),
                 "forces": Artifact(Path),
                 "mf_info": Artifact(Path,optional=True),
                 "mf_fig": Artifact(Path),
@@ -211,6 +212,7 @@ class RunLabel(OP):
             
         op_out = OPIO(
             {
+                "plm_out": plm_out,
                 "forces": mf_out["forces"],
                 "mf_info":  mf_out["mf_info"],
                 "mf_fig": Path(op_in["task_name"]).joinpath(mf_fig),

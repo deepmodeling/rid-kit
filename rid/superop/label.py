@@ -192,7 +192,7 @@ def _label(
             slices=Slices("{{item}}",
                 input_parameter=["task_name"],
                 input_artifact=["task_path","at"],
-                output_artifact=["forces","mf_info","mf_fig","md_log"]),
+                output_artifact=["plm_out","forces","mf_info","mf_fig","md_log"]),
             **run_template_config,
         ),
         parameters={

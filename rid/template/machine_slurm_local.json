@@ -51,7 +51,6 @@
         "run_exploration_config": "local_machine",
         "prep_label_config": "local_machine_cpu",
         "run_label_config": "local_machine",
-        "post_label_config": "local_machine_cpu",
         "prep_select_config": "local_machine",
         "run_select_config": "local_machine",
         "prep_data_config": "local_machine",

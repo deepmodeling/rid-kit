@@ -79,6 +79,21 @@ def make_deepfe_bias(
         arg = cv_string
     )
 
+def make_print_bias(
+        name_list,
+        stride,
+        file_name,
+        model_list
+    ) -> str:
+    if len(model_list) != 0:
+        name_list.insert(0,"dpfe.bias")
+    else:
+        name_list.insert(0,name_list[0])
+    return print_def.format(
+        stride = stride,
+        arg = list_to_string(name_list, ","),
+        file = file_name
+    )
 
 def make_print(
         name_list,
@@ -299,7 +314,7 @@ def make_deepfe_plumed(
         raise RuntimeError("Unknown mode for making plumed files.")
     deepfe_string = make_deepfe_bias(cv_name_list, trust_lvl_1, trust_lvl_2, model_list)
     content_list.append(deepfe_string)
-    content_list.append(make_print(cv_name_list, stride, output))
+    content_list.append(make_print_bias(cv_name_list, stride, output, model_list))
     return list_to_string(content_list, split_sign="\n")
 
 

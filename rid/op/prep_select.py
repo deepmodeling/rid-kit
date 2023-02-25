@@ -93,7 +93,7 @@ class PrepSelect(OP):
         """
 
         # the first column of plm_out is time index
-        data = np.loadtxt(op_in["plm_out"])[:,1:]
+        data = np.loadtxt(op_in["plm_out"])[:,2:]
         cv_cluster = Cluster(
             data, op_in["cluster_threshold"], angular_mask=op_in["angular_mask"], 
             weights=op_in["weights"], max_selection=op_in["max_selection"])

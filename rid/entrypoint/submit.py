@@ -138,7 +138,7 @@ def submit_rid(
         prep_data_config = normalized_resources[tasks["prep_data_config"]],
         run_train_config = normalized_resources[tasks["run_train_config"]],
         workflow_steps_config = normalized_resources[tasks["workflow_steps_config"]],
-        retry_times=3
+        retry_times=1
     )
 
     if isinstance(confs, str):

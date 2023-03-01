@@ -41,17 +41,21 @@ pip install setuptools_scm
 pip install .
 ```
 ## Run an example
+Change to the rid-kit directory
+```
+cd rid-kit
+```
 Run a example of Ala-dipeptide using dihedral as CVs (change to your own Bohrium account information)
 ```
-rid submit -i /tests/data/000 -c /rid/template/rid_gmx_dih.json -m /rid/template/machine_bohrium_k8s.json
+rid submit -i ./tests/data/000 -c ./rid/template/rid_gmx_dih.json -m ./rid/template/machine_bohrium_k8s.json
 ```
 You can also run the example on a Slurm machine (But you need to configure a conda enviroment on the slurm, see below)
 ```
-rid submit -i /tests/data/000 -c /rid/template/rid_gmx_dih.json -m /rid/template/machine_slurm_k8s.json
+rid submit -i ./tests/data/000 -c ./rid/template/rid_gmx_dih.json -m ./rid/template/machine_slurm_k8s.json
 ```
 You can also run the example using distance as CVs (This will use constrained md as the mean force calculator)
 ```
-rid submit -i /tests/data/000 -c /rid/template/rid_gmx_dis.json -m /rid/template/machine_bohrium_k8s.json
+rid submit -i ./tests/data/000 -c ./rid/template/rid_gmx_dis.json -m ./rid/template/machine_bohrium_k8s.json
 ```
 
 Note that if you want to use constrained MD as the mean force calculator, apart from setting `method` to be `constrained` in the `label_config`, you should add `[ constraints ]` line corresponding to the `[ moleculartype ]` in your input `topology` file yourself, since gromacs specifies constraints information for each `[ moleculartype ]`.

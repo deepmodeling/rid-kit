@@ -48,7 +48,7 @@ def label_rid(
         RunLabel,
         prep_config = normalized_resources[tasks["prep_label_config"]],
         run_config = normalized_resources[tasks["run_label_config"]],
-        retry_times=3)
+        retry_times=1)
 
     if isinstance(confs, str):
         confs_artifact = upload_artifact(Path(confs), archive=None)

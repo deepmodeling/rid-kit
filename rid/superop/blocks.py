@@ -73,6 +73,7 @@ class InitBlock(Steps):
             "inputfile": InputArtifact(optional=True),
             "confs" : InputArtifact(),
             "index_file": InputArtifact(optional=True),
+            "data_old": InputArtifact(optional=True),
             "dp_files": InputArtifact(optional=True),
             "cv_file": InputArtifact(optional=True)
         }
@@ -226,7 +227,8 @@ def _first_run_block(
         template=data_op,
         parameters={"block_tag" : block_steps.inputs.parameters['block_tag']},
         artifacts={
-            "cv_forces": label.outputs.artifacts["cv_forces"]
+            "cv_forces": label.outputs.artifacts["cv_forces"],
+            "data_old": block_steps.inputs.artifacts['data_old']
         },
         key = '{}-gen-data'.format(block_steps.inputs.parameters['block_tag']),
     )

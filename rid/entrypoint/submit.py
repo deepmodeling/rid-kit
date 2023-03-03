@@ -117,6 +117,7 @@ def submit_rid(
         models: Optional[Union[str, List[str]]] = None,
         forcefield: Optional[str] = None,
         index_file: Optional[str] = None,
+        data_file: Optional[str] = None,
         dp_files: Optional[List[str]] = [],
         otherfiles: Optional[List[str]] = None
     ):
@@ -231,6 +232,11 @@ def submit_rid(
         top_artifact = None
     else:
         top_artifact = upload_artifact(Path(topology), archive=None)
+        
+    if data_file is None:
+        data_artifact = None
+    else:
+        data_artifact = upload_artifact(Path(data_file), archive=None)
     rid_config = upload_artifact(Path(rid_config), archive=None)
 
     rid_steps = Step("rid-procedure",
@@ -243,6 +249,7 @@ def submit_rid(
                 "forcefield": forcefield_artifact,
                 "index_file": index_file_artifact,
                 "inputfile": inputfile_artifact,
+                "data_file": data_artifact,
                 "dp_files": dp_files_artifact,
                 "cv_file": cv_file_artifact
             },

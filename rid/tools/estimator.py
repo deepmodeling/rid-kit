@@ -165,11 +165,25 @@ def CalcMF(
         KB = kb*f_cvt
         T = float(label_config["temperature"])
         coords = np.loadtxt(frame_coords,comments=["#","@"])
-        # coords units nm
-        coords = coords[:,1:]
-        forces = np.loadtxt(frame_forces,comments=["#","@"])
-        # forces units to KJ/(mol*nm)
-        forces = forces[:,1:]
+        
+        if "units" in cv_config:
+            length_units = cv_config["units"]
+        else:
+            length_units = None
+        if length_units == None or length_units == "nm":
+            # coords units nm
+            coords = coords[:,1:]
+            forces = np.loadtxt(frame_forces,comments=["#","@"])
+            # forces units to KJ/(mol*nm)
+            forces = forces[:,1:]
+        elif length_units == "A" or length_units == "Angstrom":
+            # coords units nm
+            coords = coords[:,1:]*10
+            forces = np.loadtxt(frame_forces,comments=["#","@"])
+            # forces units to KJ/(mol*nm)
+            forces = forces[:,1:]/10
+        else:
+            raise ValueError("Valid length units must be nm or A")
         
         mflist = []
         mflist_phase = []

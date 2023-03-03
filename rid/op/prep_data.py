@@ -24,8 +24,7 @@ class CollectData(OP):
     def get_input_sign(cls):
         return OPIOSign(
             {
-                "forces": Artifact(List[Path]),
-                "centers": Artifact(List[Path])
+                "cv_forces": Artifact(List[Path])
             }
         )
 
@@ -42,17 +41,13 @@ class CollectData(OP):
         self,
         op_in: OPIO,
         ) -> OPIO:
-        forces = []
-        centers = []
-        for idx in range(len(op_in["forces"])):
-            force = load_txt(op_in["forces"][idx])
-            center = load_txt(op_in["centers"][idx])
-            forces = np.append(forces, force)
-            centers = np.append(centers, center)
-        if op_in["forces"]:
-            forces = np.reshape(forces, [len(op_in["forces"]), -1])
-            centers = np.reshape(centers, [len(op_in["forces"]), -1])
-            data = np.concatenate((centers, forces), axis=1)
+        cv_forces = []
+        for idx in range(len(op_in["cv_forces"])):
+            cv_force = load_txt(op_in["cv_forces"][idx])
+            cv_forces = np.append(cv_forces, cv_force)
+        if op_in["cv_forces"]:
+            cv_forces = np.reshape(cv_forces, [len(op_in["cv_forces"]), -1])
+            data = cv_forces
         else:
             data = np.array([])
         np.save(data_new, data)

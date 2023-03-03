@@ -10,7 +10,7 @@ from typing import List, Optional, Union, Dict
 from pathlib import Path
 import numpy as np
 from rid.constants import (
-        force_out
+        cv_force_out
     )
 from rid.common.gromacs.trjconv import generate_coords, generate_forces
 from rid.utils import load_txt, set_directory
@@ -139,10 +139,15 @@ def CalcMF(
         
         task_path = Path(task_name)
         task_path.mkdir(exist_ok=True, parents=True)
-        np.savetxt(task_path.joinpath(force_out),  np.reshape(ff, [1, -1]), fmt='%.10e')
+        cv_forces = np.concatenate((centers, ff))
+        np.savetxt(task_path.joinpath(cv_force_out),  np.reshape(cv_forces, [1, -1]), fmt='%.10f')
         plot_mf_average_all(mf_avg_list, task_path, dt = label_config["dt"]*label_config["output_freq"])
         
         with open(task_path.joinpath("mf_info.out"),"w") as f:
+            f.write("cv list value      ")
+            for cv_ in centers:
+                f.write("%.4f "%cv_)
+            f.write("\n")
             f.write("mean force value   ")
             for mf_ in ff:
                 f.write("%.4f "%mf_)
@@ -242,10 +247,15 @@ def CalcMF(
         
         task_path = Path(task_name)
         task_path.mkdir(exist_ok=True, parents=True)
-        np.savetxt(task_path.joinpath(force_out),  np.reshape(avg_force, [1, -1]), fmt='%.10e')
+        cv_forces = np.concatenate((centers, avg_force))
+        np.savetxt(task_path.joinpath(cv_force_out),  np.reshape(cv_forces, [1, -1]), fmt='%.10f')
         plot_mf_average_all(mf_average_phase, task_path, dt = label_config["dt"]*label_config["output_freq"])
         
         with open(task_path.joinpath("mf_info.out"),"w") as f:
+            f.write("cv list value      ")
+            for cv_ in centers:
+                f.write("%.4f "%cv_)
+            f.write("\n")
             f.write("mean force value   ")
             for mf_ in avg_force:
                 f.write("%.4f "%mf_)
@@ -263,7 +273,7 @@ def CalcMF(
         mf_info = task_path.joinpath("mf_info.out")
             
     op_out = {
-                "forces": task_path.joinpath(force_out),
+                "cv_forces": task_path.joinpath(cv_force_out),
                 "mf_info": mf_info
             }
 

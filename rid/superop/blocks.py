@@ -226,8 +226,7 @@ def _first_run_block(
         template=data_op,
         parameters={"block_tag" : block_steps.inputs.parameters['block_tag']},
         artifacts={
-            "forces": label.outputs.artifacts["forces"],
-            "centers": selection.outputs.artifacts["selected_cv_init"]
+            "cv_forces": label.outputs.artifacts["cv_forces"]
         },
         key = '{}-gen-data'.format(block_steps.inputs.parameters['block_tag']),
     )
@@ -518,8 +517,7 @@ def _iter_block(
         template=data_op,
         parameters={"block_tag" : block_steps.inputs.parameters['block_tag']},
         artifacts={
-            "forces": label.outputs.artifacts["forces"],
-            "centers": selection.outputs.artifacts["selected_cv_init"],
+            "cv_forces": label.outputs.artifacts["cv_forces"],
             "data_old": block_steps.inputs.artifacts['data_old']
         },
         key = '{}-gen-data'.format(block_steps.inputs.parameters['block_tag']),

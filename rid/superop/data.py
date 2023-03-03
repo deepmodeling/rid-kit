@@ -34,8 +34,7 @@ class DataGenerator(Steps):
             "block_tag" : InputParameter(type=str, value="")
         }        
         self._input_artifacts = {
-            "forces": InputArtifact(),
-            "centers": InputArtifact(),
+            "cv_forces": InputArtifact(),
             "data_old": InputArtifact(optional=True)
         }
         self._output_parameters = {}
@@ -107,8 +106,7 @@ def _gen_data(
         ),
         parameters={},
         artifacts={
-            "forces": data_steps.inputs.artifacts['forces'],
-            "centers": data_steps.inputs.artifacts['centers']
+            "cv_forces": data_steps.inputs.artifacts['cv_forces'],
         },
         key = '{}-collect-data'.format(data_steps.inputs.parameters["block_tag"]),
         executor = run_executor,

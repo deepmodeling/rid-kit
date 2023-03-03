@@ -58,7 +58,7 @@ class Label(Steps):
         }
         self._output_artifacts = {
             "md_log": OutputArtifact(),
-            "forces": OutputArtifact()
+            "cv_forces": OutputArtifact()
         }
 
         super().__init__(        
@@ -192,7 +192,7 @@ def _label(
             slices=Slices("{{item}}",
                 input_parameter=["task_name"],
                 input_artifact=["task_path","at"],
-                output_artifact=["plm_out","forces","mf_info","mf_fig","md_log"]),
+                output_artifact=["plm_out","cv_forces","mf_info","mf_fig","md_log"]),
             **run_template_config,
         ),
         parameters={
@@ -218,7 +218,7 @@ def _label(
     )
     label_steps.add(run_label)
 
-    label_steps.outputs.artifacts["forces"]._from = run_label.outputs.artifacts["forces"]
+    label_steps.outputs.artifacts["cv_forces"]._from = run_label.outputs.artifacts["cv_forces"]
     label_steps.outputs.artifacts["md_log"]._from = run_label.outputs.artifacts["md_log"]
     
     return label_steps

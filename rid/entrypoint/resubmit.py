@@ -168,23 +168,26 @@ def resubmit_rid(
     restart_flag = 1
     for step in all_steps:
         if step["type"] == "Pod":
-            if step["phase"] == "Succeeded":
-                if step["key"] != "prepare-rid" and step["key"] != "init-recorder":
-                    pod_key = step["key"]
-                    if pod_key is not None:
-                        pod_key_list = pod_key.split("-")
-                        pod_iter = int(pod_key_list[1])
-                        pod_step = "-".join(pod_key_list[2:-1])
-                        if iteration is not None:
-                            if pod is not None:
-                                if pod_iter == int(iteration) and pod_step == pod:
-                                    restart_flag = 0
-                            else:
-                                if pod_iter == int(iteration):
-                                    restart_flag = 0
-                    
-                    if restart_flag == 1:
-                        succeeded_steps.append(step)
-    wf = Workflow("reinforced-dynamics", pod_gc_strategy="OnPodSuccess", parallelism=30)
+            # if step["phase"] == "Succeeded":
+            if step["key"] != "prepare-rid" and step["key"] != "init-recorder":
+                pod_key = step["key"]
+                if pod_key is not None:
+                    pod_key_list = pod_key.split("-")
+                    pod_iter = int(pod_key_list[1])
+                    pod_step = "-".join(pod_key_list[2:-1])
+                    if iteration is not None:
+                        if pod is not None:
+                            if pod_iter == int(iteration) and pod_step == pod:
+                                restart_flag = 0
+                        else:
+                            if pod_iter == int(iteration):
+                                restart_flag = 0
+                else:
+                    if step["phase"] != "Succeeded":
+                        restart_flag = 0
+                
+                if restart_flag == 1:
+                    succeeded_steps.append(step)
+    wf = Workflow("reinforced-dynamics", pod_gc_strategy="OnPodSuccess", parallelism=50)
     wf.add(rid_steps)
     wf.submit(reuse_step=succeeded_steps)

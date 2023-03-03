@@ -178,6 +178,6 @@ def relabel_rid(
             if step["phase"] == "Succeeded":
                 succeeded_steps.append(step)
                         
-    wf = Workflow("rid-labeling", pod_gc_strategy="OnPodSuccess", parallelism=30)
+    wf = Workflow("rid-labeling", pod_gc_strategy="OnPodSuccess", parallelism=50)
     wf.add(rid_steps)
     wf.submit(reuse_step=succeeded_steps)

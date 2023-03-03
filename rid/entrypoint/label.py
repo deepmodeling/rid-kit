@@ -167,6 +167,6 @@ def label_rid(
                 "block_tag" : "000"
             },
         )
-    wf = Workflow("rid-labeling", pod_gc_strategy="OnPodSuccess", parallelism=30)
+    wf = Workflow("rid-labeling", pod_gc_strategy="OnPodSuccess", parallelism=50)
     wf.add(rid_steps)
     wf.submit()

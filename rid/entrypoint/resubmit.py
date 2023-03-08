@@ -192,9 +192,11 @@ def resubmit_rid(
                     else:
                         if step["phase"] != "Succeeded":
                             restart_flag = 0
+                        else:
+                            restart_flag = 1
                 
                 if restart_flag == 1:
                     succeeded_steps.append(step)
-    wf = Workflow("reinforced-dynamics", pod_gc_strategy="OnPodSuccess", parallelism=50)
+    wf = Workflow("reinforced-dynamics-continue", pod_gc_strategy="OnPodSuccess", parallelism=50)
     wf.add(rid_steps)
     wf.submit(reuse_step=succeeded_steps)

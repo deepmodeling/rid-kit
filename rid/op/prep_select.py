@@ -12,7 +12,8 @@ from rid.select.cluster import Cluster
 from rid.utils import save_txt, set_directory
 from rid.constants import (
     cluster_selection_data_name, 
-    cluster_selection_index_name
+    cluster_selection_index_name,
+    cluster_fig
 )
 import numpy as np
 
@@ -52,6 +53,7 @@ class PrepSelect(OP):
             {
                 "numb_cluster": int,
                 "cluster_threshold": float,
+                "cluster_fig": Artifact(Path),
                 "cluster_selection_index": Artifact(Path),
                 "cluster_selection_data": Artifact(Path)
             }
@@ -91,11 +93,12 @@ class PrepSelect(OP):
             - `cluster_selection_index`: (`Artifact(Path)`) Indice of chosen representive frames of clusters in trajectories.
             - `cluster_selection_data`: (`Artifact(Path)`) Collective variable values of chosen representive frames of clusters.
         """
-
-        # the first column of plm_out is time index
+        task_path = Path(op_in["task_name"])
+        task_path.mkdir(exist_ok=True, parents=True)
+        # the first column of plm_out is time index, the second columnn is biased potential
         data = np.loadtxt(op_in["plm_out"])[:,2:]
         cv_cluster = Cluster(
-            data, op_in["cluster_threshold"], angular_mask=op_in["angular_mask"], 
+            data, op_in["cluster_threshold"], op_in["task_name"], angular_mask=op_in["angular_mask"], 
             weights=op_in["weights"], max_selection=op_in["max_selection"])
         if op_in["if_make_threshold"]:
             assert (op_in["numb_cluster_lower"] is not None) and (op_in["numb_cluster_upper"] is not None), \
@@ -107,8 +110,6 @@ class PrepSelect(OP):
         selected_data = data[cls_sel_idx]
         numb_cluster = len(cls_sel_idx)
 
-        task_path = Path(op_in["task_name"])
-        task_path.mkdir(exist_ok=True, parents=True)
         with set_directory(task_path):
             np.save(cluster_selection_index_name, cls_sel_idx)
             np.save(cluster_selection_data_name, selected_data)
@@ -116,6 +117,7 @@ class PrepSelect(OP):
         op_out = OPIO({
                 "cluster_threshold": threshold,
                 "numb_cluster": numb_cluster,
+                "cluster_fig": task_path.joinpath(cluster_fig),
                 "cluster_selection_index": task_path.joinpath(cluster_selection_index_name),
                 "cluster_selection_data": task_path.joinpath(cluster_selection_data_name)
             })

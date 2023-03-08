@@ -148,7 +148,7 @@ def _select(
                 "{{item}}",
                 input_parameter=["cluster_threshold", "task_name"],
                 input_artifact=["plm_out"],
-                output_artifact=["cluster_selection_index", "cluster_selection_data"],
+                output_artifact=["cluster_fig","cluster_selection_index", "cluster_selection_data"],
                 output_parameter=["cluster_threshold", "numb_cluster"]
                 ),
                 

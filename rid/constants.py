@@ -62,6 +62,7 @@ dp_config_name = "dp_config"
 mf_fig = "mf_average.png"
 bias_fig = "bias.png"
 model_devi_fig = "model_devi.png"
+cluster_fig = "cluster.png"
 
 # Units
 kb = 8.617333E-5

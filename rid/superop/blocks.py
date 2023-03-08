@@ -245,7 +245,7 @@ def _first_run_block(
             retry_on_transient_error = retry_times,
             slices=Slices("{{item}}",
                 input_parameter=["model_tag"],
-                output_artifact=["model"]),
+                output_artifact=["model","train_fig"]),
             **train_template_config,
         ),
         parameters={
@@ -537,7 +537,7 @@ def _iter_block(
             retry_on_transient_error = retry_times,
             slices=Slices("{{item}}",
                 input_parameter=["model_tag"],
-                output_artifact=["model"]),
+                output_artifact=["model","train_fig"]),
             **train_template_config,
         ),
         parameters={

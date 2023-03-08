@@ -8,9 +8,10 @@ from dflow.python import (
     Artifact,
     Parameter
 )
-from rid.constants import tf_model_name
+from rid.constants import tf_model_name, train_fig
 from rid.nn.train_net import train
 from rid.nn.freeze import freeze_model
+from matplotlib import pyplot as plt
 
 
 class TrainModel(OP):
@@ -35,7 +36,8 @@ class TrainModel(OP):
         return OPIOSign(
             {
                 "model": Artifact(Path),
-                "train_log": Artifact(Path)
+                "train_log": Artifact(Path),
+                "train_fig": Artifact(Path)
             }
         )
 
@@ -86,6 +88,31 @@ class TrainModel(OP):
         )
         out_put_name = tf_model_name.format(tag=op_in["model_tag"])
         train_log_name = "log"
+        train_fig_name = train_fig.format(tag=op_in["model_tag"])
+        # plot loglog loss png
+        loss_list = []
+        epoch_list = []
+        with open(train_log_name, "r") as f:
+            while True:
+                line = f.readline()
+                if "running time" in line:
+                    break
+                if "rid.nn.model" in line:
+                    data = line.split(" ")
+                    if len(loss_list) == 0:
+                        epoch_list.append(int(data[10][:-1]))
+                        loss_list.append(float(data[14][:-1]))
+                    else:
+                        epoch_list.append(int(data[8][:-1]))
+                        loss_list.append(float(data[12][:-1]))
+
+        plt.figure(figsize=(10, 8), dpi=100)
+        plt.loglog(epoch_list,loss_list)
+        plt.xlabel("log of training epoches")
+        plt.ylabel("log of relative error")
+        plt.title("loglog fig of training")
+        plt.savefig(train_fig_name)
+        
         freeze_model(
             model_folder=".",
             output=out_put_name
@@ -93,7 +120,8 @@ class TrainModel(OP):
         op_out = OPIO(
             {
                 "model": Path(out_put_name),
-                "train_log": Path(train_log_name)
+                "train_log": Path(train_log_name),
+                "train_fig": Path(train_fig_name)
             }
         )
         return op_out

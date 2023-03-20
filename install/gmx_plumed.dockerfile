@@ -1,4 +1,4 @@
-# Run "docker build --network=host --tag *** ." to build the image
+# Run "docker build -f gmx_plumed.dockerfile --network=host --tag rid-gmx-plumed ." to build the image
 
 # Build from nvidia/cuda iamge
 FROM nvidia/cuda:11.0.3-cudnn8-devel-ubuntu20.04
@@ -36,42 +36,43 @@ RUN conda init bash && source /root/.bashrc \
 RUN source activate base && rm ${CONDA_PREFIX}/lib/libtinfo.so* && ln -s /usr/lib/x86_64-linux-gnu/libtinfo.so.6 ${CONDA_PREFIX}/lib/libtinfo.so.6 \
     && rm ${CONDA_PREFIX}/lib/libcurl.so* && ln -s /usr/lib/x86_64-linux-gnu/libcurl.so.4 ${CONDA_PREFIX}/lib/libcurl.so.4
 
+# Install necessary packages
+RUN source activate base && pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple && pip install cython
+
 ENV LIBRARY_PATH "/opt/conda/lib:$LIBRARY_PATH"
 ENV LD_LIBRARY_PATH "/opt/conda/lib:$LD_LIBRARY_PATH"
 
 # Compile Plumed from source
-RUN wget -O /root/plumed-2.8.0.tgz https://github.com/plumed/plumed2/releases/download/v2.8.0/plumed-2.8.0.tgz
-RUN tar zxvf /root/plumed-2.8.0.tgz
-#ADD plumed-2.8.0.tgz /root/
-# RUN tar zxvf /root/plumed-2.8.0.tgz
+RUN wget -O /root/plumed-2.8.1.tgz https://github.com/plumed/plumed2/releases/download/v2.8.1/plumed-2.8.1.tgz
+RUN tar zxvf /root/plumed-2.8.1.tgz
+#ADD plumed-2.8.1.tgz /root/
 RUN source activate base \
-    && cd /root/plumed-2.8.0 \
+    && cd /root/plumed-2.8.1 \
     && ./configure --prefix=$CONDA_PREFIX \
                    --enable-modules=all\
     && make -j 6 \
     && make install \
-    && rm -rf /root/plumed-2.8.0 /root/plumed-2.8.0.tgz
+    && rm -rf /root/plumed-2.8.1 /root/plumed-2.8.1.tgz
 
-ENV LIBRARY_PATH "/opt/conda/lib:$LIBRARY_PATH"
-ENV LD_LIBRARY_PATH "/opt/conda/lib:$LD_LIBRARY_PATH"
 ENV PLUMED_KERNEL "/opt/conda/lib/libplumedKernel.@SOEXT@"
 
 # Compile gromacs from source
-RUN wget -O root/gromacs-2021.4.tar.gz https://github.com/gromacs/gromacs/archive/refs/tags/v2021.4.tar.gz --no-check-certificate
-RUN tar zxvf /root/gromacs-2021.4.tar.gz
-#ADD gromacs-2021.4.tar.gz /root/
+RUN wget -O root/gromacs-2022.4.tar.gz https://github.com/gromacs/gromacs/archive/refs/tags/v2022.4.tar.gz --no-check-certificate
+RUN tar zxvf /root/gromacs-2022.4.tar.gz
+#ADD gromacs-2022.4.tar.gz /root/
 RUN source activate base && echo $PLUMED_KERNEL && ls $CONDA_PREFIX/lib/ | grep plumed \
-    && cd /root/gromacs-2021.4 \
-    && echo -e "3\n" | plumed patch -p \
+    && cd /root/gromacs-2022.4 \
+    && echo -e "4\n" | plumed patch -p \
     && mkdir build \
     && cd build \
     && cmake .. -DGMX_BUILD_OWN_FFTW=ON \
                 -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
-                -DGMX_GPU=CUDA  \
-                -DGMX_SIMD=avx_512 \
+                -DGMX_GPU=CUDA\
     && make -j 8 \
-    && make install \
-    && rm -rf /root/gromacs-2021.4 /root/gromacs-2021.4.tar.gz \
+    && make install
+
+#delete source files
+RUN  rm -rf /root/gromacs-2022.4 /root/gromacs-2022.4.tar.gz \
     && rm -rf /var/lib/apt/lists/*
 
 # Environment variables set manually since github actions will overwrite entrypoints

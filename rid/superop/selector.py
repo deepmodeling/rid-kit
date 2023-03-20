@@ -184,7 +184,8 @@ def _select(
                 "int({{item}})",
                 input_parameter=["task_name", "trust_lvl_1", "trust_lvl_2"],
                 input_artifact=["cluster_selection_index", "cluster_selection_data", "xtc_traj", "topology"],
-                output_artifact=["selected_confs", "selected_cv_init", "model_devi", "selected_indices"]
+                output_artifact=["selected_confs", "selected_cv_init", "model_devi", "selected_indices"],
+                output_parameter=["selected_conf_tags"]
             ),
             **run_template_config,
         ),

@@ -147,7 +147,8 @@ def _exploration(
             "trust_lvl_2": exploration_steps.inputs.parameters['trust_lvl_2'],
             "exploration_config" : exploration_steps.inputs.parameters['exploration_config'],
             "cv_config" : exploration_steps.inputs.parameters['cv_config'],
-            "task_name": exploration_steps.inputs.parameters['task_names']
+            "task_name": exploration_steps.inputs.parameters['task_names'],
+            "block_tag": exploration_steps.inputs.parameters["block_tag"]
         },
         artifacts={
             "models" : exploration_steps.inputs.artifacts['models'],

@@ -13,7 +13,9 @@ from rid.common.plumed.plumed_constant import (
     distance_def_from_atoms,
     deepfe_def,
     print_def,
-    restraint_def
+    restraint_def,
+    upper_def,
+    lower_def
 )
 
 
@@ -221,6 +223,27 @@ def make_distance_list_from_file(
     assert len(cv_info.keys()) > 0, "No valid CVs created."
     return make_distance_list(cv_info)
 
+def make_wall_list(
+    cv_name_list,
+    wall_list,
+    iteration
+):
+    ret = ""
+    for index in range(len(wall_list)):
+        if wall_list[index][0].upper() != "NONE":
+            start = float(wall_list[index][1])
+            end = float(wall_list[index][2])
+            iterations = float(wall_list[index][3])
+            kappa = float(wall_list[index][4])
+            iteration_index = (iteration-1) % (iterations)
+            at = start + (end - start)/(iterations-1)*(iteration_index)
+            if wall_list[index][0].upper() == "UPPER":
+                line = upper_def.format(arg = cv_name_list[index], at=at,kappa=kappa,name="upper%s"%index)
+            elif wall_list[index][0].upper() == "LOWER":
+                line = lower_def.format(arg = cv_name_list[index], at=at,kappa=kappa,name="lower%s"%index)
+            ret += line+"\n"
+    return ret
+
 def make_restraint_plumed(
         conf: Optional[str] = None,
         cv_file: Optional[List[str]] = None,
@@ -294,7 +317,9 @@ def make_deepfe_plumed(
         model_list: List[str] = ["graph.pb"],
         stride: int = 100,
         output: str = "plm.out",
-        mode: str = "torsion"
+        mode: str = "torsion",
+        wall_list: Optional[List[str]] = None,
+        iteration: Optional[str] = None
     ):
     content_list = []
     if mode == "torsion":
@@ -312,6 +337,9 @@ def make_deepfe_plumed(
         content_list.append(ret)
     else:
         raise RuntimeError("Unknown mode for making plumed files.")
+    if wall_list is not None:
+        ret = make_wall_list(cv_name_list, wall_list, iteration)
+        content_list.append(ret)
     deepfe_string = make_deepfe_bias(cv_name_list, trust_lvl_1, trust_lvl_2, model_list)
     content_list.append(deepfe_string)
     content_list.append(make_print_bias(cv_name_list, stride, output, model_list))

@@ -37,7 +37,9 @@ class EnhcMDTaskBuilder(TaskBuilder):
         trust_lvl_2: float = 2.0,
         model_list: List[str] = ["graph.pb"],
         plumed_output: str = "plm.out",
-        cv_mode: str = "torsion"
+        cv_mode: str = "torsion",
+        wall_list: Optional[List[str]] = None,
+        iteration: Optional[str] = None
     ):
         super().__init__()
         self.conf = conf
@@ -54,6 +56,8 @@ class EnhcMDTaskBuilder(TaskBuilder):
         self.model_list = model_list
         self.plumed_output = plumed_output
         self.cv_mode = cv_mode
+        self.wall_list = wall_list
+        self.iteration = iteration
         self.task = Task()
         self.cv_names = get_cv_name(
             conf=self.conf, cv_file=self.cv_file,
@@ -90,7 +94,7 @@ class EnhcMDTaskBuilder(TaskBuilder):
             selected_atomid=self.selected_atomid,
             trust_lvl_1=self.trust_lvl_1, trust_lvl_2=self.trust_lvl_2,
             model_list=self.model_list, stride=self.stride, output=self.plumed_output,
-            mode=self.cv_mode
+            mode=self.cv_mode, wall_list = self.wall_list, iteration=self.iteration
         )
     
     def get_cv_dim(self):
@@ -257,7 +261,9 @@ def build_plumed_dict(
         model_list: List[str] = ["graph.pb"],
         stride: int = 100,
         output: str = "plm.out",
-        mode: str = "torsion"
+        mode: str = "torsion",
+        wall_list: Optional[List[str]] = None,
+        iteration: Optional[str] = None
     ):
     plumed_task_files = {}
     plm_content = make_deepfe_plumed(
@@ -265,7 +271,7 @@ def build_plumed_dict(
         selected_atomid = selected_atomid,
         trust_lvl_1=trust_lvl_1, trust_lvl_2=trust_lvl_2,
         model_list=model_list, stride=stride,
-        output=output, mode=mode
+        output=output, mode=mode, wall_list=wall_list, iteration=iteration
     )
     plumed_task_files[plumed_input_name] = (plm_content, "w")
     return plumed_task_files

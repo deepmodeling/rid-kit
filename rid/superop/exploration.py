@@ -147,7 +147,8 @@ def _exploration(
             "trust_lvl_2": exploration_steps.inputs.parameters['trust_lvl_2'],
             "exploration_config" : exploration_steps.inputs.parameters['exploration_config'],
             "cv_config" : exploration_steps.inputs.parameters['cv_config'],
-            "task_name": exploration_steps.inputs.parameters['task_names']
+            "task_name": exploration_steps.inputs.parameters['task_names'],
+            "block_tag": exploration_steps.inputs.parameters["block_tag"]
         },
         artifacts={
             "models" : exploration_steps.inputs.artifacts['models'],
@@ -170,7 +171,7 @@ def _exploration(
             retry_on_transient_error = retry_times,
             slices=Slices("{{item}}",
                 input_artifact=["task_path"],
-                output_artifact=["plm_out", "trajectory", "md_log", "conf_out"]
+                output_artifact=["plm_out", "bias_fig","model_devi_fig", "trajectory", "md_log", "conf_out"]
             ),
             **run_template_config,
         ),

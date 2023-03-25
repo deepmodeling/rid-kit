@@ -251,6 +251,7 @@ def parse_submit(args):
     index_file = None
     dp_files = []
     models = []
+    data_file = None
     otherfiles = []
     for file in allfiles:
         if os.path.basename(file).endswith("ff"):
@@ -261,6 +262,8 @@ def parse_submit(args):
             top_file = file
         elif os.path.basename(file).endswith("pb"):
             models.append(file)
+        elif os.path.basename(file).endswith("npy"):
+            data_file = file
         elif os.path.basename(file).endswith("ndx"):
             index_file = file
         elif os.path.basename(file).endswith("json") or os.path.basename(file).endswith("raw"):
@@ -268,7 +271,7 @@ def parse_submit(args):
         else:
             otherfiles.append(file)
         
-    return confs, top_file, models, forcefield, index_file, dp_files, otherfiles
+    return confs, top_file, models, forcefield, index_file, data_file, dp_files, otherfiles
 
 
 def log_ui():
@@ -280,7 +283,7 @@ def main():
     args = parse_args()
     if args.command == "submit":
         logger.info("Preparing RiD ...")
-        confs, top_file, models, forcefield, index_file, dp_files, otherfiles = parse_submit(args)
+        confs, top_file, models, forcefield, index_file, data_file, dp_files, otherfiles = parse_submit(args)
         submit_rid(
             confs = confs,
             topology = top_file,
@@ -289,13 +292,14 @@ def main():
             models = models,
             forcefield = forcefield,
             index_file = index_file,
+            data_file = data_file,
             dp_files = dp_files,
             otherfiles = otherfiles
         )
         log_ui()
     elif args.command == "resubmit":
         logger.info("Preparing RiD ...")
-        confs, top_file, models, forcefield, index_file, dp_files, otherfiles = parse_submit(args)
+        confs, top_file, models, forcefield, index_file, data_file, dp_files, otherfiles = parse_submit(args)
         resubmit_rid(
             workflow_id=args.WORKFLOW_ID,
             confs = confs,
@@ -307,6 +311,7 @@ def main():
             models = models,
             forcefield = forcefield,
             index_file = index_file,
+            data_file = data_file,
             dp_files = dp_files,
             otherfiles = otherfiles
         )
@@ -316,7 +321,7 @@ def main():
         return None
     elif args.command == "label":
         logger.info("Labeling MD ...")
-        confs, top_file, models, forcefield, index_file, dp_files, otherfiles = parse_submit(args)
+        confs, top_file, models, forcefield, index_file, data_files, dp_files, otherfiles = parse_submit(args)
         label_rid(
             confs = confs,
             topology = top_file,
@@ -331,7 +336,7 @@ def main():
         log_ui()
     elif args.command == "relabel":
         logger.info("Labeling MD ...")
-        confs, top_file, models, forcefield, index_file, dp_files, otherfiles = parse_submit(args)
+        confs, top_file, models, forcefield, index_file, data_files, dp_files, otherfiles = parse_submit(args)
         relabel_rid(
             workflow_id=args.WORKFLOW_ID,
             confs = confs,

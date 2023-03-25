@@ -10,15 +10,6 @@ import numpy as np
 from rid.nn.model import Reader, Model
 
 
-logging.basicConfig(
-    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-    level=os.environ.get("LOGLEVEL", "INFO").upper(),
-    stream=sys.stdout,
-)
-logger = logging.getLogger(__name__)
-
-
 class Config(object):
     def __init__(self, cv_dim):
         self.batch_size = 64
@@ -51,6 +42,13 @@ def reset_batch_size(config):
 
 
 def print_conf(config, nthreads):
+    logger = logging.getLogger(__name__)
+    logger.setLevel(level=os.environ.get("LOGLEVEL", "INFO").upper())
+    handler = logging.FileHandler(config.log_name)
+    formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(name)s | %(message)s")
+    handler.setFormatter(fmt=formatter)
+    logger.addHandler(handler)
+    
     logger.info("# restart           " + str(config.restart))
     logger.info("# num_threads       %d" % nthreads)
     logger.info("# neurons           " + str(config.n_neuron))
@@ -82,7 +80,8 @@ def set_conf(cv_dim,
              old_ratio=7.0,
              decay_steps_inner=0,
              drop_out_rate=0.5,
-             data_path="./"):
+             data_path="./",
+             log_name = "log"):
     config = Config(cv_dim)
     config.n_neuron = neurons
     config.batch_size = batch_size
@@ -98,6 +97,7 @@ def set_conf(cv_dim,
     config.drop_out_rate = drop_out_rate
     config.angular_mask = angular_mask
     config.data_path = data_path
+    config.log_name = log_name
     return config
 
 
@@ -118,7 +118,8 @@ def train(
         decay_steps_inner=0,
         init_model=None,
         drop_out_rate=0.5,
-        data_path="./"
+        data_path="./",
+        log_name = "log"
     ):
     config = set_conf(cv_dim,
                       angular_mask=angular_mask,
@@ -135,7 +136,8 @@ def train(
                       old_ratio=old_ratio,
                       decay_steps_inner=decay_steps_inner,
                       drop_out_rate = drop_out_rate,
-                      data_path = data_path)
+                      data_path = data_path,
+                      log_name = log_name)
     if init_model is not None:
         if config.restart:
             raise RuntimeError(

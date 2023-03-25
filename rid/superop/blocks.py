@@ -73,6 +73,7 @@ class InitBlock(Steps):
             "inputfile": InputArtifact(optional=True),
             "confs" : InputArtifact(),
             "index_file": InputArtifact(optional=True),
+            "data_old": InputArtifact(optional=True),
             "dp_files": InputArtifact(optional=True),
             "cv_file": InputArtifact(optional=True)
         }
@@ -226,8 +227,8 @@ def _first_run_block(
         template=data_op,
         parameters={"block_tag" : block_steps.inputs.parameters['block_tag']},
         artifacts={
-            "forces": label.outputs.artifacts["forces"],
-            "centers": selection.outputs.artifacts["selected_cv_init"]
+            "cv_forces": label.outputs.artifacts["cv_forces"],
+            "data_old": block_steps.inputs.artifacts['data_old']
         },
         key = '{}-gen-data'.format(block_steps.inputs.parameters['block_tag']),
     )
@@ -244,7 +245,7 @@ def _first_run_block(
             retry_on_transient_error = retry_times,
             slices=Slices("{{item}}",
                 input_parameter=["model_tag"],
-                output_artifact=["model"]),
+                output_artifact=["model","train_fig"]),
             **train_template_config,
         ),
         parameters={
@@ -518,8 +519,7 @@ def _iter_block(
         template=data_op,
         parameters={"block_tag" : block_steps.inputs.parameters['block_tag']},
         artifacts={
-            "forces": label.outputs.artifacts["forces"],
-            "centers": selection.outputs.artifacts["selected_cv_init"],
+            "cv_forces": label.outputs.artifacts["cv_forces"],
             "data_old": block_steps.inputs.artifacts['data_old']
         },
         key = '{}-gen-data'.format(block_steps.inputs.parameters['block_tag']),
@@ -537,7 +537,7 @@ def _iter_block(
             retry_on_transient_error = retry_times,
             slices=Slices("{{item}}",
                 input_parameter=["model_tag"],
-                output_artifact=["model"]),
+                output_artifact=["model","train_fig"]),
             **train_template_config,
         ),
         parameters={

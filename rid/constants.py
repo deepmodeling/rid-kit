@@ -11,7 +11,7 @@ sel_ndx_name = "sel.ndx"
 cv_init_label = "cv_init_{walker:03d}_{idx:d}.out"
 model_devi_name = "model_devi.txt"
 label_task_pattern = "{:03d}"
-force_out = "forces.out"
+cv_force_out = "cv_forces.out"
 data_new = "data.new.npy"
 data_old = "data.old.npy"
 data_raw = "data.raw.npy"
@@ -51,12 +51,20 @@ lmp_conf_out = "confout.lmp"
 
 # Tensorflow files
 tf_model_name = "model_{tag}.pb"
+train_log = "log_{tag}"
 dp_model_name = "dp.pb"
 model_tag_fmt = "{idx:03d}"
 N_grid = 100
 
 # Dp config file
 dp_config_name = "dp_config"
+
+# figure file name
+mf_fig = "mf_average.png"
+bias_fig = "bias.png"
+model_devi_fig = "model_devi.png"
+cluster_fig = "cluster.png"
+train_fig = "train_{tag}.png"
 
 # Units
 kb = 8.617333E-5

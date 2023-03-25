@@ -49,6 +49,7 @@
         "nsteps": 50000,
         "temperature":300,
         "method": "constrained",
+        "system": "Protein",
         "type": "gmx",
         "output_freq": 100,
         "ref-t": "300 300",

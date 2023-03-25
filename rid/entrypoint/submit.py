@@ -22,7 +22,6 @@ from rid.op.run_exploration import RunExplore
 from rid.superop.label import Label
 from rid.op.prep_label import PrepLabel, CheckLabelInputs
 from rid.op.run_label import RunLabel
-from rid.op.calc_mf import CalcMF
 from rid.superop.selector import Selector
 from rid.op.prep_select import PrepSelect
 from rid.op.run_select import RunSelect
@@ -39,7 +38,6 @@ def prep_rid_op(
     run_exploration_config,
     prep_label_config,
     run_label_config,
-    post_label_config,
     prep_select_config,
     run_select_config,
     prep_data_config,
@@ -61,10 +59,8 @@ def prep_rid_op(
         CheckLabelInputs,
         PrepLabel,
         RunLabel,
-        CalcMF,
         prep_label_config,
         run_label_config,
-        post_label_config,
         retry_times=retry_times)
 
     select_op = Selector(
@@ -121,6 +117,7 @@ def submit_rid(
         models: Optional[Union[str, List[str]]] = None,
         forcefield: Optional[str] = None,
         index_file: Optional[str] = None,
+        data_file: Optional[str] = None,
         dp_files: Optional[List[str]] = [],
         otherfiles: Optional[List[str]] = None
     ):
@@ -137,13 +134,12 @@ def submit_rid(
         run_exploration_config = normalized_resources[tasks["run_exploration_config"]],
         prep_label_config = normalized_resources[tasks["prep_label_config"]],
         run_label_config = normalized_resources[tasks["run_label_config"]],
-        post_label_config = normalized_resources[tasks["post_label_config"]],
         prep_select_config = normalized_resources[tasks["prep_select_config"]],
         run_select_config = normalized_resources[tasks["run_select_config"]],
         prep_data_config = normalized_resources[tasks["prep_data_config"]],
         run_train_config = normalized_resources[tasks["run_train_config"]],
         workflow_steps_config = normalized_resources[tasks["workflow_steps_config"]],
-        retry_times=3
+        retry_times=1
     )
 
     if isinstance(confs, str):
@@ -236,6 +232,11 @@ def submit_rid(
         top_artifact = None
     else:
         top_artifact = upload_artifact(Path(topology), archive=None)
+        
+    if data_file is None:
+        data_artifact = None
+    else:
+        data_artifact = upload_artifact(Path(data_file), archive=None)
     rid_config = upload_artifact(Path(rid_config), archive=None)
 
     rid_steps = Step("rid-procedure",
@@ -248,11 +249,12 @@ def submit_rid(
                 "forcefield": forcefield_artifact,
                 "index_file": index_file_artifact,
                 "inputfile": inputfile_artifact,
+                "data_file": data_artifact,
                 "dp_files": dp_files_artifact,
                 "cv_file": cv_file_artifact
             },
             parameters={}
         )
-    wf = Workflow("reinforced-dynamics", pod_gc_strategy="OnPodSuccess", parallelism=30)
+    wf = Workflow("reinforced-dynamics", pod_gc_strategy="OnPodSuccess", parallelism=50)
     wf.add(rid_steps)
     wf.submit()

@@ -28,6 +28,7 @@ def resubmit_rid(
         pod: Optional[str] = None,
         models: Optional[Union[str, List[str]]] = None,
         index_file: Optional[str] = None,
+        data_file: Optional[str] = None,
         dp_files: Optional[List[str]] = None,
         forcefield: Optional[str] = None,
         otherfiles: Optional[List[str]] = None
@@ -45,7 +46,6 @@ def resubmit_rid(
         run_exploration_config = normalized_resources[tasks["run_exploration_config"]],
         prep_label_config = normalized_resources[tasks["prep_label_config"]],
         run_label_config = normalized_resources[tasks["run_label_config"]],
-        post_label_config = normalized_resources[tasks["post_label_config"]],
         prep_select_config = normalized_resources[tasks["prep_select_config"]],
         run_select_config = normalized_resources[tasks["run_select_config"]],
         prep_data_config = normalized_resources[tasks["prep_data_config"]],
@@ -144,6 +144,11 @@ def resubmit_rid(
         top_artifact = None
     else:
         top_artifact = upload_artifact(Path(topology), archive=None)
+        
+    if data_file is None:
+        data_artifact = None
+    else:
+        data_artifact = upload_artifact(Path(data_file), archive=None)
     rid_config = upload_artifact(Path(rid_config), archive=None)
 
     rid_steps = Step(
@@ -157,6 +162,7 @@ def resubmit_rid(
             "forcefield": forcefield_artifact,
             "index_file": index_file_artifact,
             "inputfile": inputfile_artifact,
+            "data_file": data_artifact,
             "dp_files": dp_files_artifact,
             "cv_file": cv_file_artifact
         },
@@ -169,23 +175,28 @@ def resubmit_rid(
     restart_flag = 1
     for step in all_steps:
         if step["type"] == "Pod":
-            if step["phase"] == "Succeeded":
-                if step["key"] != "prepare-rid" and step["key"] != "init-recorder":
-                    pod_key = step["key"]
-                    if pod_key is not None:
-                        pod_key_list = pod_key.split("-")
-                        pod_iter = int(pod_key_list[1])
-                        pod_step = "-".join(pod_key_list[2:-1])
-                        if iteration is not None:
-                            if pod is not None:
-                                if pod_iter == int(iteration) and pod_step == pod:
-                                    restart_flag = 0
-                            else:
-                                if pod_iter == int(iteration):
-                                    restart_flag = 0
-                    
-                    if restart_flag == 1:
-                        succeeded_steps.append(step)
-    wf = Workflow("reinforced-dynamics", pod_gc_strategy="OnPodSuccess", parallelism=30)
+            # if step["phase"] == "Succeeded":
+            if step["key"] != "prepare-rid" and step["key"] != "init-recorder":
+                pod_key = step["key"]
+                if pod_key is not None:
+                    pod_key_list = pod_key.split("-")
+                    pod_iter = int(pod_key_list[1])
+                    pod_step = "-".join(pod_key_list[2:-1])
+                    if iteration is not None:
+                        if pod is not None:
+                            if pod_iter == int(iteration) and pod_step == pod:
+                                restart_flag = 0
+                        else:
+                            if pod_iter == int(iteration):
+                                restart_flag = 0
+                    else:
+                        if step["phase"] != "Succeeded":
+                            restart_flag = 0
+                        else:
+                            restart_flag = 1
+                
+                if restart_flag == 1:
+                    succeeded_steps.append(step)
+    wf = Workflow("reinforced-dynamics-continue", pod_gc_strategy="OnPodSuccess", parallelism=50)
     wf.add(rid_steps)
     wf.submit(reuse_step=succeeded_steps)

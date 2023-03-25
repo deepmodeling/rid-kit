@@ -3,6 +3,7 @@
         "local_machine": {
             "executor":{
             "image": "dptechnology/dpdispatcher:latest",
+            "merge_sliced_step": "True",
             "machine_dict":{
                 "batch_type": "Slurm",
                 "context_type": "Local",
@@ -25,6 +26,7 @@
         "local_machine_cpu": {
             "executor":{
             "image": "dptechnology/dpdispatcher:latest",
+            "merge_sliced_step": "True",
             "machine_dict":{
                 "batch_type": "Slurm",
                 "context_type": "Local",
@@ -51,7 +53,6 @@
         "run_exploration_config": "local_machine",
         "prep_label_config": "local_machine_cpu",
         "run_label_config": "local_machine",
-        "post_label_config": "local_machine_cpu",
         "prep_select_config": "local_machine",
         "run_select_config": "local_machine",
         "prep_data_config": "local_machine",

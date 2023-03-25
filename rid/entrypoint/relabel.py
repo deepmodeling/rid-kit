@@ -20,7 +20,6 @@ from rid.utils import normalize_resources
 from rid.superop.label import Label
 from rid.op.prep_label import PrepLabel, CheckLabelInputs
 from rid.op.run_label import RunLabel
-from rid.op.calc_mf import CalcMF
 from rid.constants import label_task_pattern
 
 def relabel_rid(
@@ -48,10 +47,8 @@ def relabel_rid(
         CheckLabelInputs,
         PrepLabel,
         RunLabel,
-        CalcMF,
         prep_config = normalized_resources[tasks["prep_label_config"]],
         run_config = normalized_resources[tasks["run_label_config"]],
-        post_config = normalized_resources[tasks["post_label_config"]],
         retry_times=None)
 
     if isinstance(confs, str):
@@ -181,6 +178,6 @@ def relabel_rid(
             if step["phase"] == "Succeeded":
                 succeeded_steps.append(step)
                         
-    wf = Workflow("rid-labeling", pod_gc_strategy="OnPodSuccess", parallelism=30)
+    wf = Workflow("rid-labeling", pod_gc_strategy="OnPodSuccess", parallelism=50)
     wf.add(rid_steps)
     wf.submit(reuse_step=succeeded_steps)

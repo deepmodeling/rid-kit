@@ -17,7 +17,7 @@ except ModuleNotFoundError:
 
 from rid.constants import (
     data_raw,
-    force_out,
+    cv_force_out,
     center_out_name,
     data_old
 )
@@ -101,16 +101,14 @@ default_config = normalize_resources({
 @unittest.skipIf(skip_ut_with_dflow, skip_ut_with_dflow_reason)
 class TestMockedData(unittest.TestCase):
     def setUp(self):
-        self.forces = make_mocked_init_data(force_out,1)
-        self.centers = make_mocked_init_data(center_out_name,1)
+        self.cv_forces = make_mocked_init_data(cv_force_out,1)
         self.data_old = make_mocked_init_data(data_old,1)
         self.block_tag = "000"
         self.data_out = "data_generate"
         self.expected_out = data_raw
 
     def tearDown(self):
-        clear_dir(self.forces[0])
-        clear_dir(self.centers[0])
+        clear_dir(self.cv_forces[0])
         clear_dir(self.data_old[0])
         clear_dir(self.data_out)
             
@@ -128,8 +126,7 @@ class TestMockedData(unittest.TestCase):
                 "block_tag" : self.block_tag
             },
             artifacts = {
-            "forces": upload_artifact(self.forces[1]),
-            "centers": upload_artifact(self.centers[1]),
+            "cv_forces": upload_artifact(self.cv_forces[1]),
             "data_old": upload_artifact(self.data_old[1])
             },
         )
@@ -153,6 +150,4 @@ class TestMockedData(unittest.TestCase):
             l1 = f.readline()
             self.assertEqual(l1, "this is %s 0\n"%data_old)
             l2 = f.readline()
-            self.assertEqual(l2, "this is %s 0\n"%force_out)
-            l3 = f.readline()
-            self.assertEqual(l3, "this is %s 0"%center_out_name)
+            self.assertEqual(l2, "this is %s 0"%cv_force_out)

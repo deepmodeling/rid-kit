@@ -53,7 +53,8 @@ class PrepExplore(OP):
                 "trust_lvl_2": float,
                 "exploration_config": Dict,
                 "cv_config": Dict,
-                "task_name": str
+                "task_name": str,
+                "block_tag": str
             }
         )
 
@@ -110,8 +111,11 @@ class PrepExplore(OP):
         else:
             models = [str(model.name) for model in op_in["models"]]
 
-        #print("what is cv", cv_file)
+        wall_list = None
+        if "iterative_walls" in op_in["cv_config"]:
+            wall_list = op_in["cv_config"]["iterative_walls"]
         
+        iteration = int(op_in["block_tag"].split("-")[1])
         gmx_task_builder = EnhcMDTaskBuilder(
             conf = op_in["conf"],
             topology = op_in["topology"],
@@ -124,7 +128,9 @@ class PrepExplore(OP):
             trust_lvl_2 = op_in["trust_lvl_2"],
             model_list = models,
             plumed_output = plumed_output_name,
-            cv_mode = op_in["cv_config"]["mode"]
+            cv_mode = op_in["cv_config"]["mode"],
+            wall_list = wall_list,
+            iteration = iteration
         )
         cv_dim = gmx_task_builder.get_cv_dim()
         task_path = Path(op_in["task_name"])

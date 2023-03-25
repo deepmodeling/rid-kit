@@ -16,8 +16,7 @@ from rid.constants import (
         data_new,
         data_old,
         data_raw,
-        force_out,
-        center_out_name
+        cv_force_out
     )
 
 
@@ -36,8 +35,7 @@ class Test_Collectdata(unittest.TestCase):
         data = Path(self.datapath)
         op_in = OPIO(
             {
-                "forces": [data/force_out],
-                "centers": [data/center_out_name]
+                "cv_forces": [data/cv_force_out]
             }
         )
         op_out = op.execute(op_in)

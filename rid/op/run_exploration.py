@@ -2,6 +2,8 @@ import os, sys
 import logging
 from typing import List, Dict, Union
 from pathlib import Path
+import numpy as np
+from matplotlib import pyplot as plt
 from dflow.python import (
     OP,
     OPIO,
@@ -20,11 +22,14 @@ from rid.constants import (
         gmx_xtc_name,
         gmx_conf_out,
         lmp_conf_out,
+        bias_fig,
+        model_devi_fig,
         lmp_input_name
     )
 from rid.utils import run_command, set_directory, list_to_string
 from rid.common.lammps.command import final_dump
 from rid.common.sampler.command import get_grompp_cmd, get_mdrun_cmd
+from rid.select.model_devi import make_std
 
 
 logging.basicConfig(
@@ -64,6 +69,8 @@ class RunExplore(OP):
         return OPIOSign(
             {
                 "plm_out": Artifact(Path),
+                "bias_fig": Artifact(Path, optional=True),
+                "model_devi_fig": Artifact(Path,optional=True),
                 "md_log": Artifact(Path),
                 "trajectory": Artifact(Path),
                 "conf_out": Artifact(Path)
@@ -142,23 +149,29 @@ class RunExplore(OP):
 
         with set_directory(op_in["task_path"]):
             if op_in["forcefield"] is not None:
-                os.symlink(op_in["forcefield"], op_in["forcefield"].name)
+                if not os.path.islink(op_in["forcefield"].name):
+                    os.symlink(op_in["forcefield"], op_in["forcefield"].name)
             if op_in["models"] is not None:
                 for model in op_in["models"]:
-                    os.symlink(model, model.name)
+                    if not os.path.islink(model.name):
+                        os.symlink(model, model.name)
             if op_in["dp_files"] is not None:
                 for file in op_in["dp_files"]:
-                    os.symlink(file, file.name)
+                    if not os.path.islink(file.name):
+                        os.symlink(file, file.name)
             if op_in["index_file"] is not None:
-                os.symlink(op_in["index_file"], op_in["index_file"].name)
+                if not os.path.islink(op_in["index_file"].name):
+                    os.symlink(op_in["index_file"], op_in["index_file"].name)
             if op_in["cv_file"] is not None:
                 for file in op_in["cv_file"]:
                     if file.name != "colvar":
-                        os.symlink(file, file.name)
+                        if not os.path.islink(file.name):
+                            os.symlink(file, file.name)
             if op_in["inputfile"] is not None:
                 for file in op_in["inputfile"]:
                     if file.name == inputfile_name:
-                        os.symlink(file, file.name)
+                        if not os.path.islink(file.name):
+                            os.symlink(file, file.name)
             
             if op_in["dp_files"] is not None:
                 for dp_file in op_in["dp_files"]:
@@ -177,7 +190,34 @@ class RunExplore(OP):
                 logger.info(err)
             if op_in["exploration_config"]["type"] == "lmp":
                 final_dump(dump="out.dump",selected_idx=-1,output_format=lmp_conf_out)
-        
+            
+            bias_fig_file = None
+            model_devi_fig_file = None
+            if op_in["models"] is not None:
+                # plot bias during simulation
+                bias = np.loadtxt(plumed_output_name)[:,1]
+                dt = op_in["exploration_config"]["dt"]*op_in["exploration_config"]["output_freq"]
+                xlist = [i*dt for i in range(len(bias))]
+                plt.figure(figsize=(10, 8), dpi=100)
+                plt.scatter(xlist,np.log(bias+0.001))
+                plt.xlabel("simulation time (ps)")
+                plt.ylabel("log of bias (kj/(mol))")
+                plt.title("log bias for the simulation")
+                plt.savefig(op_in["task_path"].joinpath(bias_fig))
+                # plot model deviation during simulation
+                cv_list = np.loadtxt(plumed_output_name)[:,2:]
+                stds = make_std(cv_list, op_in["models"])
+                plt.figure(figsize=(10, 8), dpi=100)
+                plt.scatter(xlist,stds)
+                plt.xlabel("simulation time (ps)")
+                plt.ylabel("force std (KJ/(mol*nm))")
+                plt.title("model deviation during simulation")
+                plt.savefig(op_in["task_path"].joinpath(model_devi_fig))
+                
+                bias_fig_file = op_in["task_path"].joinpath(bias_fig)
+                model_devi_fig_file = op_in["task_path"].joinpath(model_devi_fig)
+                
+                        
         if op_in["exploration_config"]["type"] == "gmx":
             mdrun_log = gmx_mdrun_log
             traj_name = gmx_xtc_name
@@ -192,6 +232,8 @@ class RunExplore(OP):
         op_out = OPIO(
             {
                 "plm_out": op_in["task_path"].joinpath(plumed_output_name),
+                "bias_fig": bias_fig_file,
+                "model_devi_fig": model_devi_fig_file,
                 "md_log": op_in["task_path"].joinpath(mdrun_log),
                 "trajectory": op_in["task_path"].joinpath(traj_name),
                 "conf_out": op_in["task_path"].joinpath(conf_out),

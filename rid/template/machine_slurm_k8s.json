@@ -47,7 +47,6 @@
         "run_exploration_config": "remote_slurm",
         "prep_label_config": "local_k8s",
         "run_label_config": "remote_slurm",
-        "post_label_config": "remote_slurm",
         "prep_select_config": "local_k8s",
         "run_select_config": "remote_slurm",
         "prep_data_config": "local_k8s",

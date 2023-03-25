@@ -6,7 +6,8 @@ from dflow.python import (
     OP,
     OPIO,
     OPIOSign,
-    Artifact
+    Artifact,
+    Parameter
 )
 from rid.constants import (
         gmx_conf_name,
@@ -20,12 +21,14 @@ from rid.constants import (
         gmx_xtc_name,
         gmx_trr_name,
         gmx_coord_name,
-        gmx_force_name
+        gmx_force_name,
+        mf_fig
     )
 
 from rid.utils import run_command, set_directory, list_to_string
 from rid.common.sampler.command import get_grompp_cmd, get_mdrun_cmd
 from rid.common.gromacs.trjconv import generate_coords, generate_forces
+from rid.tools.estimator import CalcMF
 import numpy as np
 
 logging.basicConfig(
@@ -52,6 +55,10 @@ class RunLabel(OP):
                 "task_path": Artifact(Path),
                 "forcefield": Artifact(Path, optional=True),
                 "label_config": Dict,
+                "cv_config": Dict,
+                "at": Artifact(Path, optional=True),
+                "task_name": str,
+                "tail": Parameter(float, default=0.9),
                 "index_file": Artifact(Path, optional=True),
                 "dp_files": Artifact(List[Path], optional=True),
                 "cv_file": Artifact(List[Path], optional=True),
@@ -64,9 +71,9 @@ class RunLabel(OP):
         return OPIOSign(
             {
                 "plm_out": Artifact(Path),
-                "trajectory": Artifact(Path, optional=True),
-                "frame_coords": Artifact(Path, optional=True),
-                "frame_forces": Artifact(Path, optional=True),
+                "cv_forces": Artifact(Path),
+                "mf_info": Artifact(Path,optional=True),
+                "mf_fig": Artifact(Path),
                 "md_log": Artifact(Path)
             }
         )
@@ -86,13 +93,14 @@ class RunLabel(OP):
 
             - `task_path`: (`Artifact(Path)`) A directory path containing files for Gromacs/Lammps MD simulations.
             - `label_config`: (`Dict`) Configuration of Gromacs/Lammps simulations in label steps.
+            - `cv_config`: (`Dict`) Configuration of CV in MD simulations.
           
         Returns
         -------
             Output dict with components:
         
-            - `plm_out`: (`Artifact(Path)`) Outputs of CV values (`plumed.out` by default) from label steps.
-            - `md_log`: (`Artifact(Path)`) Log files of Gromacs/Lammps `mdrun` commands.
+            - `forces`: (`Artifact(Path)`) mean forces value of restrained/constrained estimator.
+            - `mf_info`: (`Artifact(Path)`) mean force value and std information of restrained/constrained estimator.
         """
         
         if op_in["index_file"] is None:
@@ -125,20 +133,25 @@ class RunLabel(OP):
 
         with set_directory(op_in["task_path"]):
             if op_in["forcefield"] is not None:
-                os.symlink(op_in["forcefield"], op_in["forcefield"].name)
+                if not os.path.islink(op_in["forcefield"].name):
+                    os.symlink(op_in["forcefield"], op_in["forcefield"].name)
             if op_in["dp_files"] is not None:
                 for file in op_in["dp_files"]:
-                    os.symlink(file, file.name)
+                    if not os.path.islink(file.name):
+                        os.symlink(file, file.name)
             if op_in["index_file"] is not None:
-                os.symlink(op_in["index_file"], op_in["index_file"].name)
+                if not os.path.islink(op_in["index_file"].name):
+                    os.symlink(op_in["index_file"], op_in["index_file"].name)
             if op_in["cv_file"] is not None:
                 for file in op_in["cv_file"]:
                     if file.name != "colvar":
-                        os.symlink(file, file.name)
+                        if not os.path.islink(file.name):
+                            os.symlink(file, file.name)
             if op_in["inputfile"] is not None:
                 for file in op_in["inputfile"]:
                     if file.name == inputfile_name:
-                        os.symlink(file, file.name)
+                        if not os.path.islink(file.name):
+                            os.symlink(file, file.name)
             
             if op_in["dp_files"] is not None:
                 for dp_file in op_in["dp_files"]:
@@ -157,27 +170,57 @@ class RunLabel(OP):
                 logger.info(err)
             
             if op_in["label_config"]["method"] == "constrained":
-                generate_coords(system = op_in["label_config"]["system"], trr = gmx_trr_name, top = op_in["task_path"].joinpath(gmx_conf_name), out_coord=gmx_coord_name)
-                generate_forces(system = op_in["label_config"]["system"], trr = gmx_trr_name, top = op_in["task_path"].joinpath(gmx_conf_name), out_force=gmx_force_name)
+                select_system = "System"
+                if "system" in op_in["label_config"]:
+                    select_system = op_in["label_config"]["system"]
+                generate_coords(output_group = select_system, trr = gmx_trr_name, top = op_in["task_path"].joinpath(gmx_conf_name), index = op_in["index_file"], out_coord=gmx_coord_name)
+                generate_forces(output_group = select_system, trr = gmx_trr_name, top = op_in["task_path"].joinpath(gmx_conf_name), index = op_in["index_file"], out_force=gmx_force_name)
 
         frame_coords = None
         frame_forces = None
+        traj_path = None
         if op_in["label_config"]["type"] == "gmx":
             mdrun_log = gmx_mdrun_log
-            traj_name = gmx_xtc_name
+            if os.path.exists(op_in["task_path"].joinpath(gmx_xtc_name)):
+                traj_path = op_in["task_path"].joinpath(gmx_xtc_name)
             if op_in["label_config"]["method"] == "constrained":
                 frame_coords = op_in["task_path"].joinpath(gmx_coord_name)
                 frame_forces = op_in["task_path"].joinpath(gmx_force_name)
         elif op_in["label_config"]["type"] == "lmp":
             mdrun_log = lmp_mdrun_log
-            traj_name = "out.dump"
+            if os.path.exists(op_in["task_path"].joinpath("out.dump")):
+                traj_path = op_in["task_path"].joinpath("out.dump")
+        
+        conf = None
+        topology = None
+        plm_out = None
+        
+        if os.path.exists(op_in["task_path"].joinpath(gmx_conf_name)):
+            conf = op_in["task_path"].joinpath(gmx_conf_name)
+        if os.path.exists(op_in["task_path"].joinpath(gmx_top_name)):
+            topology = op_in["task_path"].joinpath(gmx_top_name)
+        if os.path.exists(op_in["task_path"].joinpath(plumed_output_name)):
+            plm_out = op_in["task_path"].joinpath(plumed_output_name)
+            
+        mf_out = CalcMF(
+            conf = conf,
+            task_name = op_in["task_name"],
+            plm_out = plm_out,
+            cv_config = op_in["cv_config"],
+            label_config = op_in["label_config"],
+            tail = op_in["tail"],
+            topology = topology,
+            frame_coords = frame_coords,
+            frame_forces = frame_forces,
+            at = op_in["at"]
+        )
             
         op_out = OPIO(
             {
-                "plm_out": op_in["task_path"].joinpath(plumed_output_name),
-                "trajectory": op_in["task_path"].joinpath(traj_name),
-                "frame_coords": frame_coords,
-                "frame_forces": frame_forces,
+                "plm_out": plm_out,
+                "cv_forces": mf_out["cv_forces"],
+                "mf_info":  mf_out["mf_info"],
+                "mf_fig": Path(op_in["task_name"]).joinpath(mf_fig),
                 "md_log": op_in["task_path"].joinpath(mdrun_log)
             }
         )

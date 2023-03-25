@@ -19,7 +19,7 @@ except ModuleNotFoundError:
 from rid.constants import (
     walker_tag_fmt,
     gmx_mdrun_log,
-    force_out
+    cv_force_out
 )
 
 from rid.utils import normalize_resources
@@ -41,8 +41,7 @@ from mocked_ops import (
     make_mocked_init_confs,
     MockedCheckLabelInputs,
     MockedPrepLabel,
-    MockedRunLabel,
-    MockedCalcMF
+    MockedRunLabel
 )
 
 from dflow.python import upload_packages
@@ -160,10 +159,8 @@ class TestMockedLabel(unittest.TestCase):
             MockedCheckLabelInputs,
             MockedPrepLabel,
             MockedRunLabel,
-            MockedCalcMF,
             prep_config = default_config,
-            run_config = default_config,
-            post_config = default_config
+            run_config = default_config
         )
         labeling_step = Step(
             'label-step',
@@ -201,11 +198,11 @@ class TestMockedLabel(unittest.TestCase):
 
         if not os.path.exists(self.data_out):
             os.mkdir(self.data_out)
-        download_artifact(step.outputs.artifacts["forces"],path=self.data_out)
+        download_artifact(step.outputs.artifacts["cv_forces"],path=self.data_out)
         download_artifact(step.outputs.artifacts["md_log"],path=self.data_out)
         sub_path = "/000_000/"
         self.assertTrue(os.path.isfile(self.data_out+sub_path+gmx_mdrun_log))
-        self.assertTrue(os.path.isfile(self.data_out+sub_path+force_out))
-        with open(self.data_out+sub_path+force_out,"r") as f:
+        self.assertTrue(os.path.isfile(self.data_out+sub_path+cv_force_out))
+        with open(self.data_out+sub_path+cv_force_out,"r") as f:
             l1 = f.readline()
             self.assertEqual(l1, '1.000000e+00 2.000000e+00\n')

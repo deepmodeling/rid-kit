@@ -134,7 +134,6 @@
         "run_exploration_config": "bohrium1",
         "prep_label_config": "local_k8s",
         "run_label_config": "bohrium2",
-        "post_label_config": "bohrium3",
         "prep_select_config": "local_k8s",
         "run_select_config": "bohrium3",
         "prep_data_config": "local_k8s",

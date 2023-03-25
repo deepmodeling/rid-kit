@@ -30,10 +30,8 @@ class Label(Steps):
         check_input_op: OP,
         prep_op: OP,
         run_op: OP,
-        post_op: OP,
         prep_config: Dict,
         run_config: Dict,
-        post_config: Dict,
         upload_python_package = None,
         retry_times = None
     ):
@@ -60,7 +58,7 @@ class Label(Steps):
         }
         self._output_artifacts = {
             "md_log": OutputArtifact(),
-            "forces": OutputArtifact()
+            "cv_forces": OutputArtifact()
         }
 
         super().__init__(        
@@ -79,7 +77,6 @@ class Label(Steps):
             "check_label_inputs": "{}-check-label-inputs".format(self.inputs.parameters["block_tag"]),
             "prep_label": "{}-prep-label".format(self.inputs.parameters["block_tag"]),
             "run_label": "{}-run-label".format(self.inputs.parameters["block_tag"]),
-            "post_label": "{}-post-label".format(self.inputs.parameters["block_tag"])
         }
 
         self = _label(
@@ -88,10 +85,8 @@ class Label(Steps):
             check_input_op,
             prep_op,
             run_op,
-            post_op,
             prep_config = prep_config,
             run_config = run_config,
-            post_config = post_config,
             upload_python_package = upload_python_package,
             retry_times = retry_times
         )            
@@ -123,24 +118,19 @@ def _label(
         check_label_input_op : OP,
         prep_label_op : OP,
         run_label_op : OP,
-        post_label_op : OP,
         prep_config : Dict,
         run_config : Dict,
-        post_config : Dict,
         upload_python_package : str = None,
         retry_times: int = None
     ):
     prep_config = deepcopy(prep_config)
     run_config = deepcopy(run_config)
-    post_config = deepcopy(post_config)
 
     prep_template_config = prep_config.pop('template_config')
     run_template_config = run_config.pop('template_config')
-    post_template_config = post_config.pop('template_config')
 
     prep_executor = init_executor(prep_config.pop('executor'))
     run_executor = init_executor(run_config.pop('executor'))
-    post_executor = init_executor(post_config.pop('executor'))
 
     check_label_inputs = Step(
         'check-label-inputs',
@@ -200,12 +190,16 @@ def _label(
             python_packages = upload_python_package,
             retry_on_transient_error = retry_times,
             slices=Slices("{{item}}",
-                input_artifact=["task_path"],
-                output_artifact=["plm_out", "md_log","trajectory","frame_coords","frame_forces"]),
+                input_parameter=["task_name"],
+                input_artifact=["task_path","at"],
+                output_artifact=["plm_out","cv_forces","mf_info","mf_fig","md_log"]),
             **run_template_config,
         ),
         parameters={
-            "label_config": label_steps.inputs.parameters["label_config"]
+            "label_config": label_steps.inputs.parameters["label_config"],
+            "cv_config": label_steps.inputs.parameters['cv_config'],
+            "task_name": check_label_inputs.outputs.parameters['conf_tags'],
+            "tail": label_steps.inputs.parameters['tail']
         },
         artifacts={
             "forcefield": label_steps.inputs.artifacts['forcefield'],
@@ -213,49 +207,18 @@ def _label(
             "index_file": label_steps.inputs.artifacts['index_file'],
             "dp_files": label_steps.inputs.artifacts['dp_files'],
             "cv_file": label_steps.inputs.artifacts['cv_file'],
-            "inputfile": label_steps.inputs.artifacts['inputfile']
+            "inputfile": label_steps.inputs.artifacts['inputfile'],
+            "at": label_steps.inputs.artifacts['at']
         },
         key = step_keys['run_label']+"-{{item}}",
         executor = run_executor,
         with_param=argo_range(argo_len(check_label_inputs.outputs.parameters['conf_tags'])),
+        continue_on_success_ratio = 0.75,
         **run_config,
     )
     label_steps.add(run_label)
 
-    post_label = Step(
-        'post-label',
-        template=PythonOPTemplate(
-            post_label_op,
-            python_packages = upload_python_package,
-            retry_on_transient_error = retry_times,
-            slices=Slices("{{item}}",
-                input_parameter=["task_name"],
-                input_artifact=["conf","plm_out", "frame_coords","frame_forces","at"],
-                output_artifact=["forces","mf_info"]),
-            **post_template_config,
-        ),
-        parameters={
-            "task_name": check_label_inputs.outputs.parameters['conf_tags'],
-            "tail": label_steps.inputs.parameters['tail'],
-            "label_config": label_steps.inputs.parameters["label_config"],
-            "cv_config": label_steps.inputs.parameters['cv_config'],
-        },
-        artifacts={
-            "conf": label_steps.inputs.artifacts["confs"],
-            "topology": label_steps.inputs.artifacts["topology"],
-            "plm_out": run_label.outputs.artifacts["plm_out"],
-            "frame_coords": run_label.outputs.artifacts["frame_coords"],
-            "frame_forces": run_label.outputs.artifacts["frame_forces"],
-            "at": label_steps.inputs.artifacts['at']
-        },
-        key = step_keys['post_label']+"-{{item}}",
-        executor = post_executor,
-        with_param=argo_range(argo_len(check_label_inputs.outputs.parameters['conf_tags'])),
-        **post_config,
-    )
-    label_steps.add(post_label)
-
-    label_steps.outputs.artifacts["forces"]._from = post_label.outputs.artifacts["forces"]
+    label_steps.outputs.artifacts["cv_forces"]._from = run_label.outputs.artifacts["cv_forces"]
     label_steps.outputs.artifacts["md_log"]._from = run_label.outputs.artifacts["md_log"]
     
     return label_steps

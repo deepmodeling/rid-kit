@@ -277,6 +277,7 @@ class ReinforcedDynamics(Steps):
             "confs": InputArtifact(),
             "rid_config": InputArtifact(),
             "index_file": InputArtifact(optional=True),
+            "data_file": InputArtifact(optional=True),
             "dp_files": InputArtifact(optional=True),
             "cv_file": InputArtifact(optional=True)
         }
@@ -420,6 +421,7 @@ def _rid(
             "inputfile": steps.inputs.artifacts["inputfile"],
             "confs": prep_rid.outputs.artifacts["confs"],
             "index_file": steps.inputs.artifacts["index_file"],
+            "data_old": steps.inputs.artifacts["data_file"],
             "dp_files": steps.inputs.artifacts["dp_files"],
             "cv_file": steps.inputs.artifacts["cv_file"]
         },

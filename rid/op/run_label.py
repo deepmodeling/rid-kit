@@ -133,20 +133,25 @@ class RunLabel(OP):
 
         with set_directory(op_in["task_path"]):
             if op_in["forcefield"] is not None:
-                os.symlink(op_in["forcefield"], op_in["forcefield"].name)
+                if not os.path.islink(op_in["forcefield"].name):
+                    os.symlink(op_in["forcefield"], op_in["forcefield"].name)
             if op_in["dp_files"] is not None:
                 for file in op_in["dp_files"]:
-                    os.symlink(file, file.name)
+                    if not os.path.islink(file.name):
+                        os.symlink(file, file.name)
             if op_in["index_file"] is not None:
-                os.symlink(op_in["index_file"], op_in["index_file"].name)
+                if not os.path.islink(op_in["index_file"].name):
+                    os.symlink(op_in["index_file"], op_in["index_file"].name)
             if op_in["cv_file"] is not None:
                 for file in op_in["cv_file"]:
                     if file.name != "colvar":
-                        os.symlink(file, file.name)
+                        if not os.path.islink(file.name):
+                            os.symlink(file, file.name)
             if op_in["inputfile"] is not None:
                 for file in op_in["inputfile"]:
                     if file.name == inputfile_name:
-                        os.symlink(file, file.name)
+                        if not os.path.islink(file.name):
+                            os.symlink(file, file.name)
             
             if op_in["dp_files"] is not None:
                 for dp_file in op_in["dp_files"]:

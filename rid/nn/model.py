@@ -15,15 +15,6 @@ from rid.constants import kbT, beta, N_grid, inverse_f_cvt
 tf_precision = tf.float32
 
 
-logging.basicConfig(
-    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-    level=os.environ.get("LOGLEVEL", "INFO").upper(),
-    stream=sys.stdout,
-)
-logger = logging.getLogger(__name__)
-
-
 class Reader(object):
     def __init__(self, config):
         # copy from config
@@ -132,6 +123,7 @@ class Reader(object):
 
 class Model(object):
     def __init__(self, config, sess):
+        self.log_name = config.log_name
         self.sess = sess
         # copy from config
         self.data_path = config.data_path
@@ -183,8 +175,14 @@ class Model(object):
         return error_new, error_new2, error_old, error_old2
 
     def train(self, reader):
+        logger = logging.getLogger(__name__)
+        logger.setLevel(level=os.environ.get("LOGLEVEL", "INFO").upper())
+        handler = logging.FileHandler(self.log_name)
+        formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(name)s | %(message)s")
+        handler.setFormatter(fmt=formatter)
+        logger.addHandler(handler)
+        
         reader.prepare()
-
         self.n_input = reader.n_input
         self.inputs_train = tf.placeholder(
             tf_precision, [None, self.n_input + self.cv_dim], name='inputs')

@@ -8,10 +8,11 @@ from dflow.python import (
     Artifact,
     Parameter
 )
-from rid.constants import tf_model_name, train_fig
+from rid.constants import tf_model_name, train_fig, train_log
 from rid.nn.train_net import train
 from rid.nn.freeze import freeze_model
 from matplotlib import pyplot as plt
+from rid.utils import set_directory
 
 
 class TrainModel(OP):
@@ -70,58 +71,62 @@ class TrainModel(OP):
         data_shape = np.load(op_in["data"]).shape
         cv_dim = int(data_shape[1] // 2)
         train_config = op_in["train_config"]
-        train(
-            cv_dim=cv_dim,
-            neurons=train_config["neurons"],
-            angular_mask=op_in["angular_mask"],
-            numb_threads=train_config.get("numb_threads", 8),
-            resnet=train_config["resnet"],
-            use_mix=train_config["use_mix"],
-            restart=train_config.get("restart", False),
-            batch_size=train_config["batch_size"],
-            epoches=train_config["epoches"],
-            lr=train_config["init_lr"],
-            decay_steps=train_config["decay_steps"],
-            decay_rate=train_config["decay_rate"],
-            drop_out_rate=train_config["drop_out_rate"],
-            data_path=str(op_in["data"])
-        )
-        out_put_name = tf_model_name.format(tag=op_in["model_tag"])
-        train_log_name = "log"
-        train_fig_name = train_fig.format(tag=op_in["model_tag"])
-        # plot loglog loss png
-        loss_list = []
-        epoch_list = []
-        with open(train_log_name, "r") as f:
-            while True:
-                line = f.readline()
-                if "running time" in line:
-                    break
-                if "rid.nn.model" in line:
-                    data = line.split(" ")
-                    if len(loss_list) == 0:
-                        epoch_list.append(int(data[10][:-1]))
-                        loss_list.append(float(data[14][:-1]))
-                    else:
-                        epoch_list.append(int(data[8][:-1]))
-                        loss_list.append(float(data[12][:-1]))
+        task_path = Path(op_in["model_tag"])
+        task_path.mkdir(exist_ok=True, parents=True)
+        train_log_name = train_log.format(tag=op_in["model_tag"])
+        with set_directory(task_path):
+            train(
+                cv_dim=cv_dim,
+                neurons=train_config["neurons"],
+                angular_mask=op_in["angular_mask"],
+                numb_threads=train_config.get("numb_threads", 8),
+                resnet=train_config["resnet"],
+                use_mix=train_config["use_mix"],
+                restart=train_config.get("restart", False),
+                batch_size=train_config["batch_size"],
+                epoches=train_config["epoches"],
+                lr=train_config["init_lr"],
+                decay_steps=train_config["decay_steps"],
+                decay_rate=train_config["decay_rate"],
+                drop_out_rate=train_config["drop_out_rate"],
+                data_path=str(op_in["data"]),
+                log_name = train_log_name
+            )
+            out_put_name = tf_model_name.format(tag=op_in["model_tag"])
+            train_fig_name = train_fig.format(tag=op_in["model_tag"])
+            # plot loglog loss png
+            loss_list = []
+            epoch_list = []
+            with open(train_log_name, "r") as f:
+                while True:
+                    line = f.readline()
+                    if "running time" in line:
+                        break
+                    if "rid.nn.model" in line:
+                        data = line.split(" ")
+                        if len(loss_list) == 0:
+                            epoch_list.append(int(data[10][:-1]))
+                            loss_list.append(float(data[14][:-1]))
+                        else:
+                            epoch_list.append(int(data[8][:-1]))
+                            loss_list.append(float(data[12][:-1]))
 
-        plt.figure(figsize=(10, 8), dpi=100)
-        plt.loglog(epoch_list,loss_list)
-        plt.xlabel("log of training epoches")
-        plt.ylabel("log of relative error")
-        plt.title("loglog fig of training")
-        plt.savefig(train_fig_name)
-        
-        freeze_model(
-            model_folder=".",
-            output=out_put_name
-        )
+            plt.figure(figsize=(10, 8), dpi=100)
+            plt.loglog(epoch_list,loss_list)
+            plt.xlabel("log of training epoches")
+            plt.ylabel("log of relative error")
+            plt.title("loglog fig of training")
+            plt.savefig(train_fig_name)
+            
+            freeze_model(
+                model_folder=".",
+                output=out_put_name
+            )
         op_out = OPIO(
             {
-                "model": Path(out_put_name),
-                "train_log": Path(train_log_name),
-                "train_fig": Path(train_fig_name)
+                "model": task_path.joinpath(out_put_name),
+                "train_log": task_path.joinpath(train_log_name),
+                "train_fig": task_path.joinpath(train_fig_name)
             }
         )
         return op_out

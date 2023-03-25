@@ -51,6 +51,7 @@ lmp_conf_out = "confout.lmp"
 
 # Tensorflow files
 tf_model_name = "model_{tag}.pb"
+train_log = "log_{tag}"
 dp_model_name = "dp.pb"
 model_tag_fmt = "{idx:03d}"
 N_grid = 100

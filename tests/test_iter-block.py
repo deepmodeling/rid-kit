@@ -54,7 +54,6 @@ from mocked_ops import (
     MockedCheckLabelInputs,
     MockedPrepLabel,
     MockedRunLabel,
-    MockedCalcMF,
     MockedPrepSelect,
     MockedRunSelect,
     MockedCollectData,
@@ -85,8 +84,6 @@ label_op = Label(
     MockedCheckLabelInputs,
     MockedPrepLabel,
     MockedRunLabel,
-    MockedCalcMF,
-    default_config,
     default_config,
     default_config)
 
@@ -228,7 +225,7 @@ class TestMockedIterBlock(unittest.TestCase):
         self.assertTrue(os.path.isfile(self.data_out+sub_path+gmx_xtc_name))
         self.assertTrue(os.path.isfile(self.data_out+sub_path+sel_ndx_name))
         self.assertTrue(os.path.isfile(self.data_out+"/"+data_raw))
-        self.assertTrue(os.path.isfile(self.data_out+"/"+tf_model_name.format(tag="000")))
+        self.assertTrue(os.path.isfile(self.data_out+sub_path+tf_model_name.format(tag="000")))
         with open(self.data_out+sub_path+gmx_conf_out,"r") as f:
             l1 = f.readline()
             self.assertEqual(l1, "This is init conf 0")

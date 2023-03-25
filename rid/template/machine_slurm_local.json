@@ -3,6 +3,7 @@
         "local_machine": {
             "executor":{
             "image": "dptechnology/dpdispatcher:latest",
+            "merge_sliced_step": "True",
             "machine_dict":{
                 "batch_type": "Slurm",
                 "context_type": "Local",
@@ -25,6 +26,7 @@
         "local_machine_cpu": {
             "executor":{
             "image": "dptechnology/dpdispatcher:latest",
+            "merge_sliced_step": "True",
             "machine_dict":{
                 "batch_type": "Slurm",
                 "context_type": "Local",

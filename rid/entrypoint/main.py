@@ -7,6 +7,10 @@ from typing import (
 )
 import rid
 
+if os.getenv('DFLOW_DEBUG'):
+    from dflow import config
+    config["mode"] = "debug"
+    
 NUMEXPR_MAX_THREADS = os.getenv("NUMEXPR_MAX_THREADS")
 if NUMEXPR_MAX_THREADS is None:
     NUMEXPR_MAX_THREADS = 8
@@ -23,6 +27,8 @@ except ImportError:
 
 from .submit import submit_rid
 from .resubmit import resubmit_rid
+from .label import label_rid
+from .relabel import relabel_rid
 from .info import information
 from .server import forward_ports
 from .cli import rid_ls, rid_rm
@@ -105,7 +111,7 @@ def main_parser() -> argparse.ArgumentParser:
     # resubmit
     parser_rerun = subparsers.add_parser(
         "resubmit",
-        help="Submit RiD workflow",
+        help="Resubmit RiD workflow",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser_rerun.add_argument(
@@ -119,6 +125,12 @@ def main_parser() -> argparse.ArgumentParser:
     )
     parser_rerun.add_argument(
         "--machine", "-m", help="Machine configuration.", dest="machine"
+    )
+    parser_rerun.add_argument(
+        "--iteration", "-t", help="restart from t-th iteration.", default = None, dest="iteration"
+    )
+    parser_rerun.add_argument(
+        "--pod", "-p", help="restart from the pod.", default = None, dest="pod"
     )
     
     # Explore
@@ -134,6 +146,41 @@ def main_parser() -> argparse.ArgumentParser:
         "--config", "-c", help="RiD configuration.", dest="config"
     )
     parser_exp.add_argument(
+        "--machine", "-m", help="Machine configuration.", dest="machine"
+    )
+    
+    # Label
+    parser_label = subparsers.add_parser(
+        "label",
+        help="labeling MD workflow",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser_label.add_argument(
+        "--mol", "-i", help="Initial conformation files.", dest="mol",
+    )
+    parser_label.add_argument(
+        "--config", "-c", help="RiD configuration.", dest="config"
+    )
+    parser_label.add_argument(
+        "--machine", "-m", help="Machine configuration.", dest="machine"
+    )
+    
+    # Relabel
+    parser_relabel = subparsers.add_parser(
+        "relabel",
+        help="Resubmit labeling MD workflow",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser_relabel.add_argument(
+        "WORKFLOW_ID", help="Workflow ID."
+    )
+    parser_relabel.add_argument(
+        "--mol", "-i", help="Initial conformation files.", dest="mol",
+    )
+    parser_relabel.add_argument(
+        "--config", "-c", help="RiD configuration.", dest="config"
+    )
+    parser_relabel.add_argument(
         "--machine", "-m", help="Machine configuration.", dest="machine"
     )
     
@@ -204,6 +251,7 @@ def parse_submit(args):
     index_file = None
     dp_files = []
     models = []
+    data_file = None
     otherfiles = []
     for file in allfiles:
         if os.path.basename(file).endswith("ff"):
@@ -214,6 +262,8 @@ def parse_submit(args):
             top_file = file
         elif os.path.basename(file).endswith("pb"):
             models.append(file)
+        elif os.path.basename(file).endswith("npy"):
+            data_file = file
         elif os.path.basename(file).endswith("ndx"):
             index_file = file
         elif os.path.basename(file).endswith("json") or os.path.basename(file).endswith("raw"):
@@ -221,7 +271,7 @@ def parse_submit(args):
         else:
             otherfiles.append(file)
         
-    return confs, top_file, models, forcefield, index_file, dp_files, otherfiles
+    return confs, top_file, models, forcefield, index_file, data_file, dp_files, otherfiles
 
 
 def log_ui():
@@ -233,8 +283,46 @@ def main():
     args = parse_args()
     if args.command == "submit":
         logger.info("Preparing RiD ...")
-        confs, top_file, models, forcefield, index_file, dp_files, otherfiles = parse_submit(args)
+        confs, top_file, models, forcefield, index_file, data_file, dp_files, otherfiles = parse_submit(args)
         submit_rid(
+            confs = confs,
+            topology = top_file,
+            rid_config = args.config,
+            machine_config = args.machine,
+            models = models,
+            forcefield = forcefield,
+            index_file = index_file,
+            data_file = data_file,
+            dp_files = dp_files,
+            otherfiles = otherfiles
+        )
+        log_ui()
+    elif args.command == "resubmit":
+        logger.info("Preparing RiD ...")
+        confs, top_file, models, forcefield, index_file, data_file, dp_files, otherfiles = parse_submit(args)
+        resubmit_rid(
+            workflow_id=args.WORKFLOW_ID,
+            confs = confs,
+            topology = top_file,
+            rid_config = args.config,
+            machine_config = args.machine,
+            iteration = args.iteration,
+            pod = args.pod,
+            models = models,
+            forcefield = forcefield,
+            index_file = index_file,
+            data_file = data_file,
+            dp_files = dp_files,
+            otherfiles = otherfiles
+        )
+        log_ui()
+    elif args.command == "explore":
+        logger.info("RiD Exploration.")
+        return None
+    elif args.command == "label":
+        logger.info("Labeling MD ...")
+        confs, top_file, models, forcefield, index_file, data_files, dp_files, otherfiles = parse_submit(args)
+        label_rid(
             confs = confs,
             topology = top_file,
             rid_config = args.config,
@@ -246,10 +334,10 @@ def main():
             otherfiles = otherfiles
         )
         log_ui()
-    elif args.command == "resubmit":
-        logger.info("Preparing RiD ...")
-        confs, top_file, models, forcefield, index_file, dp_files, otherfiles = parse_submit(args)
-        resubmit_rid(
+    elif args.command == "relabel":
+        logger.info("Labeling MD ...")
+        confs, top_file, models, forcefield, index_file, data_files, dp_files, otherfiles = parse_submit(args)
+        relabel_rid(
             workflow_id=args.WORKFLOW_ID,
             confs = confs,
             topology = top_file,
@@ -262,9 +350,6 @@ def main():
             otherfiles = otherfiles
         )
         log_ui()
-    elif args.command == "explore":
-        logger.info("RiD Exploration.")
-        return None
     elif args.command == "port-forward":
         forward_ports()
     elif args.command == "ls":

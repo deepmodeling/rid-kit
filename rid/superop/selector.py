@@ -22,6 +22,10 @@ from rid.utils import init_executor
 
 
 class Selector(Steps):
+    
+    r""" Selector SuperOP.
+    This SuperOP combines PrepSelect OP and RunSelect OP.    
+    """
     def __init__(
         self,
         name: str,
@@ -29,7 +33,8 @@ class Selector(Steps):
         run_op: OP,
         prep_config: Dict,
         run_config: Dict,
-        upload_python_package = None
+        upload_python_package = None,
+        retry_times = None
     ):
         self._input_parameters = {
             "trust_lvl_1" : InputParameter(type=List[float], value=2.0),
@@ -92,6 +97,7 @@ class Selector(Steps):
             prep_config = prep_config,
             run_config = run_config,
             upload_python_package = upload_python_package,
+            retry_times = retry_times
         )            
     
     @property
@@ -123,6 +129,7 @@ def _select(
         prep_config : Dict,
         run_config : Dict,
         upload_python_package : str = None,
+        retry_times: int = None
     ):
     prep_config = deepcopy(prep_config)
     run_config = deepcopy(run_config)
@@ -136,11 +143,12 @@ def _select(
         template=PythonOPTemplate(
             prep_select_op,
             python_packages = upload_python_package,
+            retry_on_transient_error = retry_times,
             slices=Slices(
                 "{{item}}",
                 input_parameter=["cluster_threshold", "task_name"],
                 input_artifact=["plm_out"],
-                output_artifact=["cluster_selection_index", "cluster_selection_data"],
+                output_artifact=["cluster_fig","cluster_selection_index", "cluster_selection_data"],
                 output_parameter=["cluster_threshold", "numb_cluster"]
                 ),
                 
@@ -171,11 +179,13 @@ def _select(
         template=PythonOPTemplate(
             run_select_op,
             python_packages = upload_python_package,
+            retry_on_transient_error = retry_times,
             slices=Slices(
                 "int({{item}})",
                 input_parameter=["task_name", "trust_lvl_1", "trust_lvl_2"],
                 input_artifact=["cluster_selection_index", "cluster_selection_data", "xtc_traj", "topology"],
-                output_artifact=["selected_confs", "selected_cv_init", "model_devi", "selected_indices"]
+                output_artifact=["selected_confs", "selected_cv_init", "model_devi", "selected_indices"],
+                output_parameter=["selected_conf_tags"]
             ),
             **run_template_config,
         ),

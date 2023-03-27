@@ -1,0 +1,62 @@
+{
+    "resources": {
+        "local_machine": {
+            "executor":{
+            "image": "dptechnology/dpdispatcher:latest",
+            "merge_sliced_step": "True",
+            "machine_dict":{
+                "batch_type": "Slurm",
+                "context_type": "Local",
+                "local_root" : "./",
+                "remote_root": ""
+            },
+            "resources_dict":{
+                "number_node": 1,
+                "cpu_per_node": 8,
+                "gpu_per_node": 1,
+                "queue_name": "GPU",
+                "group_size": 1,
+                "custom_flags": [
+                    "#SBATCH --time=120:00:00"
+                   ],
+                "source_list": ["/path/to/rid.env"]
+            }
+        }
+        },
+        "local_machine_cpu": {
+            "executor":{
+            "image": "dptechnology/dpdispatcher:latest",
+            "merge_sliced_step": "True",
+            "machine_dict":{
+                "batch_type": "Slurm",
+                "context_type": "Local",
+                "local_root" : "./",
+                "remote_root": ""
+            },
+            "resources_dict":{
+                "number_node": 1,
+                "cpu_per_node": 8,
+                "gpu_per_node": 0,
+                "queue_name": "C032M0128G",
+                "group_size": 1,
+                "custom_flags": [
+                    "#SBATCH --time=120:00:00"
+                   ],
+                "source_list": ["/path/to/rid.env"]
+            }
+        }
+        }
+    },
+
+    "tasks": {
+        "prep_exploration_config": "local_machine_cpu",
+        "run_exploration_config": "local_machine",
+        "prep_label_config": "local_machine_cpu",
+        "run_label_config": "local_machine",
+        "prep_select_config": "local_machine",
+        "run_select_config": "local_machine",
+        "prep_data_config": "local_machine",
+        "run_train_config": "local_machine",
+        "workflow_steps_config": "local_machine_cpu"
+    }
+}

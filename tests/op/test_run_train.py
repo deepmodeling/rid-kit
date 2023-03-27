@@ -10,6 +10,7 @@ from rid.op.run_train import TrainModel
 from rid.constants import data_raw
 from pathlib import Path
 from utils import DATA_RAW
+import shutil
 
 class Test_RunTrain(unittest.TestCase):
     def setUp(self):
@@ -18,16 +19,14 @@ class Test_RunTrain(unittest.TestCase):
 
     
     def tearDown(self):
-        os.remove("./model_000.pb")
-        os.remove("./model.ckpt.index")
-        os.remove("./model.ckpt.meta")
-        os.remove("./model.ckpt.data-00000-of-00001")
-        os.remove("./checkpoint")
         os.remove(Path(self.datapath)/data_raw)
+        ii = Path("000")
+        if ii.is_dir():
+            shutil.rmtree(ii)
     
     def test(self):
         op = TrainModel()
-        data = Path(self.datapath)
+        data = Path(os.path.abspath(self.datapath))
         train_config = {"neurons": [20, 20], "resnet": True, "batch_size": 2,
                         "epoches": 200, "init_lr": 0.0008, "decay_steps": 120,
                         "decay_rate": 0.96, "train_thread": 8, "drop_out_rate": 0.3, 

@@ -13,7 +13,7 @@ The `enviroment` of rid-kit software is a bit complex, it uses `dflow` to manage
 We recommend using conda to manage the python enviroment. 
 Use the command
 ```
-conda create -n rid-dp python=3.9 libtensorflow_cc=2.6.2=*cuda110* tensorflow=2.6.2=*cuda110* nccl mdtraj numpy scikit-learn cmake -c conda-forge
+conda create -n rid-dp python=3.9 libtensorflow_cc=2.6.2=*cuda110* tensorflow=2.6.2=*cuda110* nccl mdtraj numpy scikit-learn cmake dpdata cython -c conda-forge
 ```
 to get the compiled libtensorflow_cc and other necessary packages.
 After installation, activate the enviroment and set library path
@@ -69,8 +69,8 @@ tar -xvzf plumed-2.6.1.tgz
 cp DeePFE.cpp plumed-2.6.1/src/bias
 cd plumed-2.6.1
 ./configure --prefix=$CONDA_PREFIX \
-                   CXXFLAGS="-std=gnu++14 -I $CONDA_PREFIX/include/" \
-                   LDFLAGS=" -L$CONDA_PREFIX/lib -ltensorflow_cc -ltensorflow_framework -Wl,-rpath=$CONDA_PREFIX/lib/" \
+                   CXXFLAGS="-O3 -I $CONDA_PREFIX/include/" \
+                   LDFLAGS=" -L$CONDA_PREFIX/lib -ltensorflow_cc -ltensorflow_framework" \
 make -j 6
 make install
 ```
@@ -90,7 +90,7 @@ nvcc fatal   : Unsupported gpu architecture 'compute_30'
 ```bash
 tar -xzvf gromacs-2020.2.tar.gz
 cd gromacs-2020.2
-plumed patch -p  # make sure you use the correct plumed version
+plumed patch -p  # make sure you use the correct gromacs version
 dp_gmx_patch -d $gromacs_root -v $version -p #version=2020.2 is supported
 mkdir build
 cd build

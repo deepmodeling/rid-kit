@@ -49,7 +49,6 @@ class ReinforcedDynamicsLoop(Steps):
             "output_freq": InputParameter(type=float, value=2500),
             "slice_mode": InputParameter(type=str, value="gmx"),
             "label_config": InputParameter(type=Dict),
-            "kappas": InputParameter(type=List[float]),
             "tail": InputParameter(type=float, value=0.9),
             "train_config": InputParameter(type=Dict),
             "adjust_amplifier": InputParameter(type=float, value=1.5),
@@ -173,7 +172,6 @@ def _loop (
             "output_freq": steps.inputs.parameters["output_freq"],
             "slice_mode": steps.inputs.parameters["slice_mode"],
             "label_config": steps.inputs.parameters["label_config"],
-            "kappas": steps.inputs.parameters["kappas"],
             "train_config": steps.inputs.parameters["train_config"]
         },
         artifacts={
@@ -215,7 +213,6 @@ def _loop (
             "output_freq": steps.inputs.parameters["output_freq"],
             "slice_mode": steps.inputs.parameters["slice_mode"],
             "label_config": steps.inputs.parameters["label_config"],
-            "kappas": steps.inputs.parameters["kappas"],
             "train_config": steps.inputs.parameters["train_config"]
         },
         artifacts={
@@ -280,6 +277,7 @@ class ReinforcedDynamics(Steps):
             "confs": InputArtifact(),
             "rid_config": InputArtifact(),
             "index_file": InputArtifact(optional=True),
+            "data_file": InputArtifact(optional=True),
             "dp_files": InputArtifact(optional=True),
             "cv_file": InputArtifact(optional=True)
         }
@@ -414,7 +412,6 @@ def _rid(
             "output_freq": prep_rid.outputs.parameters["output_freq"],
             "slice_mode": prep_rid.outputs.parameters["slice_mode"],
             "label_config": prep_rid.outputs.parameters["label_config"],
-            "kappas": prep_rid.outputs.parameters["kappas"],
             "train_config": prep_rid.outputs.parameters["train_config"]
         },
         artifacts={
@@ -424,6 +421,7 @@ def _rid(
             "inputfile": steps.inputs.artifacts["inputfile"],
             "confs": prep_rid.outputs.artifacts["confs"],
             "index_file": steps.inputs.artifacts["index_file"],
+            "data_old": steps.inputs.artifacts["data_file"],
             "dp_files": steps.inputs.artifacts["dp_files"],
             "cv_file": steps.inputs.artifacts["cv_file"]
         },
@@ -460,7 +458,6 @@ def _rid(
             "output_freq": prep_rid.outputs.parameters["output_freq"],
             "slice_mode": prep_rid.outputs.parameters["slice_mode"],
             "label_config": prep_rid.outputs.parameters["label_config"],
-            "kappas": prep_rid.outputs.parameters["kappas"],
             "train_config": prep_rid.outputs.parameters["train_config"]
         },
         artifacts={

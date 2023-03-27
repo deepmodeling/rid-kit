@@ -51,7 +51,6 @@ from mocked_ops import (
     MockedCheckLabelInputs,
     MockedPrepLabel,
     MockedRunLabel,
-    MockedCalcMF,
     MockedPrepSelect,
     MockedRunSelect,
     MockedCollectData,
@@ -82,7 +81,6 @@ label_op = Label(
     MockedCheckLabelInputs,
     MockedPrepLabel,
     MockedRunLabel,
-    MockedCalcMF,
     default_config,
     default_config)
 
@@ -132,7 +130,6 @@ class TestMockedInitBlock(unittest.TestCase):
         self.trust_lvl_1 = [trust_lvl_1]*self.numb_walkers
         self.trust_lvl_2 = [trust_lvl_2]*self.numb_walkers
         self.cluster_threshold = [2.0]*self.numb_walkers
-        self.kappas = [500.]*3
         self.angular_mask = [0.]*3
         self.weights = [1.]*3
         self.numb_cluster_upper = 8
@@ -175,7 +172,6 @@ class TestMockedInitBlock(unittest.TestCase):
                 "output_freq": self.output_freq,
                 "slice_mode": self.slice_mode,
                 "label_config": self.label_config,
-                "kappas": self.kappas,
                 "tail": self.tail,
                 "train_config": self.train_config
             },
@@ -216,7 +212,7 @@ class TestMockedInitBlock(unittest.TestCase):
         self.assertTrue(os.path.isfile(self.data_out+sub_path+gmx_xtc_name))
         self.assertTrue(os.path.isfile(self.data_out+sub_path+sel_ndx_name))
         self.assertTrue(os.path.isfile(self.data_out+"/"+data_raw))
-        self.assertTrue(os.path.isfile(self.data_out+"/"+tf_model_name.format(tag="000")))
+        self.assertTrue(os.path.isfile(self.data_out+sub_path+tf_model_name.format(tag="000")))
         with open(self.data_out+sub_path+gmx_conf_out,"r") as f:
             l1 = f.readline()
             self.assertEqual(l1, "This is init conf 0")

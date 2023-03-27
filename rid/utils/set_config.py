@@ -2,6 +2,7 @@ from typing import Dict
 from dflow.plugins.lebesgue import LebesgueExecutor
 from dflow.plugins.dispatcher import DispatcherExecutor
 from dflow import SlurmRemoteExecutor
+import os
 
 
 def init_executor(

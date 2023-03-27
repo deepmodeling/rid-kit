@@ -28,6 +28,10 @@ from rid.constants import (
 class Test_MockedRunLabel(unittest.TestCase):
     def setUp(self):
         self.taskname = "001"
+        self.datapath = "data"
+        os.mkdir(self.taskname)
+        plm_data = np.loadtxt(Path(self.datapath)/"plm_label.out")
+        np.savetxt(Path(self.taskname)/"plm.out", plm_data)
     
     def tearDown(self):
         ii = Path(self.taskname)
@@ -38,12 +42,16 @@ class Test_MockedRunLabel(unittest.TestCase):
     def test(self, mocked_run):
         mocked_run.return_value = 0, 0, 1
         op = RunLabel()
-        gmx_config = {"type":"gmx", "nsteps": 50, "output_freq": 1, "temperature": 300, 
-                               "dt": 0.002, "output_mode": "both", "ntmpi": 1, "nt": 8, "max_warning": 0}
+        gmx_config = {"type":"gmx","nsteps": 50,"method":"restrained", "output_freq": 1, "temperature": 300, "kappas": [500,500],
+                      "dt": 0.002, "output_mode": "both", "ntmpi": 1, "nt": 8, "max_warning": 0}
+        cv_config = {"mode": "torsion", "selected_resid": [1, 2],"angular_mask": [ 1, 1 ],"weights": [ 1, 1 ],"cv_file": []}
         op_in1 = OPIO(
             {
                 "task_path": Path(self.taskname),
                 "label_config": gmx_config,
+                "cv_config": cv_config,
+                "task_name": self.taskname,
+                "at": None,
                 "forcefield": None,
                 "index_file": None,
                 "dp_files": None,

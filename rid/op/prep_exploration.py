@@ -16,10 +16,10 @@ from rid.task.builder import EnhcMDTaskBuilder
 
 class PrepExplore(OP):
 
-    r"""Prepare files for exploration tasks.
-    Currently, RiD is based on Gromacs with PLUMED2 plugin. Input files must contain .gro for conformations,
-    .top for topology (with pre-defined force fields) and corresponding configuration in Dict formats while `models` 
-    (graph files, .pb) are optional. Exploration step would run biased MD sampling with neural network models or 
+    r"""
+    Prepare files for exploration tasks.
+    Currently, RiD is based on Gromacs/Lammps with PLUMED2 plugin. Provide .gro files and .top files if running Gromacs and .lmp files if running Lammps.
+    Exploration step would run biased MD sampling with neural network models or 
     brute force MD sampling without neural network model provided.
 
     With models provided, the bias forces will be the average value of outputs of these models and tuned by a switching function.
@@ -53,7 +53,8 @@ class PrepExplore(OP):
                 "trust_lvl_2": float,
                 "exploration_config": Dict,
                 "cv_config": Dict,
-                "task_name": str
+                "task_name": str,
+                "block_tag": str
             }
         )
 
@@ -84,9 +85,8 @@ class PrepExplore(OP):
             - `trust_lvl_1`: (`float`) Trust level 1.
             - `trust_lvl_2`: (`float`) Trust level 2.
             - `topology`: (`Artifact(Path)`) Topology files (.top) for Gromacs simulations.
-            - `conf`: (`Artifact(Path)`) Conformation files (.gro) for Gromacs simulations.
-            - `exploration_config`: (`Dict`) Configuration in `Dict` format for Gromacs run. Must contains:
-                `dt`, `steps`, `temperature`, `output_freq`.
+            - `conf`: (`Artifact(Path)`) Conformation files (.gro, .lmp) for Gromacs/Lammps simulations.
+            - `exploration_config`: (`Dict`) Configuration in `Dict` format for Gromacs/Lammps run.
             - `cv_config`: (`Dict`) Configuration for CV creation.
             - `task_name`: (`str`) Task name used to make sub-dir for tasks.
            
@@ -99,30 +99,38 @@ class PrepExplore(OP):
         """
         cv_file = []
         selected_resid = None
+        selected_atomid = None
         if op_in["cv_config"]["mode"] == "torsion":
             selected_resid = op_in["cv_config"]["selected_resid"]
+        elif op_in["cv_config"]["mode"] == "distance":
+            selected_atomid = op_in["cv_config"]["selected_atomid"]
         elif op_in["cv_config"]["mode"] == "custom":
-            #print("custom!!!")
             cv_file = op_in["cv_file"]
         if op_in["models"] is None:
             models = []
         else:
             models = [str(model.name) for model in op_in["models"]]
 
-        #print("what is cv", cv_file)
+        wall_list = None
+        if "iterative_walls" in op_in["cv_config"]:
+            wall_list = op_in["cv_config"]["iterative_walls"]
         
+        iteration = int(op_in["block_tag"].split("-")[1])
         gmx_task_builder = EnhcMDTaskBuilder(
             conf = op_in["conf"],
             topology = op_in["topology"],
             exploration_config = op_in["exploration_config"],
             cv_file=cv_file,
             selected_resid = selected_resid,
+            selected_atomid = selected_atomid,
             sampler_type = op_in["exploration_config"]["type"],
             trust_lvl_1 = op_in["trust_lvl_1"],
             trust_lvl_2 = op_in["trust_lvl_2"],
             model_list = models,
             plumed_output = plumed_output_name,
-            cv_mode = op_in["cv_config"]["mode"]
+            cv_mode = op_in["cv_config"]["mode"],
+            wall_list = wall_list,
+            iteration = iteration
         )
         cv_dim = gmx_task_builder.get_cv_dim()
         task_path = Path(op_in["task_name"])

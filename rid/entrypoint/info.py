@@ -20,6 +20,7 @@ Let us know if you have any question. Feel free to open issues on Github.
 
 Welcome to reach out to :
     yanze039@mit.edu
+    jiahaofan@pku.edu.cn
     wangdd@dp.tech
     
 """

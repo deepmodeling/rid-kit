@@ -49,6 +49,7 @@ class Test_PrepExplore(unittest.TestCase):
                 "exploration_config": gmx_config,
                 "cv_config": cv_config,
                 "task_name": "explored",
+                "block_tag": "iter-001"
             }
         )
         op_in2 = OPIO(
@@ -62,6 +63,7 @@ class Test_PrepExplore(unittest.TestCase):
                 "exploration_config": gmx_config,
                 "cv_config": cv_config,
                 "task_name": "explored",
+                "block_tag":"iter-001"
             }
         )
         op_in3 = OPIO(
@@ -75,6 +77,7 @@ class Test_PrepExplore(unittest.TestCase):
                 "exploration_config": gmx_config,
                 "cv_config": cv_config2,
                 "task_name": "explored",
+                "block_tag":"iter-001"
             }
         )
         op_out1 = op.execute(op_in1)

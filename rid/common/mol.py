@@ -24,6 +24,12 @@ def _zip_dict(resi_indices, atom_indices):
         dihedral_dict[resi_idx] = atom_indices[idx].tolist()
     return dihedral_dict
 
+def distance(r1,r2):
+    d = 0
+    for index in range(3):
+        d += (r1[index] - r2[index])**2
+    d = np.sqrt(d)
+    return d
 
 def get_dihedral_info(file_path: str):
     traj = md.load(file_path)
@@ -66,6 +72,18 @@ def get_dihedral_from_resid(file_path: str, selected_resid: List[int]) -> Dict:
     logger.info(f"{num_cv} CVs have been created.")
     return selected_dihedral_angle
 
+def get_distance_from_atomid(file_path: str, selected_atomid: List[int]) -> Dict:
+    if len(selected_atomid) == 0:
+        return {}
+    top = md.load(file_path)
+    selected_distance = {}
+    for sid in selected_atomid:
+        assert len(sid) == 2, "No valid distance list created."
+        d_cv = md.compute_distances(top,atom_pairs=np.array([sid[0]-1,sid[1]-1]).reshape(-1,2),periodic=True)[0][0]
+        selected_distance["%s %s"%(sid[0],sid[1])] = d_cv
+    num_cv = len(selected_distance.keys())
+    logger.info(f"{num_cv} CVs have been created.")
+    return selected_distance
 
 def slice_xtc_mdtraj(
         xtc: str,
@@ -133,11 +151,3 @@ def slice_dump(
         )
     else:
         raise RuntimeError("Unknown Style for Slicing Trajectory.")
-    
-def final_dump(
-    dump: str,
-    selected_idx,
-    output_format:str
-):
-    traj = dpdata.System(dump, fmt="lammps/dump")
-    traj.to('lammps/lmp', output_format, frame_idx=selected_idx)

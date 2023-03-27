@@ -2,6 +2,7 @@
 gmx_prep_cmd = "gmx grompp"
 gmx_run_cmd = "gmx mdrun"
 gmx_trjconv_cmd = "gmx trjconv"
+gmx_traj_cmd = 'gmx traj'
 
 mdp_parameters = {
     "md": {

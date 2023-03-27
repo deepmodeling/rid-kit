@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict
 from copy import deepcopy
 from dflow import (
     InputParameter,
@@ -17,20 +17,24 @@ from rid.utils import init_executor
 
 
 class DataGenerator(Steps):
+    
+    r""" Date generator SuperOP.
+    This SuperpOP combines CollectData OP and MergeData OP to process data for training.
+    """
     def __init__(
         self,
         name: str,
         collect_op: OP,
         merge_op: OP,
         run_config: Dict,
-        upload_python_package = None
+        upload_python_package = None,
+        retry_times = None
     ):
         self._input_parameters = {
             "block_tag" : InputParameter(type=str, value="")
         }        
         self._input_artifacts = {
-            "forces": InputArtifact(),
-            "centers": InputArtifact(),
+            "cv_forces": InputArtifact(),
             "data_old": InputArtifact(optional=True)
         }
         self._output_parameters = {}
@@ -56,6 +60,7 @@ class DataGenerator(Steps):
             merge_op,
             run_config = run_config,
             upload_python_package = upload_python_package,
+            retry_times = retry_times
         )            
     
     @property
@@ -85,6 +90,7 @@ def _gen_data(
         merge_op : OP,
         run_config : Dict,
         upload_python_package : str = None,
+        retry_times: int = None
     ):
     run_config = deepcopy(run_config)
     run_template_config = run_config.pop('template_config')
@@ -95,12 +101,12 @@ def _gen_data(
         template=PythonOPTemplate(
             collect_op,
             python_packages = upload_python_package,
+            retry_on_transient_error = retry_times,
             **run_template_config,
         ),
         parameters={},
         artifacts={
-            "forces": data_steps.inputs.artifacts['forces'],
-            "centers": data_steps.inputs.artifacts['centers']
+            "cv_forces": data_steps.inputs.artifacts['cv_forces'],
         },
         key = '{}-collect-data'.format(data_steps.inputs.parameters["block_tag"]),
         executor = run_executor,
@@ -113,6 +119,7 @@ def _gen_data(
         template=PythonOPTemplate(
             merge_op,
             python_packages = upload_python_package,
+            retry_on_transient_error = retry_times,
             **run_template_config,
         ),
         parameters={},

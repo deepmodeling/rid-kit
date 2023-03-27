@@ -3,6 +3,9 @@ from typing import Union, List, Optional
 import logging
 import numpy as np
 import sklearn.cluster as skcluster
+from matplotlib import pyplot as plt
+from rid.constants import cluster_fig
+from pathlib import Path
 
 
 logging.basicConfig(
@@ -19,6 +22,7 @@ class Cluster:
         self,
         cvs: Union[np.ndarray, List],
         threshold: float,
+        task_name: str,
         angular_mask: Optional[Union[np.ndarray, List]] = None, 
         weights: Optional[Union[np.ndarray, List]] = None,
         max_search_step: int = 500,
@@ -30,6 +34,7 @@ class Cluster:
             weights = np.ones(shape=(cvs[1],))
         self.angular_mask = angular_mask
         self.weights = weights
+        self.task_name = task_name
         self.max_search_step = max_search_step
         self.threshold = threshold
         self.cvs = cvs
@@ -47,7 +52,7 @@ class Cluster:
         while current_iter < self.max_search_step:
             logger.info(f"making threshold attempt {current_iter}")
             cls_sel = sel_from_cluster(
-                self.cvs, self.threshold, angular_mask=self.angular_mask, 
+                self.cvs, self.threshold, Path(self.task_name),angular_mask=self.angular_mask, 
                 weights=self.weights, max_selection=self.max_selection)
             test_numb_cluster = len(set(cls_sel))
             if test_numb_cluster < numb_cluster_lower:
@@ -64,7 +69,7 @@ class Cluster:
     def get_cluster_selection(self):
         if self.cls_sel is None:
             self.cls_sel = sel_from_cluster(
-                self.cvs, self.threshold, angular_mask=self.angular_mask, 
+                self.cvs, self.threshold, Path(self.task_name),angular_mask=self.angular_mask, 
                 weights=self.weights, max_selection=self.max_selection)
         return self.cls_sel
         
@@ -100,12 +105,20 @@ def mk_cluster(dist, distance_threshold):
     return cluster.labels_
 
 
-def sel_from_cluster(cvs, threshold, angular_mask=None, weights=None, max_selection=1000):
+def sel_from_cluster(cvs, threshold, task_path, angular_mask=None, weights=None, max_selection=1000):
     if len(cvs) <= 1:
         return cvs
     weights = np.array(weights)
     dist = mk_dist(cvs, angular_mask, weights) 
     labels = mk_cluster(dist, threshold)
+    # plot clustering distributions
+    xlist = [i for i in range(len(labels))]
+    plt.figure(figsize=(10, 8), dpi=100)
+    plt.xlabel("trajectory frames")
+    plt.ylabel("cluster index")
+    plt.title("cluster distributions along trajectories")
+    plt.scatter(xlist, labels, s = 5)
+    plt.savefig(task_path.joinpath(cluster_fig))
     # make cluster map
     _cls_map = []
     for _ in range(len(set(labels))):

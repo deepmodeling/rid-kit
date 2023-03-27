@@ -28,6 +28,10 @@ from rid.utils import init_executor
 
 
 class InitBlock(Steps):
+    
+    r"""Initial Block SuperOP
+    This SuperOP is the first iteration of the rid-kit cycle.
+    """
     def __init__(
         self,
         name: str,
@@ -37,7 +41,8 @@ class InitBlock(Steps):
         data_op: OP,
         train_op: OP,
         train_config: Dict,
-        upload_python_package = None
+        upload_python_package = None,
+        retry_times = None
     ):
 
         self._input_parameters = {
@@ -58,7 +63,6 @@ class InitBlock(Steps):
             "output_freq": InputParameter(type=float, value=2500),
             "slice_mode": InputParameter(type=str, value="gmx"),
             "label_config": InputParameter(type=Dict),
-            "kappas": InputParameter(type=List[float]),
             "tail": InputParameter(type=float, value=0.9),
             "train_config": InputParameter(type=Dict)
         }        
@@ -69,6 +73,7 @@ class InitBlock(Steps):
             "inputfile": InputArtifact(optional=True),
             "confs" : InputArtifact(),
             "index_file": InputArtifact(optional=True),
+            "data_old": InputArtifact(optional=True),
             "dp_files": InputArtifact(optional=True),
             "cv_file": InputArtifact(optional=True)
         }
@@ -104,6 +109,7 @@ class InitBlock(Steps):
             train_op,
             train_config,
             upload_python_package = upload_python_package,
+            retry_times = retry_times
         )            
     
     @property
@@ -136,6 +142,7 @@ def _first_run_block(
         train_op: OP,
         train_config : Dict,
         upload_python_package : str = None,
+        retry_times: int = None
     ):
     exploration = Step(
         "Exploration",
@@ -195,10 +202,8 @@ def _first_run_block(
         "Label",
         template=label_op,
         parameters={
-            "angular_mask": block_steps.inputs.parameters['angular_mask'],
             "label_config": block_steps.inputs.parameters['label_config'],
             "cv_config": block_steps.inputs.parameters['cv_config'],
-            "kappas": block_steps.inputs.parameters['kappas'],
             "tail": block_steps.inputs.parameters['tail'],
             "conf_tags" : selection.outputs.parameters['selected_conf_tags'],
             "block_tag" : block_steps.inputs.parameters['block_tag'],
@@ -222,8 +227,8 @@ def _first_run_block(
         template=data_op,
         parameters={"block_tag" : block_steps.inputs.parameters['block_tag']},
         artifacts={
-            "forces": label.outputs.artifacts["forces"],
-            "centers": selection.outputs.artifacts["selected_cv_init"]
+            "cv_forces": label.outputs.artifacts["cv_forces"],
+            "data_old": block_steps.inputs.artifacts['data_old']
         },
         key = '{}-gen-data'.format(block_steps.inputs.parameters['block_tag']),
     )
@@ -237,9 +242,10 @@ def _first_run_block(
         template=PythonOPTemplate(
             train_op,
             python_packages = upload_python_package,
+            retry_on_transient_error = retry_times,
             slices=Slices("{{item}}",
                 input_parameter=["model_tag"],
-                output_artifact=["model"]),
+                output_artifact=["model","train_fig"]),
             **train_template_config,
         ),
         parameters={
@@ -269,6 +275,10 @@ def _first_run_block(
 
 
 class IterBlock(Steps):
+    
+    r"""Iterative Block SuperOP.
+    This SuperOP is the iterations after the inital iteration of the rid-kit cycle.
+    """
     def __init__(
         self,
         name: str,
@@ -280,7 +290,8 @@ class IterBlock(Steps):
         train_op: OP,  
         adjust_lvl_config: Dict,
         train_config: Dict,
-        upload_python_package = None
+        upload_python_package = None,
+        retry_times = None
     ):
 
         self._input_parameters = {
@@ -302,7 +313,6 @@ class IterBlock(Steps):
             "output_freq": InputParameter(type=float, value=2500),
             "slice_mode": InputParameter(type=str, value="gmx"),
             "label_config": InputParameter(type=Dict),
-            "kappas": InputParameter(type=List[float]),
             "tail": InputParameter(type=float, value=0.9),
             "train_config": InputParameter(type=Dict),
             "adjust_amplifier": InputParameter(type=float, value=1.5),
@@ -356,6 +366,7 @@ class IterBlock(Steps):
             adjust_lvl_config,
             train_config,
             upload_python_package = upload_python_package,
+            retry_times = retry_times
         )            
     
     @property
@@ -390,6 +401,7 @@ def _iter_block(
         adjust_lvl_config : Dict,
         train_config : Dict,
         upload_python_package : str = None,
+        retry_times: int = None
     ):
 
     exploration = Step(
@@ -453,8 +465,10 @@ def _iter_block(
         template=PythonOPTemplate(
             adjust_lvl_op,
             python_packages = upload_python_package,
+            retry_on_transient_error = retry_times,
             slices=Slices("{{item}}",
-                input_parameter=["trust_lvl_1", "trust_lvl_2", "numb_cluster", "init_trust_lvl_1", "init_trust_lvl_2"]
+                input_parameter=["trust_lvl_1", "trust_lvl_2", "numb_cluster", "init_trust_lvl_1", "init_trust_lvl_2"],
+                output_parameter=["adjust_trust_lvl_1", "adjust_trust_lvl_2"]
                 ),
             **adjust_lvl_template_config,
         ),
@@ -480,10 +494,8 @@ def _iter_block(
         "Label",
         template=label_op,
         parameters={
-            "angular_mask": block_steps.inputs.parameters['angular_mask'],
             "label_config": block_steps.inputs.parameters['label_config'],
             "cv_config": block_steps.inputs.parameters['cv_config'],
-            "kappas": block_steps.inputs.parameters['kappas'],
             "tail": block_steps.inputs.parameters['tail'],
             "conf_tags" : selection.outputs.parameters['selected_conf_tags'],
             "block_tag" : block_steps.inputs.parameters['block_tag'],
@@ -507,8 +519,7 @@ def _iter_block(
         template=data_op,
         parameters={"block_tag" : block_steps.inputs.parameters['block_tag']},
         artifacts={
-            "forces": label.outputs.artifacts["forces"],
-            "centers": selection.outputs.artifacts["selected_cv_init"],
+            "cv_forces": label.outputs.artifacts["cv_forces"],
             "data_old": block_steps.inputs.artifacts['data_old']
         },
         key = '{}-gen-data'.format(block_steps.inputs.parameters['block_tag']),
@@ -523,9 +534,10 @@ def _iter_block(
         template=PythonOPTemplate(
             train_op,
             python_packages = upload_python_package,
+            retry_on_transient_error = retry_times,
             slices=Slices("{{item}}",
                 input_parameter=["model_tag"],
-                output_artifact=["model"]),
+                output_artifact=["model","train_fig"]),
             **train_template_config,
         ),
         parameters={

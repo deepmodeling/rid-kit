@@ -19,7 +19,7 @@ except ModuleNotFoundError:
 from rid.constants import (
     walker_tag_fmt,
     gmx_mdrun_log,
-    force_out
+    cv_force_out
 )
 
 from rid.utils import normalize_resources
@@ -41,8 +41,7 @@ from mocked_ops import (
     make_mocked_init_confs,
     MockedCheckLabelInputs,
     MockedPrepLabel,
-    MockedRunLabel,
-    MockedCalcMF
+    MockedRunLabel
 )
 
 from dflow.python import upload_packages
@@ -127,12 +126,12 @@ default_config = normalize_resources({
 class TestMockedLabel(unittest.TestCase):
     def setUp(self):
         self.init_models = make_mocked_init_models(4)
-        self.init_confs = make_mocked_init_confs(3)
         self.center = make_mocked_init_data("center", 3)
         label_config = {"type":"gmx"}
         cv_config = {"cv_dim": 3}
         walker_tags = []
         self.numb_walkers = 3
+        self.init_confs = make_mocked_init_confs(self.numb_walkers)
         for ii in range(self.numb_walkers):
             walker_tags.append(walker_tag_fmt.format(idx=ii))
         self.models = upload_artifact(self.init_models)
@@ -160,7 +159,6 @@ class TestMockedLabel(unittest.TestCase):
             MockedCheckLabelInputs,
             MockedPrepLabel,
             MockedRunLabel,
-            MockedCalcMF,
             prep_config = default_config,
             run_config = default_config
         )
@@ -170,8 +168,6 @@ class TestMockedLabel(unittest.TestCase):
             parameters = {
                 "label_config" : self.label_config,
                 "cv_config" : self.cv_config,
-                "kappas": self.kappas,
-                "angular_mask": self.angular_mask,
                 "tail": self.tail,
                 "conf_tags": self.conf_tags,
                 "block_tag" : self.block_tag
@@ -202,11 +198,11 @@ class TestMockedLabel(unittest.TestCase):
 
         if not os.path.exists(self.data_out):
             os.mkdir(self.data_out)
-        download_artifact(step.outputs.artifacts["forces"],path=self.data_out)
+        download_artifact(step.outputs.artifacts["cv_forces"],path=self.data_out)
         download_artifact(step.outputs.artifacts["md_log"],path=self.data_out)
         sub_path = "/000_000/"
         self.assertTrue(os.path.isfile(self.data_out+sub_path+gmx_mdrun_log))
-        self.assertTrue(os.path.isfile(self.data_out+sub_path+force_out))
-        with open(self.data_out+sub_path+force_out,"r") as f:
+        self.assertTrue(os.path.isfile(self.data_out+sub_path+cv_force_out))
+        with open(self.data_out+sub_path+cv_force_out,"r") as f:
             l1 = f.readline()
             self.assertEqual(l1, '1.000000e+00 2.000000e+00\n')

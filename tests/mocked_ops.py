@@ -23,7 +23,6 @@ from rid.op.prep_label import PrepLabel
 from rid.op.prep_label import CheckLabelInputs
 from rid.op.run_exploration import RunExplore
 from rid.op.run_label import RunLabel
-from rid.op.calc_mf import CalcMF
 from rid.op.prep_select import PrepSelect
 from rid.op.run_select import RunSelect
 from rid.op.run_train import TrainModel
@@ -37,14 +36,18 @@ from rid.constants import (
     plumed_output_name,
     gmx_mdrun_log,
     gmx_xtc_name,
-    force_out,
+    cv_force_out,
+    mf_fig,
+    cluster_fig,
     cluster_selection_data_name,
     cluster_selection_index_name,
     sel_gro_name,
     model_devi_name,
     sel_ndx_name,
     cv_init_label,
-    model_devi_precision
+    model_devi_precision,
+    train_log,
+    train_fig
 )
 
 upload_packages.append(__file__)
@@ -98,15 +101,11 @@ class MockedCollectData(CollectData):
             self,
             ip : OPIO,
     ) -> OPIO:
-        with open(ip["forces"][0], "r") as f:
+        with open(ip["cv_forces"][0], "r") as f:
             f1 = f.read()
-        with open(ip["centers"][0], "r") as f:
-            f2 = f.read()
         
         with open(data_new, "w") as f:
             f.write(f1)
-            f.write("\n")
-            f.write(f2)
     
         op = OPIO({
             "data_new" : Path(data_new)
@@ -259,30 +258,17 @@ class MockedRunLabel(RunLabel):
             print("write log")
             with open(gmx_mdrun_log, "w") as f:
                 f.write("gmx md log file")
+            with open(cv_force_out,"w") as f:
+                f.write('1.000000e+00 2.000000e+00\n')
         
         op = OPIO({
                 "plm_out": ip["task_path"].joinpath(plumed_output_name),
-                "md_log": ip["task_path"].joinpath(gmx_mdrun_log)
+                "md_log": ip["task_path"].joinpath(gmx_mdrun_log),
+                "cv_forces": ip["task_path"].joinpath(cv_force_out),
+                "mf_fig": ip["task_path"].joinpath(mf_fig),
+                
             })
         return op
-    
-class MockedCalcMF(CalcMF):
-    @OP.exec_sign_check
-    def execute(
-            self,
-            ip : OPIO,
-    ) -> OPIO:
-        task_path = Path(ip["task_name"])
-        task_path.mkdir(exist_ok=True, parents=True)
-        force = np.array([1,2])
-        with set_directory(task_path):
-            save_txt(force_out, force.reshape(1,-1))
-        op_out = OPIO(
-            {
-                "forces": task_path.joinpath(force_out)
-            }
-        )
-        return op_out
     
 class MockedPrepSelect(PrepSelect):
     @OP.exec_sign_check
@@ -297,12 +283,15 @@ class MockedPrepSelect(PrepSelect):
         task_path = Path(ip["task_name"])
         task_path.mkdir(exist_ok=True, parents=True)
         with set_directory(task_path):
+            with open(cluster_fig, "w") as f:
+                f.write("this is the cluster fig")
             np.save(cluster_selection_index_name, cls_sel_idx)
             np.save(cluster_selection_data_name, selected_data)
         
         op_out = OPIO({
                 "cluster_threshold": cluster_threshold,
                 "numb_cluster": numb_cluster,
+                "cluster_fig": task_path.joinpath(cluster_fig),
                 "cluster_selection_index": task_path.joinpath(cluster_selection_index_name),
                 "cluster_selection_data": task_path.joinpath(cluster_selection_data_name)
             })
@@ -352,13 +341,25 @@ class MockedTrain(TrainModel):
             self,
             ip : OPIO,
     ) -> OPIO:
+        task_path = Path(ip["model_tag"])
+        task_path.mkdir(exist_ok=True, parents=True)
         assert(ip["data"].is_file())
-        tf_model = Path(tf_model_name.format(tag=ip["model_tag"]))
-        tf_model.write_text(f'This is init model {ip["model_tag"]}')
+        with set_directory(task_path):
+            tf_model = tf_model_name.format(tag=ip["model_tag"])
+            with open(tf_model,"w") as f:
+                f.write("this is trained model")
+            train_log_name = train_log.format(tag=ip["model_tag"])
+            with open(train_log_name,"w") as f:
+                f.write("this is log file")
+            train_fig_name = train_fig.format(tag=ip["model_tag"])
+            with open(train_fig_name,"w") as f:
+                f.write("this is train fig")
         
         op_out = OPIO(
             {
-                "model": tf_model
+                "model": task_path.joinpath(tf_model),
+                "train_log": task_path.joinpath(train_log_name),
+                "train_fig": task_path.joinpath(train_fig_name)
             }
         )
         return op_out

@@ -1,7 +1,8 @@
 import os, sys
 import logging
-from typing import Sequence
-from rid.common.gromacs.gmx_constant import gmx_trjconv_cmd
+from typing import Optional,Sequence
+from rid.common.gromacs.gmx_constant import gmx_trjconv_cmd, gmx_traj_cmd
+from rid.constants import gmx_coord_name, gmx_force_name
 from rid.utils import list_to_string
 from rid.utils import run_command
 
@@ -14,6 +15,46 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+def generate_coords(
+    trr: str,
+    top: str,
+    out_coord: str = gmx_coord_name,
+    output_group: str  = "System",
+    index: Optional[str] = None
+):
+    cmd_list = gmx_traj_cmd.split(" ")
+    cmd_list += ["-f", str(trr)]
+    cmd_list += ["-s", str(top)]
+    if index is not None:
+        cmd_list += ["-n", str(index)]
+    cmd_list += ["-ox", out_coord]
+    logger.info(list_to_string(cmd_list, " "))
+    return_code, out, err = run_command(
+        cmd_list,
+        stdin=f"{output_group}\n"
+    )
+    assert return_code == 0, err
+    
+    
+def generate_forces(
+    trr: str,
+    top: str,
+    out_force: str = gmx_force_name,
+    output_group: str  = "System",
+    index: Optional[str] = None
+):
+    cmd_list = gmx_traj_cmd.split(" ")
+    cmd_list += ["-f", str(trr)]
+    cmd_list += ["-s", str(top)]
+    if index is not None:
+        cmd_list += ["-n", str(index)]
+    cmd_list += ["-of", out_force]
+    logger.info(list_to_string(cmd_list, " "))
+    return_code, out, err = run_command(
+        cmd_list,
+        stdin=f"{output_group}\n"
+    )
+    assert return_code == 0, err
 
 def slice_trjconv(
         xtc: str,

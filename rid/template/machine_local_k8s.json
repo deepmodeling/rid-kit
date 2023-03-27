@@ -1,0 +1,51 @@
+{
+    "resources": {
+        "local_k8s_1": {
+            "template_config" : {
+                "image": "pkufjhdocker/rid-gmx-exploration:stable", 
+                "image_pull_policy" : "IfNotPresent",
+                "requests" : {"ephemeral-storage": "1Gi"}
+            }
+        },
+        "local_k8s_2": {
+            "template_config" : {
+                "image": "pkufjhdocker/rid-gmx-plumed:stable", 
+                "image_pull_policy" : "IfNotPresent",
+                "requests" : {"ephemeral-storage": "1Gi"}
+            }
+        },
+        "local_k8s_3": {
+            "template_config" : {
+                "image": "pkufjhdocker/rid-tf-cpu:stable", 
+                "image_pull_policy" : "IfNotPresent",
+                "requests" : {"ephemeral-storage": "1Gi"}
+            }
+        },
+        "local_k8s_4": {
+            "template_config" : {
+                "image": "pkufjhdocker/rid-gmx-tf:stable", 
+                "image_pull_policy" : "IfNotPresent",
+                "requests" : {"ephemeral-storage": "1Gi"}
+            }
+        },
+        "local_k8s_5": {
+            "template_config" : {
+                "image": "pkufjhdocker/rid-tf-gpu:stable", 
+                "image_pull_policy" : "IfNotPresent",
+                "requests" : {"ephemeral-storage": "1Gi"}
+            }
+        }
+    },
+
+    "tasks": {
+        "prep_exploration_config": "local_k8s_3",
+        "run_exploration_config": "local_k8s_1",
+        "prep_label_config": "local_k8s_3",
+        "run_label_config": "local_k8s_2",
+        "prep_select_config": "local_k8s_3",
+        "run_select_config": "local_k8s_4",
+        "prep_data_config": "local_k8s_3",
+        "run_train_config": "local_k8s_5",
+        "workflow_steps_config": "local_k8s_3"
+    }
+}

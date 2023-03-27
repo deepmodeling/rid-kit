@@ -2,6 +2,8 @@ import os, sys
 import logging
 from typing import List, Dict, Union
 from pathlib import Path
+import numpy as np
+from matplotlib import pyplot as plt
 from dflow.python import (
     OP,
     OPIO,
@@ -20,11 +22,14 @@ from rid.constants import (
         gmx_xtc_name,
         gmx_conf_out,
         lmp_conf_out,
+        bias_fig,
+        model_devi_fig,
         lmp_input_name
     )
 from rid.utils import run_command, set_directory, list_to_string
-from rid.common.mol import final_dump
+from rid.common.lammps.command import final_dump
 from rid.common.sampler.command import get_grompp_cmd, get_mdrun_cmd
+from rid.select.model_devi import make_std
 
 
 logging.basicConfig(
@@ -39,8 +44,8 @@ logger = logging.getLogger(__name__)
 class RunExplore(OP):
 
     """Run (biased or brute-force) MD simulations with files provided by `PrepExplore` OP.
-    RiD-kit emploies Gromacs as MD engine with PLUMED2 plugin (with or without MPI-implement). Make sure work environment 
-    has properly installed Gromacs with patched PLUMED2. Also, PLUMED2 need an additional `DeePFE.cpp` patch to use bias potential of RiD.
+    RiD-kit emploies Gromacs/Lammps as MD engine with PLUMED2 plugin (with or without MPI-implement). Make sure work environment 
+    has properly installed Gromacs/Lammps with patched PLUMED2. Also, PLUMED2 need an additional `DeePFE.cpp` patch to use bias potential of RiD.
     See `install` in the home page for details.
     """
 
@@ -64,6 +69,8 @@ class RunExplore(OP):
         return OPIOSign(
             {
                 "plm_out": Artifact(Path),
+                "bias_fig": Artifact(Path, optional=True),
+                "model_devi_fig": Artifact(Path,optional=True),
                 "md_log": Artifact(Path),
                 "trajectory": Artifact(Path),
                 "conf_out": Artifact(Path)
@@ -83,8 +90,8 @@ class RunExplore(OP):
         op_in : dict
             Input dict with components:
 
-            - `task_path`: (`Artifact(Path)`) A directory path containing files for Gromacs MD simulations.
-            - `exploration_config`: (`Dict`) Configuration of Gromacs simulations in exploration steps.
+            - `task_path`: (`Artifact(Path)`) A directory path containing files for Gromacs/Lammps MD simulations.
+            - `exploration_config`: (`Dict`) Configuration of Gromacs/Lammps simulations in exploration steps.
             - `models`: (`Artifact(List[Path])`) Optional. Neural network model files (`.pb`) used to bias the simulation. 
                 Run brute force MD simulations if not provided.
           
@@ -93,7 +100,7 @@ class RunExplore(OP):
             Output dict with components:
         
             - `plm_out`: (`Artifact(Path)`) Outputs of CV values (`plumed.out` by default) from exploration steps.
-            - `md_log`: (`Artifact(Path)`) Log files of Gromacs `mdrun` commands.
+            - `md_log`: (`Artifact(Path)`) Log files of Gromacs/lammps `mdrun` commands.
             - `trajectory`: (`Artifact(Path)`) Trajectory files (`.xtc`). The output frequency is defined in `exploration_config`.
             - `conf_out`: (`Artifact(Path)`) Final frames of conformations in simulations.
         """
@@ -142,26 +149,35 @@ class RunExplore(OP):
 
         with set_directory(op_in["task_path"]):
             if op_in["forcefield"] is not None:
-                os.symlink(op_in["forcefield"], op_in["forcefield"].name)
+                if not os.path.islink(op_in["forcefield"].name):
+                    os.symlink(op_in["forcefield"], op_in["forcefield"].name)
             if op_in["models"] is not None:
                 for model in op_in["models"]:
-                    os.symlink(model, model.name)
+                    if not os.path.islink(model.name):
+                        os.symlink(model, model.name)
             if op_in["dp_files"] is not None:
                 for file in op_in["dp_files"]:
-                    os.symlink(file, file.name)
+                    if not os.path.islink(file.name):
+                        os.symlink(file, file.name)
             if op_in["index_file"] is not None:
-                os.symlink(op_in["index_file"], op_in["index_file"].name)
+                if not os.path.islink(op_in["index_file"].name):
+                    os.symlink(op_in["index_file"], op_in["index_file"].name)
             if op_in["cv_file"] is not None:
                 for file in op_in["cv_file"]:
                     if file.name != "colvar":
-                        os.symlink(file, file.name)
+                        if not os.path.islink(file.name):
+                            os.symlink(file, file.name)
             if op_in["inputfile"] is not None:
                 for file in op_in["inputfile"]:
                     if file.name == inputfile_name:
-                        os.symlink(file, file.name)
+                        if not os.path.islink(file.name):
+                            os.symlink(file, file.name)
             
             if op_in["dp_files"] is not None:
-                os.environ["GMX_DEEPMD_INPUT_JSON"] = "./input.json"
+                for dp_file in op_in["dp_files"]:
+                    if (dp_file.name).endswith("json"):
+                        os.environ["GMX_DEEPMD_INPUT_JSON"] = dp_file.name
+                        
             if grompp_cmd is not None:
                 logger.info(list_to_string(grompp_cmd, " "))
                 return_code, out, err = run_command(grompp_cmd)
@@ -174,7 +190,34 @@ class RunExplore(OP):
                 logger.info(err)
             if op_in["exploration_config"]["type"] == "lmp":
                 final_dump(dump="out.dump",selected_idx=-1,output_format=lmp_conf_out)
-        
+            
+            bias_fig_file = None
+            model_devi_fig_file = None
+            if op_in["models"] is not None:
+                # plot bias during simulation
+                bias = np.loadtxt(plumed_output_name)[:,1]
+                dt = op_in["exploration_config"]["dt"]*op_in["exploration_config"]["output_freq"]
+                xlist = [i*dt for i in range(len(bias))]
+                plt.figure(figsize=(10, 8), dpi=100)
+                plt.scatter(xlist,np.log(bias+0.001))
+                plt.xlabel("simulation time (ps)")
+                plt.ylabel("log of bias (kj/(mol))")
+                plt.title("log bias for the simulation")
+                plt.savefig(op_in["task_path"].joinpath(bias_fig))
+                # plot model deviation during simulation
+                cv_list = np.loadtxt(plumed_output_name)[:,2:]
+                stds = make_std(cv_list, op_in["models"])
+                plt.figure(figsize=(10, 8), dpi=100)
+                plt.scatter(xlist,stds)
+                plt.xlabel("simulation time (ps)")
+                plt.ylabel("force std (KJ/(mol*nm))")
+                plt.title("model deviation during simulation")
+                plt.savefig(op_in["task_path"].joinpath(model_devi_fig))
+                
+                bias_fig_file = op_in["task_path"].joinpath(bias_fig)
+                model_devi_fig_file = op_in["task_path"].joinpath(model_devi_fig)
+                
+                        
         if op_in["exploration_config"]["type"] == "gmx":
             mdrun_log = gmx_mdrun_log
             traj_name = gmx_xtc_name
@@ -189,6 +232,8 @@ class RunExplore(OP):
         op_out = OPIO(
             {
                 "plm_out": op_in["task_path"].joinpath(plumed_output_name),
+                "bias_fig": bias_fig_file,
+                "model_devi_fig": model_devi_fig_file,
                 "md_log": op_in["task_path"].joinpath(mdrun_log),
                 "trajectory": op_in["task_path"].joinpath(traj_name),
                 "conf_out": op_in["task_path"].joinpath(conf_out),

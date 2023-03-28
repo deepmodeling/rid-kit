@@ -7,8 +7,8 @@
             "executor":{
             "image": "dptechnology/dpdispatcher:latest",
             "machine_dict":{
-                "batch_type": "DpCloudServer",
-                "context_type": "DpCloudServerContext",
+                "batch_type": "Bohrium",
+                "context_type": "Bohrium",
                 "local_root" : "./",
                 "remote_profile":{
                     "email": "",
@@ -37,8 +37,8 @@
             "executor":{
             "image": "dptechnology/dpdispatcher:latest",
             "machine_dict":{
-                "batch_type": "DpCloudServer",
-                "context_type": "DpCloudServerContext",
+                "batch_type": "Bohrium",
+                "context_type": "Bohrium",
                 "local_root" : "./",
                 "remote_profile":{
                     "email": "",
@@ -67,8 +67,8 @@
             "executor":{
             "image": "dptechnology/dpdispatcher:latest",
             "machine_dict":{
-                "batch_type": "DpCloudServer",
-                "context_type": "DpCloudServerContext",
+                "batch_type": "Bohrium",
+                "context_type": "Bohrium",
                 "local_root" : "./",
                 "remote_profile":{
                     "email": "",
@@ -97,8 +97,8 @@
             "executor":{
             "image": "dptechnology/dpdispatcher:latest",
             "machine_dict":{
-                "batch_type": "DpCloudServer",
-                "context_type": "DpCloudServerContext",
+                "batch_type": "Bohrium",
+                "context_type": "Bohrium",
                 "local_root" : "./",
                 "remote_profile":{
                     "email": "",
@@ -127,8 +127,8 @@
             "executor":{
             "image": "dptechnology/dpdispatcher:latest",
             "machine_dict":{
-                "batch_type": "DpCloudServer",
-                "context_type": "DpCloudServerContext",
+                "batch_type": "Bohrium",
+                "context_type": "Bohrium",
                 "local_root" : "./",
                 "remote_profile":{
                     "email": "",

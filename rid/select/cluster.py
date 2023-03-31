@@ -105,6 +105,26 @@ def mk_cluster(dist, distance_threshold):
     return cluster.labels_
 
 
+def chooseClusterCenter(dist:np.ndarray, conf_ids:list):
+    id_min = conf_ids[0]
+    min_loss = None
+    # n_tot_frame = dist.shape[0]
+    for id in conf_ids:
+        rmsd = dist[id]
+        loss = 0
+        for i, conf in enumerate(conf_ids):
+            rms = rmsd[conf]
+            loss += rms * rms
+        loss = np.sqrt(loss)
+        if min_loss == None:
+            min_loss = loss
+        else:
+            if loss < min_loss:
+                id_min = id
+                min_loss = loss
+    return [id_min]
+
+
 def sel_from_cluster(cvs, threshold, task_path, angular_mask=None, weights=None, max_selection=1000):
     if len(cvs) <= 1:
         return cvs
@@ -133,7 +153,8 @@ def sel_from_cluster(cvs, threshold, task_path, angular_mask=None, weights=None,
     cls_sel = []
     np.random.seed(seed=None)
     for cluster, _ in cls_map:
-        _ret = np.random.choice(cluster, 1)
+        # _ret = np.random.choice(cluster, 1)
+        _ret = chooseClusterCenter(dist, cluster)
         cls_sel.append(_ret[0])
     if len(cls_sel) > max_selection:
         cls_sel = cls_sel[:max_selection]

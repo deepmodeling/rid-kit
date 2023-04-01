@@ -3,7 +3,8 @@ from dflow.python import (
     OP,
     OPIO,
     OPIOSign,
-    Artifact
+    Artifact,
+    BigParameter
 )
 
 from typing import List, Dict, Union
@@ -51,8 +52,8 @@ class PrepExplore(OP):
                 "cv_file": Artifact(List[Path], optional=True),
                 "trust_lvl_1": float,
                 "trust_lvl_2": float,
-                "exploration_config": Dict,
-                "cv_config": Dict,
+                "exploration_config": BigParameter(Dict),
+                "cv_config": BigParameter(Dict),
                 "task_name": str,
                 "block_tag": str
             }

@@ -6,7 +6,8 @@ from dflow.python import (
     OPIO,
     OPIOSign,
     Artifact,
-    Parameter
+    Parameter,
+    BigParameter
 )
 from rid.constants import tf_model_name, train_fig, train_log
 from rid.nn.train_net import train
@@ -28,7 +29,7 @@ class TrainModel(OP):
                 "model_tag": str,
                 "angular_mask": List,
                 "data": Artifact(Path),
-                "train_config": Dict
+                "train_config": BigParameter(Dict)
             }
         )
 

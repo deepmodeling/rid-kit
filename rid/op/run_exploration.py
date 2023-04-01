@@ -8,7 +8,8 @@ from dflow.python import (
     OP,
     OPIO,
     OPIOSign,
-    Artifact
+    Artifact,
+    BigParameter
 )
 from rid.constants import (
         gmx_conf_name,
@@ -55,7 +56,7 @@ class RunExplore(OP):
             {
                 "task_path": Artifact(Path),
                 "forcefield": Artifact(Path, optional=True),
-                "exploration_config": Dict,
+                "exploration_config": BigParameter(Dict),
                 "models": Artifact(List[Path], optional=True),
                 "index_file": Artifact(Path, optional=True),
                 "dp_files": Artifact(List[Path], optional=True),

@@ -6,7 +6,8 @@ from dflow.python import (
     OP,
     OPIO,
     OPIOSign,
-    Artifact
+    Artifact,
+    BigParameter
 )
 from rid.utils import load_json
 from rid.constants import model_tag_fmt, init_conf_name, init_input_name, walker_tag_fmt
@@ -69,8 +70,8 @@ class PrepRiD(OP):
                 "walker_tags": List,
                 "model_tags": List,
                 
-                "exploration_config": Dict,
-                "cv_config": Dict,
+                "exploration_config": BigParameter(Dict),
+                "cv_config": BigParameter(Dict),
                 "trust_lvl_1": List[float],
                 "trust_lvl_2": List[float],
                 "cluster_threshold": List[float],
@@ -83,8 +84,8 @@ class PrepRiD(OP):
                 "dt": float,
                 "output_freq": float,
                 "slice_mode": str,
-                "label_config": Dict,
-                "train_config": Dict
+                "label_config": BigParameter(Dict),
+                "train_config": BigParameter(Dict)
             }
         )
 

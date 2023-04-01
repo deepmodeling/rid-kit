@@ -3,7 +3,8 @@ from dflow.python import (
     OPIO,
     OPIOSign,
     Artifact,
-    Parameter
+    Parameter,
+    BigParameter
 )
 
 import json
@@ -38,7 +39,7 @@ class CheckLabelInputs(OP):
         return OPIOSign(
             {
                 "if_continue": int,
-                "conf_tags": List
+                "conf_tags": BigParameter(List)
             }
         )
 
@@ -104,9 +105,9 @@ class PrepLabel(OP):
                 "topology": Artifact(Path, optional=True),
                 "conf": Artifact(Path),
                 "cv_file": Artifact(List[Path], optional=True),
-                "label_config": Dict,
-                "cv_config": Dict,
-                "task_name": str,
+                "label_config": BigParameter(Dict),
+                "cv_config": BigParameter(Dict),
+                "task_name": BigParameter(str),
                 "at": Artifact(Path, optional=True)
             }
         )

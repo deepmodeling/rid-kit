@@ -7,7 +7,8 @@ from dflow.python import (
     OPIO,
     OPIOSign,
     Artifact,
-    Parameter
+    Parameter,
+    BigParameter
 )
 from rid.constants import (
         gmx_conf_name,
@@ -54,10 +55,10 @@ class RunLabel(OP):
             {
                 "task_path": Artifact(Path),
                 "forcefield": Artifact(Path, optional=True),
-                "label_config": Dict,
-                "cv_config": Dict,
+                "label_config": BigParameter(Dict),
+                "cv_config": BigParameter(Dict),
                 "at": Artifact(Path, optional=True),
-                "task_name": str,
+                "task_name": BigParameter(str),
                 "tail": Parameter(float, default=0.9),
                 "index_file": Artifact(Path, optional=True),
                 "dp_files": Artifact(List[Path], optional=True),

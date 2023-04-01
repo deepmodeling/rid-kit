@@ -65,9 +65,9 @@ Also note that, since gromacs only supports constrained MD for `distance CV`, th
 # Run the Workflow without k8s environment
 To run the workflow without k8s environment, one can use the `Debug` mode of `Dflow`. In this mode however, one can not monitor the workflow in the `Argo` UI.
 ## Run an example
-If one wants to run the workflow on the `Slurm` machine locally, type
+If one wants to run the workflow on the `Slurm` machine locally, change to the rid-kit directory and type (change to your slurm configuration)
 ```
-DFLOW_DEBUG=1 rid submit -i /tests/data/000 -c /rid/template/rid_gmx_dih.json -m /rid/template/machine_slurm_local.json
+DFLOW_DEBUG=1 rid submit -i ./tests/data/000 -c ./rid/template/rid_gmx_dih.json -m ./rid/template/machine_slurm_local.json
 ```
 
 # Main procedure of RiD

@@ -65,7 +65,7 @@ class PrepRiD(OP):
                 "numb_iters": int,
                 "numb_walkers": int,
                 "numb_models": int,
-                "confs": Artifact(List[Path]),
+                "confs": Artifact(List[Path],archive = None),
                 "walker_tags": List,
                 "model_tags": List,
                 

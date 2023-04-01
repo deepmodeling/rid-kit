@@ -68,12 +68,12 @@ class RunExplore(OP):
     def get_output_sign(cls):
         return OPIOSign(
             {
-                "plm_out": Artifact(Path),
-                "bias_fig": Artifact(Path, optional=True),
-                "model_devi_fig": Artifact(Path,optional=True),
-                "md_log": Artifact(Path),
-                "trajectory": Artifact(Path),
-                "conf_out": Artifact(Path)
+                "plm_out": Artifact(Path, archive = None),
+                "bias_fig": Artifact(Path, optional=True, archive = None),
+                "model_devi_fig": Artifact(Path,optional=True, archive = None),
+                "md_log": Artifact(Path, archive = None),
+                "trajectory": Artifact(Path, archive = None),
+                "conf_out": Artifact(Path, archive = None)
             }
         )
 

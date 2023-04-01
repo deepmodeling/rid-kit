@@ -70,11 +70,11 @@ class RunLabel(OP):
     def get_output_sign(cls):
         return OPIOSign(
             {
-                "plm_out": Artifact(Path),
-                "cv_forces": Artifact(Path),
-                "mf_info": Artifact(Path,optional=True),
-                "mf_fig": Artifact(Path),
-                "md_log": Artifact(Path)
+                "plm_out": Artifact(Path, archive = None),
+                "cv_forces": Artifact(Path, archive = None),
+                "mf_info": Artifact(Path,optional=True, archive = None),
+                "mf_fig": Artifact(Path, archive = None),
+                "md_log": Artifact(Path, archive = None)
             }
         )
 

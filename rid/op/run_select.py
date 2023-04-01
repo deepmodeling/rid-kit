@@ -49,10 +49,10 @@ class RunSelect(OP):
     def get_output_sign(cls):
         return OPIOSign(
             {
-                "selected_confs": Artifact(List[Path]),
-                "selected_cv_init": Artifact(List[Path]),
-                "model_devi": Artifact(Path, optional=True),
-                "selected_indices": Artifact(Path),
+                "selected_confs": Artifact(List[Path], archive = None),
+                "selected_cv_init": Artifact(List[Path], archive = None),
+                "model_devi": Artifact(Path, optional=True, archive = None),
+                "selected_indices": Artifact(Path, archive = None),
                 "selected_conf_tags": Dict
             }
         )

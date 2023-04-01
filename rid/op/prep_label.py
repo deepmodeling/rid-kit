@@ -115,7 +115,7 @@ class PrepLabel(OP):
     def get_output_sign(cls):
         return OPIOSign(
             {
-                "task_path": Artifact(Path),
+                "task_path": Artifact(Path, archive = None),
             }
         )
 

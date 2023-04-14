@@ -29,6 +29,7 @@ from .submit import submit_rid
 from .resubmit import resubmit_rid
 from .label import label_rid
 from .relabel import relabel_rid
+from .redim import redim_rid
 from .info import information
 from .server import forward_ports
 from .cli import rid_ls, rid_rm
@@ -204,13 +205,13 @@ def main_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser_redim.add_argument(
-        "--networks", "-n", help="Training data."
+        "--mol", "-i", help="Neural networks path", dest="mol",
     )
     parser_redim.add_argument(
-        "--dim1", help="Dimension 1."
+        "--config", "-c", help="RiD configuration.", dest="config"
     )
     parser_redim.add_argument(
-        "--dim2", help="Dimension 2."
+        "--machine", "-m", help="Machine configuration.", dest="machine"
     )
 
     # --version
@@ -348,6 +349,15 @@ def main():
             index_file = index_file,
             dp_files = dp_files,
             otherfiles = otherfiles
+        )
+        log_ui()
+    elif args.command == "redim":
+        logger.info("Preparing MCMC ...")
+        confs, top_file, models, forcefield, index_file, data_file, dp_files, otherfiles = parse_submit(args)
+        redim_rid(
+            rid_config = args.config,
+            machine_config = args.machine,
+            models = models
         )
         log_ui()
     elif args.command == "port-forward":

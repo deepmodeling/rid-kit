@@ -66,6 +66,10 @@ model_devi_fig = "model_devi.png"
 cluster_fig = "cluster.png"
 train_fig = "train_{tag}.png"
 
+# MCMC file name
+mcmc_cv_name = "mcmc_cv.dat"
+mcmc_cv_fig = "mcmc_cv.png"
+
 # Units
 kb = 8.617333E-5
 kbT = (8.617333E-5) * 300

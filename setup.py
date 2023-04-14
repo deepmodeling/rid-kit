@@ -36,6 +36,7 @@ setuptools.setup(
         "rid/nn",
         "rid/op",
         "rid/select",
+        "rid/mcmc",
         "rid/superop",
         "rid/task",
         "rid/utils",

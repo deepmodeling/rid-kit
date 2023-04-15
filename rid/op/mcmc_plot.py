@@ -10,7 +10,7 @@ from dflow.python import (
     BigParameter
 )
 from rid.utils import save_txt, set_directory
-from rid.constants import mcmc_cv_name, mcmc_cv_fig
+from rid.constants import mcmc_cv_name, mcmc_cv_fig, mcmc_cv_fig_separate
 from matplotlib import pyplot as plt
     
 # kinetic enery in eV
@@ -103,15 +103,23 @@ class MCMCPlot(OP):
                 yedges = np.linspace(0, 10, bins)
             fig = plt.figure(figsize=(8, 6))
             cmap = plt.cm.get_cmap("jet_r")
-            CS = plt.contourf(xedges,yedges,avedata.reshape(bins,bins),levels = np.linspace(0,5,11),cmap=cmap,extend="max")
+            CS = plt.contourf(xedges,yedges,avedata.reshape(bins,bins),levels = np.linspace(0,6,61),cmap=cmap,extend="max")
             cbar = plt.colorbar(CS)
             plt.xlabel(r'a')
             plt.ylabel(r'b')
             plt.savefig(mcmc_cv_fig,dpi=600,bbox_inches='tight')
+            for iii in range(len(fourdata)):
+                fig = plt.figure(figsize=(8, 6))
+                cmap = plt.cm.get_cmap("jet_r")
+                CS = plt.contourf(xedges,yedges,fourdata[iii].reshape(bins,bins),levels = np.linspace(0,6,61),cmap=cmap,extend="max")
+                cbar = plt.colorbar(CS)
+                plt.xlabel(r'a')
+                plt.ylabel(r'b')
+                plt.savefig(mcmc_cv_fig_separate.format(tag=iii),dpi=600,bbox_inches='tight')
                 
         op_out = OPIO(
             {
-               "mcmc_fig": task_path.joinpath(mcmc_cv_fig)
+               "mcmc_fig": task_path
             }
         )
         return op_out

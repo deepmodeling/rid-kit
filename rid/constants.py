@@ -69,6 +69,7 @@ train_fig = "train_{tag}.png"
 # MCMC file name
 mcmc_cv_name = "mcmc_cv.dat"
 mcmc_cv_fig = "mcmc_cv.png"
+mcmc_cv_fig_separate = "mcmc_cv_{tag}.png"
 
 # Units
 kb = 8.617333E-5

@@ -30,6 +30,7 @@ from .resubmit import resubmit_rid
 from .label import label_rid
 from .relabel import relabel_rid
 from .redim import redim_rid
+from .reredim import reredim_rid
 from .info import information
 from .server import forward_ports
 from .cli import rid_ls, rid_rm
@@ -213,6 +214,28 @@ def main_parser() -> argparse.ArgumentParser:
     parser_redim.add_argument(
         "--machine", "-m", help="Machine configuration.", dest="machine"
     )
+    
+    # resubmit NN dimension reduction.
+    parser_reredim = subparsers.add_parser(
+        "reredim",
+        help="NN dimension reduction by Monte Carlo integral.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser_reredim.add_argument(
+        "--mol", "-i", help="Neural networks path", dest="mol",
+    )
+    parser_reredim.add_argument(
+        "--config", "-c", help="RiD configuration.", dest="config"
+    )
+    parser_reredim.add_argument(
+        "--machine", "-m", help="Machine configuration.", dest="machine"
+    )
+    parser_reredim.add_argument(
+        "WORKFLOW_ID", help="Workflow ID."
+    )
+    parser_reredim.add_argument(
+        "--pod", "-p", help="restart from the pod.", default = None, dest="pod"
+    )
 
     # --version
     parser.add_argument(
@@ -358,6 +381,17 @@ def main():
             rid_config = args.config,
             machine_config = args.machine,
             models = models
+        )
+        log_ui()
+    elif args.command == "reredim":
+        logger.info("Preparing MCMC ...")
+        confs, top_file, models, forcefield, index_file, data_file, dp_files, otherfiles = parse_submit(args)
+        reredim_rid(
+            workflow_id=args.WORKFLOW_ID,
+            rid_config = args.config,
+            machine_config = args.machine,
+            models = models,
+            pod = args.pod
         )
         log_ui()
     elif args.command == "port-forward":

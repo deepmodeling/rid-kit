@@ -29,6 +29,7 @@ from rid.superop.data import DataGenerator
 from rid.op.prep_data import CollectData, MergeData
 from rid.superop.blocks import IterBlock, InitBlock
 from rid.op.run_train import TrainModel
+from rid.op.run_model_devi import RunModelDevi
 from rid.op.adjust_trust_level import AdjustTrustLevel
 from rid.flow.loop import ReinforcedDynamics
 
@@ -42,6 +43,7 @@ def prep_rid_op(
     run_select_config,
     prep_data_config,
     run_train_config,
+    model_devi_config,
     workflow_steps_config,
     retry_times
     ):
@@ -85,7 +87,9 @@ def prep_rid_op(
         label_op,
         data_op,
         TrainModel,
+        RunModelDevi,
         run_train_config,
+        model_devi_config,
         retry_times=retry_times
     )
 
@@ -97,8 +101,10 @@ def prep_rid_op(
         data_op,
         AdjustTrustLevel,
         TrainModel,
+        RunModelDevi,
         workflow_steps_config,
         run_train_config,
+        model_devi_config,
         retry_times=retry_times)
     
     rid_op = ReinforcedDynamics(
@@ -138,6 +144,7 @@ def submit_rid(
         run_select_config = normalized_resources[tasks["run_select_config"]],
         prep_data_config = normalized_resources[tasks["prep_data_config"]],
         run_train_config = normalized_resources[tasks["run_train_config"]],
+        model_devi_config = normalized_resources[tasks["model_devi_config"]],
         workflow_steps_config = normalized_resources[tasks["workflow_steps_config"]],
         retry_times=1
     )

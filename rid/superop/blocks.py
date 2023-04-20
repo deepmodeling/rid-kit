@@ -40,7 +40,9 @@ class InitBlock(Steps):
         label_op: OP,
         data_op: OP,
         train_op: OP,
+        model_devi_op: OP,
         train_config: Dict,
+        model_devi_config: Dict,
         upload_python_package = None,
         retry_times = None
     ):
@@ -107,7 +109,9 @@ class InitBlock(Steps):
             label_op,
             data_op,
             train_op,
+            model_devi_op,
             train_config,
+            model_devi_config,
             upload_python_package = upload_python_package,
             retry_times = retry_times
         )            
@@ -140,7 +144,9 @@ def _first_run_block(
         label_op: OP,
         data_op: OP,
         train_op: OP,
+        model_devi_op: OP,
         train_config : Dict,
+        model_devi_config: Dict,
         upload_python_package : str = None,
         retry_times: int = None
     ):
@@ -262,6 +268,38 @@ def _first_run_block(
         **train_config,
     )
     block_steps.add(train)
+    
+    model_devi_config = deepcopy(model_devi_config)
+    model_devi_template_config = model_devi_config.pop('template_config')
+    model_devi_executor = init_executor(model_devi_config.pop('executor'))
+    deviation = Step(
+        "ModelDeviation",
+        template=PythonOPTemplate(
+            model_devi_op,
+            python_packages = upload_python_package,
+            retry_on_transient_error = retry_times,
+            slices=Slices("{{item}}",
+                input_parameter=["trust_lvl_1","task_name"],
+                input_artifact=["plm_out","selected_indices"],
+                output_artifact=["model_devi","model_devi_png"]),
+            **model_devi_template_config,
+        ),
+        parameters={
+            "trust_lvl_1": block_steps.inputs.parameters["trust_lvl_1"],
+            "block_tag" : block_steps.inputs.parameters['block_tag'],
+            "task_name": block_steps.inputs.parameters['walker_tags'],
+        },
+        artifacts={
+            "models" : train.outputs.artifacts["model"],
+            "plm_out": exploration.outputs.artifacts["plm_out"],
+            "selected_indices": selection.outputs.artifacts["selected_indices"]
+        },
+        executor = model_devi_executor,
+        with_param=argo_range(argo_len(block_steps.inputs.parameters["walker_tags"])),
+        key = '{}-model-devi'.format(block_steps.inputs.parameters['block_tag'])+"-{{item}}",
+        **model_devi_config
+    )
+    block_steps.add(deviation)
 
     block_steps.outputs.artifacts["models"]._from = train.outputs.artifacts["model"]
     block_steps.outputs.artifacts["data"]._from = gen_data.outputs.artifacts["data"]
@@ -288,8 +326,10 @@ class IterBlock(Steps):
         data_op: OP,
         adjust_lvl_op: OP,
         train_op: OP,  
+        model_devi_op: OP,
         adjust_lvl_config: Dict,
         train_config: Dict,
+        model_devi_config: Dict,
         upload_python_package = None,
         retry_times = None
     ):
@@ -363,8 +403,10 @@ class IterBlock(Steps):
             data_op,
             adjust_lvl_op,
             train_op,
+            model_devi_op,
             adjust_lvl_config,
             train_config,
+            model_devi_config,
             upload_python_package = upload_python_package,
             retry_times = retry_times
         )            
@@ -398,8 +440,10 @@ def _iter_block(
         data_op: OP,
         adjust_lvl_op: OP,
         train_op: OP,
+        model_devi_op: OP,
         adjust_lvl_config : Dict,
         train_config : Dict,
+        model_devi_config: Dict,
         upload_python_package : str = None,
         retry_times: int = None
     ):
@@ -554,6 +598,38 @@ def _iter_block(
         **train_config,
     )
     block_steps.add(train)
+    
+    model_devi_config = deepcopy(model_devi_config)
+    model_devi_template_config = model_devi_config.pop('template_config')
+    model_devi_executor = init_executor(model_devi_config.pop('executor'))
+    deviation = Step(
+        "ModelDeviation",
+        template=PythonOPTemplate(
+            model_devi_op,
+            python_packages = upload_python_package,
+            retry_on_transient_error = retry_times,
+            slices=Slices("{{item}}",
+                input_parameter=["trust_lvl_1","task_name"],
+                input_artifact=["plm_out","selected_indices"],
+                output_artifact=["model_devi","model_devi_png"]),
+            **model_devi_template_config,
+        ),
+        parameters={
+            "trust_lvl_1": block_steps.inputs.parameters["trust_lvl_1"],
+            "block_tag" : block_steps.inputs.parameters['block_tag'],
+            "task_name": block_steps.inputs.parameters['walker_tags'],
+        },
+        artifacts={
+            "models" : train.outputs.artifacts["model"],
+            "plm_out": exploration.outputs.artifacts["plm_out"],
+            "selected_indices": selection.outputs.artifacts["selected_indices"]
+        },
+        executor = model_devi_executor,
+        with_param=argo_range(argo_len(block_steps.inputs.parameters["walker_tags"])),
+        key = '{}-model-devi'.format(block_steps.inputs.parameters['block_tag'])+"-{{item}}",
+        **model_devi_config
+    )
+    block_steps.add(deviation)
 
     block_steps.outputs.artifacts["models"]._from = train.outputs.artifacts["model"]
     block_steps.outputs.artifacts["data"]._from = gen_data.outputs.artifacts["data"]

@@ -192,7 +192,9 @@ def _label(
             prep_label_op,
             python_packages = upload_python_package,
             retry_on_transient_error = retry_times,
-            slices=Slices(sub_path = True,
+            slices=Slices("{{item}}",
+                group_size=10,
+                pool_size=1,
                 input_parameter=["task_name"],
                 input_artifact=["conf", "at"],
                 output_artifact=["task_path"]),
@@ -209,10 +211,11 @@ def _label(
             "at": label_steps.inputs.artifacts['at'],
             "cv_file": label_steps.inputs.artifacts['cv_file']
         },
-        key = step_keys['prep_label']+"-{{item.order}}",
+        key = step_keys['prep_label']+"-{{item}}",
         executor = prep_executor,
+        with_param=argo_range(argo_len(check_label_inputs.outputs.parameters['conf_tags'])),
         when = "%s > 0" % (check_label_inputs.outputs.parameters["if_continue"]),
-        **prep_config,
+        **prep_config
     )
     label_steps.add(prep_label)
 
@@ -260,7 +263,9 @@ def _label(
             run_label_op,
             python_packages = upload_python_package,
             retry_on_transient_error = retry_times,
-            slices=Slices(sub_path = True,
+            slices=Slices("{{item}}",
+                group_size=10,
+                pool_size=1,
                 input_parameter=["task_name"],
                 input_artifact=["task_path","at"],
                 output_artifact=["plm_out","cv_forces","mf_info","mf_fig","md_log"]),
@@ -281,10 +286,11 @@ def _label(
             "inputfile": label_steps.inputs.artifacts['inputfile'],
             "at": label_steps.inputs.artifacts['at']
         },
-        key = step_keys['run_label']+"-{{item.order}}",
+        key = step_keys['run_label']+"-{{item}}",
         executor = run_executor,
+        with_param=argo_range(argo_len(check_label_inputs.outputs.parameters['conf_tags'])),
         continue_on_success_ratio = 0.75,
-        **run_config,
+        **run_config
     )
     label_steps.add(run_label)
 

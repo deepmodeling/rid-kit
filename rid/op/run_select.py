@@ -6,7 +6,8 @@ from dflow.python import (
     OPIO,
     OPIOSign,
     Artifact,
-    Parameter
+    Parameter,
+    BigParameter
 )
 from rid.utils import save_txt, set_directory
 from rid.constants import sel_gro_name, sel_lmp_name, cv_init_label, model_devi_name, model_devi_precision, sel_ndx_name
@@ -40,6 +41,8 @@ class RunSelect(OP):
                 "trust_lvl_2": float,
                 "xtc_traj": Artifact(Path),
                 "topology": Artifact(Path),
+                "label_config": BigParameter(Dict),
+                "type_map": Parameter(Optional[List], default=[]),
                 "dt": Parameter(Optional[float], default=None),
                 "output_freq": Parameter(Optional[float], default=None),
                 "slice_mode": Parameter(str, default="gmx")
@@ -120,7 +123,12 @@ class RunSelect(OP):
                 slice_xtc(xtc=op_in["xtc_traj"], top=op_in["topology"],
                         walker_idx = walker_idx, selected_idx=sel_idx, output=sel_gro_name, style="mdtraj")
             elif op_in["slice_mode"] == "dpdata":
-                slice_dump(dump=op_in["xtc_traj"],walker_idx = walker_idx,selected_idx=sel_idx, output=sel_lmp_name, style="dpdata")
+                if op_in["label_config"]["type"] == "gmx":
+                    slice_dump(dump=op_in["xtc_traj"],walker_idx = walker_idx,selected_idx=sel_idx, output=sel_gro_name, type_map = op_in["type_map"], style="dpdata")
+                elif op_in["label_config"]["type"] == "lmp":
+                    slice_dump(dump=op_in["xtc_traj"],walker_idx = walker_idx,selected_idx=sel_idx, output=sel_lmp_name, type_map = op_in["type_map"],style="dpdata")
+                else:
+                    raise ValueError("Invalid labeling type, only support gmx and lmp")
             else:
                 raise RuntimeError("Unknown Style for Slicing Trajectory.")
             conf_list = []
@@ -128,8 +136,12 @@ class RunSelect(OP):
             conf_tags = {}
             for ii, sel in enumerate(sel_idx):
                 if op_in["slice_mode"] == "dpdata":
-                    conf_list.append(task_path.joinpath(sel_lmp_name.format(walker=walker_idx,idx=sel)))
-                    conf_tags[sel_lmp_name.format(walker = walker_idx,idx=sel)] = f"{op_in['task_name']}_{sel}"
+                    if op_in["label_config"]["type"] == "gmx":
+                        conf_list.append(task_path.joinpath(sel_gro_name.format(walker=walker_idx,idx=sel)))
+                        conf_tags[sel_gro_name.format(walker = walker_idx,idx=sel)] = f"{op_in['task_name']}_{sel}"
+                    elif op_in["label_config"]["type"] == "lmp":
+                        conf_list.append(task_path.joinpath(sel_lmp_name.format(walker=walker_idx,idx=sel)))
+                        conf_tags[sel_lmp_name.format(walker = walker_idx,idx=sel)] = f"{op_in['task_name']}_{sel}"
                 elif op_in["slice_mode"] == "gmx" or op_in["slice_mode"] == "mdtraj" :
                     conf_list.append(task_path.joinpath(sel_gro_name.format(walker=walker_idx,idx=sel)))
                     conf_tags[sel_gro_name.format(walker = walker_idx,idx=sel)] = f"{op_in['task_name']}_{sel}"

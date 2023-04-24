@@ -37,6 +37,7 @@ class Selector(Steps):
         retry_times = None
     ):
         self._input_parameters = {
+            "label_config": InputParameter(type=Dict),
             "trust_lvl_1" : InputParameter(type=List[float], value=2.0),
             "trust_lvl_2": InputParameter(type=List[float], value=3.0),
             "cluster_threshold": InputParameter(type=List[float], value=1.0),
@@ -48,6 +49,7 @@ class Selector(Steps):
             "dt": InputParameter(type=float, value=0.02),
             "output_freq": InputParameter(type=float, value=2500),
             "slice_mode": InputParameter(type=str, value="gmx"),
+            "type_map": InputParameter(type=List, value=[]),
             "if_make_threshold": InputParameter(type=bool, value=False),
             "task_names" : InputParameter(type=List[str]),
             "block_tag" : InputParameter(type=str, value="")
@@ -230,11 +232,13 @@ def _select(
             **run_template_config,
         ),
         parameters={
+            "label_config":  select_steps.inputs.parameters["label_config"],
             "trust_lvl_1": select_steps.inputs.parameters["trust_lvl_1"],
             "trust_lvl_2": select_steps.inputs.parameters["trust_lvl_2"],
             "dt": select_steps.inputs.parameters["dt"],
             "output_freq": select_steps.inputs.parameters["output_freq"],
             "slice_mode": select_steps.inputs.parameters["slice_mode"],
+            "type_map": select_steps.inputs.parameters["type_map"],
             "task_name": select_steps.inputs.parameters['task_names']
         },
         artifacts={
@@ -264,11 +268,13 @@ def _select(
             **run_template_config,
         ),
         parameters={
+            "label_config":  select_steps.inputs.parameters["label_config"],
             "trust_lvl_1": select_steps.inputs.parameters["trust_lvl_1"],
             "trust_lvl_2": select_steps.inputs.parameters["trust_lvl_2"],
             "dt": select_steps.inputs.parameters["dt"],
             "output_freq": select_steps.inputs.parameters["output_freq"],
             "slice_mode": select_steps.inputs.parameters["slice_mode"],
+            "type_map": select_steps.inputs.parameters["type_map"],
             "task_name": select_steps.inputs.parameters['task_names']
         },
         artifacts={

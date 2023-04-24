@@ -160,24 +160,28 @@ class RunExplore(OP):
                 for file in op_in["dp_files"]:
                     if not os.path.islink(file.name):
                         os.symlink(file, file.name)
-            if op_in["index_file"] is not None:
-                if not os.path.islink(op_in["index_file"].name):
-                    os.symlink(op_in["index_file"], op_in["index_file"].name)
+
             if op_in["cv_file"] is not None:
                 for file in op_in["cv_file"]:
                     if file.name != "colvar":
                         if not os.path.islink(file.name):
                             os.symlink(file, file.name)
-            if op_in["inputfile"] is not None:
-                for file in op_in["inputfile"]:
-                    if file.name == inputfile_name:
-                        if not os.path.islink(file.name):
-                            os.symlink(file, file.name)
+                            
+            if op_in["exploration_config"]["type"] == "lmp":
+                if op_in["inputfile"] is not None:
+                    for file in op_in["inputfile"]:
+                        if file.name == inputfile_name:
+                            if not os.path.islink(file.name):
+                                os.symlink(file, file.name)
             
-            if op_in["dp_files"] is not None:
-                for dp_file in op_in["dp_files"]:
-                    if (dp_file.name).endswith("json"):
-                        os.environ["GMX_DEEPMD_INPUT_JSON"] = dp_file.name
+            if op_in["exploration_config"]["type"] == "gmx":
+                if op_in["index_file"] is not None:
+                    if not os.path.islink(op_in["index_file"].name):
+                        os.symlink(op_in["index_file"], op_in["index_file"].name)
+                if op_in["dp_files"] is not None:
+                    for dp_file in op_in["dp_files"]:
+                        if (dp_file.name).endswith("json"):
+                            os.environ["GMX_DEEPMD_INPUT_JSON"] = dp_file.name
                         
             if grompp_cmd is not None:
                 logger.info(list_to_string(grompp_cmd, " "))

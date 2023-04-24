@@ -10,7 +10,7 @@ from dflow.python import (
     BigParameter
 )
 from rid.utils import load_json
-from rid.constants import model_tag_fmt, init_conf_name, init_input_name, walker_tag_fmt
+from rid.constants import model_tag_fmt, init_conf_gmx_name, init_conf_lmp_name,init_input_name, walker_tag_fmt
 
 
 logging.basicConfig(
@@ -22,22 +22,39 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def prep_confs(confs, numb_walkers):
+def prep_confs(confs, numb_walkers,sampler_type):
     numb_confs = len(confs)
     conf_list = []
-    if numb_confs < numb_walkers:
-        logger.info("Number of confs is smaller than number of walkers. Copy replicas up to number of walkers.")
+    if sampler_type == "gmx":
+        if numb_confs < numb_walkers:
+            logger.info("Number of confs is smaller than number of walkers. Copy replicas up to number of walkers.")
+            for idx in range(numb_walkers):
+                shutil.copyfile(confs[idx%numb_confs], init_conf_gmx_name.format(idx=idx))
+        elif numb_confs > numb_walkers:
+            logger.info("Number of confs is greater than number of walkers. Only use the fist `numb_walkers` confs.")
+            for idx in range(numb_walkers):
+                shutil.copyfile(confs[idx], init_conf_gmx_name.format(idx=idx))
+        else:
+            for idx in range(numb_walkers):
+                shutil.copyfile(confs[idx], init_conf_gmx_name.format(idx=idx))
         for idx in range(numb_walkers):
-            shutil.copyfile(confs[idx%numb_confs], init_conf_name.format(idx=idx))
-    elif numb_confs > numb_walkers:
-        logger.info("Number of confs is greater than number of walkers. Only use the fist `numb_walkers` confs.")
+            conf_list.append(Path(init_conf_gmx_name.format(idx=idx)))
+    elif sampler_type == "lmp":
+        if numb_confs < numb_walkers:
+            logger.info("Number of confs is smaller than number of walkers. Copy replicas up to number of walkers.")
+            for idx in range(numb_walkers):
+                shutil.copyfile(confs[idx%numb_confs], init_conf_lmp_name.format(idx=idx))
+        elif numb_confs > numb_walkers:
+            logger.info("Number of confs is greater than number of walkers. Only use the fist `numb_walkers` confs.")
+            for idx in range(numb_walkers):
+                shutil.copyfile(confs[idx], init_conf_lmp_name.format(idx=idx))
+        else:
+            for idx in range(numb_walkers):
+                shutil.copyfile(confs[idx], init_conf_lmp_name.format(idx=idx))
         for idx in range(numb_walkers):
-            shutil.copyfile(confs[idx], init_conf_name.format(idx=idx))
+            conf_list.append(Path(init_conf_lmp_name.format(idx=idx)))
     else:
-        for idx in range(numb_walkers):
-            shutil.copyfile(confs[idx], init_conf_name.format(idx=idx))
-    for idx in range(numb_walkers):
-        conf_list.append(Path(init_conf_name.format(idx=idx)))
+        raise ValueError("Invalid sampler type, only support gmx and lmp")
     return conf_list
 
 
@@ -84,6 +101,7 @@ class PrepRiD(OP):
                 "dt": float,
                 "output_freq": float,
                 "slice_mode": str,
+                "type_map": List,
                 "label_config": BigParameter(Dict),
                 "train_config": BigParameter(Dict)
             }
@@ -143,7 +161,10 @@ class PrepRiD(OP):
         train_config = jdata.pop("Train")
         numb_models = train_config.pop("numb_models")
         numb_iters = jdata.pop("numb_iters")
-        conf_list = prep_confs(op_in["confs"], numb_walkers)
+        exploration_config = jdata.pop("ExploreMDConfig")
+        
+        sampler_type = exploration_config["type"]
+        conf_list = prep_confs(op_in["confs"], numb_walkers, sampler_type)
 
         walker_tags = []
         model_tags = []
@@ -152,7 +173,6 @@ class PrepRiD(OP):
         for idx in range(numb_models):
             model_tags.append(model_tag_fmt.format(idx=idx))
         
-        exploration_config = jdata.pop("ExploreMDConfig")
         dt = exploration_config["dt"]
         output_freq = exploration_config["output_freq"]
         cv_config = jdata.pop("CV")
@@ -170,6 +190,11 @@ class PrepRiD(OP):
 
         cluster_threshold = selection_config.pop("cluster_threshold")
         cluster_threshold_list = [cluster_threshold for _ in range(numb_walkers)]
+        
+        if "type_map" in selection_config:
+            type_map = selection_config["type_map"]
+        else:
+            type_map = []
         
         op_out = OPIO(
             {
@@ -194,6 +219,7 @@ class PrepRiD(OP):
                 "dt": dt,
                 "output_freq": output_freq,
                 "slice_mode": selection_config.pop("slice_mode"),
+                "type_map": type_map,
                 "label_config": label_config,
                 "train_config": train_config
             }

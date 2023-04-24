@@ -1,7 +1,8 @@
 # rid task name format
 argo_namespace = "argo"
 walker_tag_fmt = "{idx:03d}"
-init_conf_name = "conf_{idx:03d}.gro"
+init_conf_gmx_name = "conf_{idx:03d}.gro"
+init_conf_lmp_name = "conf_{idx:03d}.lmp"
 init_input_name = "input_{idx:03d}.lammps"
 explore_task_pattern = "{:03d}"
 explore_task_file = "explore_{walker:03d}.pkl"

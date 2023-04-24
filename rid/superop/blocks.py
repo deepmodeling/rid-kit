@@ -65,6 +65,7 @@ class InitBlock(Steps):
             "output_freq": InputParameter(type=float, value=2500),
             "slice_mode": InputParameter(type=str, value="gmx"),
             "label_config": InputParameter(type=Dict),
+            "type_map": InputParameter(type=List, value = []),
             "tail": InputParameter(type=float, value=0.9),
             "train_config": InputParameter(type=Dict)
         }        
@@ -179,6 +180,7 @@ def _first_run_block(
         "Selection",
         template=select_op,
         parameters={
+            "label_config": block_steps.inputs.parameters["label_config"],
             "trust_lvl_1" : block_steps.inputs.parameters["trust_lvl_1"],
             "trust_lvl_2": block_steps.inputs.parameters["trust_lvl_2"],
             "cluster_threshold": block_steps.inputs.parameters["cluster_threshold"],
@@ -190,6 +192,7 @@ def _first_run_block(
             "dt": block_steps.inputs.parameters["dt"],
             "output_freq": block_steps.inputs.parameters["output_freq"],
             "slice_mode": block_steps.inputs.parameters["slice_mode"],
+            "type_map": block_steps.inputs.parameters["type_map"],
             "if_make_threshold": True,
             "task_names" : block_steps.inputs.parameters['walker_tags'],
             "block_tag" : block_steps.inputs.parameters['block_tag'],
@@ -355,6 +358,7 @@ class IterBlock(Steps):
             "label_config": InputParameter(type=Dict),
             "tail": InputParameter(type=float, value=0.9),
             "train_config": InputParameter(type=Dict),
+            "type_map": InputParameter(type=List, value=[]),
             "adjust_amplifier": InputParameter(type=float, value=1.5),
             "max_level_multiple": InputParameter(type=float, value=8.0),
         }        
@@ -477,6 +481,7 @@ def _iter_block(
         "Selection",
         template=select_op,
         parameters={
+            "label_config": block_steps.inputs.parameters["label_config"],
             "trust_lvl_1" : block_steps.inputs.parameters["init_trust_lvl_1"],
             "trust_lvl_2": block_steps.inputs.parameters["init_trust_lvl_2"],
             "cluster_threshold": block_steps.inputs.parameters["cluster_threshold"],
@@ -486,6 +491,7 @@ def _iter_block(
             "dt": block_steps.inputs.parameters["dt"],
             "output_freq": block_steps.inputs.parameters["output_freq"],
             "slice_mode": block_steps.inputs.parameters["slice_mode"],
+            "type_map": block_steps.inputs.parameters["type_map"],
             "if_make_threshold": False,
             "task_names" : block_steps.inputs.parameters['walker_tags'],
             "block_tag" : block_steps.inputs.parameters['block_tag'],

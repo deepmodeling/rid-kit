@@ -13,6 +13,7 @@ from rid.constants import sel_gro_name, sel_lmp_name, cv_init_label, model_devi_
 from rid.select.conf_select import select_from_devi
 from rid.common.mol import slice_xtc, slice_dump
 from rid.select.model_devi import make_std
+import json
 
 
 class RunSelect(OP):
@@ -53,7 +54,7 @@ class RunSelect(OP):
                 "selected_cv_init": Artifact(List[Path], archive = None),
                 "model_devi": Artifact(Path, optional=True, archive = None),
                 "selected_indices": Artifact(Path, archive = None),
-                "selected_conf_tags": Dict
+                "selected_conf_tags": Artifact(Path, archive= None)
             }
         )
 
@@ -134,6 +135,8 @@ class RunSelect(OP):
                     conf_tags[sel_gro_name.format(walker = walker_idx,idx=sel)] = f"{op_in['task_name']}_{sel}"
                 save_txt(cv_init_label.format(walker=walker_idx,idx=sel), sel_data[ii])
                 cv_init_list.append(task_path.joinpath(cv_init_label.format(walker=walker_idx,idx=sel)))
+            with open("conf.json", "w") as f:
+                json.dump(conf_tags,f)
             
         op_out = OPIO(
             {
@@ -141,7 +144,7 @@ class RunSelect(OP):
                "selected_cv_init": cv_init_list,
                "model_devi": task_path.joinpath("cls_"+model_devi_name),
                "selected_indices": task_path.joinpath(sel_ndx_name),
-               "selected_conf_tags": conf_tags
+               "selected_conf_tags": task_path.joinpath("conf.json")
             }
         )
         return op_out

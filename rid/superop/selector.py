@@ -60,15 +60,15 @@ class Selector(Steps):
         }
         self._output_parameters = {
             "cluster_threshold": OutputParameter(type=List[int]),
-            "numb_cluster": OutputParameter(type=List[int]),
-            "selected_conf_tags": OutputParameter(type=List),
+            "numb_cluster": OutputParameter(type=List[int])
         }
         self._output_artifacts = {
             "cluster_selection_index": OutputArtifact(),
             "selected_confs": OutputArtifact(),
             "selected_cv_init": OutputArtifact(),
             "model_devi": OutputArtifact(),
-            "selected_indices": OutputArtifact()
+            "selected_indices": OutputArtifact(),
+            "selected_conf_tags": OutputArtifact()
         }
 
         super().__init__(        
@@ -225,8 +225,7 @@ def _select(
                 "int({{item}})",
                 input_parameter=["task_name", "trust_lvl_1", "trust_lvl_2"],
                 input_artifact=["cluster_selection_index", "cluster_selection_data", "xtc_traj", "topology"],
-                output_artifact=["selected_confs", "selected_cv_init", "model_devi", "selected_indices"],
-                output_parameter=["selected_conf_tags"]
+                output_artifact=["selected_confs", "selected_cv_init", "model_devi", "selected_indices","selected_conf_tags"]
             ),
             **run_template_config,
         ),
@@ -260,8 +259,7 @@ def _select(
             slices=Slices(sub_path = True,
                 input_parameter=["task_name", "trust_lvl_1", "trust_lvl_2"],
                 input_artifact=["cluster_selection_index", "cluster_selection_data", "xtc_traj", "topology"],
-                output_artifact=["selected_confs", "selected_cv_init", "model_devi", "selected_indices"],
-                output_parameter=["selected_conf_tags"]
+                output_artifact=["selected_confs", "selected_cv_init", "model_devi", "selected_indices","selected_conf_tags"]
             ),
             **run_template_config,
         ),
@@ -288,8 +286,8 @@ def _select(
 
     select_steps.outputs.parameters["cluster_threshold"].value_from_parameter = prep_select.outputs.parameters["cluster_threshold"]
     select_steps.outputs.parameters["numb_cluster"].value_from_parameter = prep_select.outputs.parameters["numb_cluster"]
-    select_steps.outputs.parameters["selected_conf_tags"].value_from_parameter = run_select.outputs.parameters["selected_conf_tags"]
 
+    select_steps.outputs.artifacts["selected_conf_tags"]._from = run_select.outputs.artifacts["selected_conf_tags"]
     select_steps.outputs.artifacts["cluster_selection_index"]._from = prep_select.outputs.artifacts["cluster_selection_index"]
     select_steps.outputs.artifacts["selected_confs"]._from = run_select.outputs.artifacts["selected_confs"]
     select_steps.outputs.artifacts["selected_cv_init"]._from = run_select.outputs.artifacts["selected_cv_init"]

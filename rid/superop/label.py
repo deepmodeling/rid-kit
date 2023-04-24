@@ -40,7 +40,6 @@ class Label(Steps):
             "label_config": InputParameter(type=Dict),
             "cv_config": InputParameter(type=Dict),
             "tail": InputParameter(type=float, value=0.9),
-            "conf_tags": InputParameter(type=List),
             "block_tag" : InputParameter(type=str, value="")
         }        
         self._input_artifacts = {
@@ -52,7 +51,8 @@ class Label(Steps):
             "at": InputArtifact(optional=True),
             "index_file": InputArtifact(optional=True),
             "dp_files": InputArtifact(optional=True),
-            "cv_file": InputArtifact(optional=True)
+            "cv_file": InputArtifact(optional=True),
+            "conf_tags": InputArtifact(optional=True)
         }
         self._output_parameters = {
         }
@@ -140,10 +140,9 @@ def _label(
             retry_on_transient_error = retry_times,
             **prep_template_config,
         ),
-        parameters={
-            "conf_tags": label_steps.inputs.parameters['conf_tags'],  
-        },
+        parameters={},
         artifacts={
+            "conf_tags": label_steps.inputs.artifacts['conf_tags'],  
             "confs": label_steps.inputs.artifacts['confs'],
         },
         key = step_keys['check_label_inputs'],

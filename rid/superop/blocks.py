@@ -211,7 +211,6 @@ def _first_run_block(
             "label_config": block_steps.inputs.parameters['label_config'],
             "cv_config": block_steps.inputs.parameters['cv_config'],
             "tail": block_steps.inputs.parameters['tail'],
-            "conf_tags" : selection.outputs.parameters['selected_conf_tags'],
             "block_tag" : block_steps.inputs.parameters['block_tag'],
         },
         artifacts={
@@ -222,7 +221,8 @@ def _first_run_block(
             "index_file": block_steps.inputs.artifacts['index_file'],
             "inputfile": block_steps.inputs.artifacts['inputfile'],
             "dp_files": block_steps.inputs.artifacts['dp_files'],
-            "cv_file": block_steps.inputs.artifacts['cv_file']
+            "cv_file": block_steps.inputs.artifacts['cv_file'],
+            "conf_tags" : selection.outputs.artifacts['selected_conf_tags']
         },
         key = '{}-label'.format(block_steps.inputs.parameters['block_tag'])
     )
@@ -541,7 +541,6 @@ def _iter_block(
             "label_config": block_steps.inputs.parameters['label_config'],
             "cv_config": block_steps.inputs.parameters['cv_config'],
             "tail": block_steps.inputs.parameters['tail'],
-            "conf_tags" : selection.outputs.parameters['selected_conf_tags'],
             "block_tag" : block_steps.inputs.parameters['block_tag'],
         },
         artifacts={
@@ -552,7 +551,8 @@ def _iter_block(
             "at": selection.outputs.artifacts["selected_cv_init"],
             "index_file": block_steps.inputs.artifacts['index_file'],
             "dp_files": block_steps.inputs.artifacts['dp_files'],
-            "cv_file": block_steps.inputs.artifacts['cv_file']
+            "cv_file": block_steps.inputs.artifacts['cv_file'],
+            "conf_tags" : selection.outputs.artifacts['selected_conf_tags']
         },
         key = '{}-label'.format(block_steps.inputs.parameters['block_tag'])
     )

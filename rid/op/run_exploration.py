@@ -25,6 +25,7 @@ from rid.constants import (
         lmp_conf_out,
         bias_fig,
         model_devi_fig,
+        dp_model_devi_fig,
         lmp_input_name
     )
 from rid.utils import run_command, set_directory, list_to_string
@@ -72,6 +73,7 @@ class RunExplore(OP):
                 "plm_out": Artifact(Path, archive = None),
                 "bias_fig": Artifact(Path, optional=True, archive = None),
                 "model_devi_fig": Artifact(Path,optional=True, archive = None),
+                "dp_model_devi_fig": Artifact(Path,optional=True, archive = None),
                 "md_log": Artifact(Path, archive = None),
                 "trajectory": Artifact(Path, archive = None),
                 "conf_out": Artifact(Path, archive = None)
@@ -198,6 +200,21 @@ class RunExplore(OP):
             
             bias_fig_file = None
             model_devi_fig_file = None
+            
+            dp_model_devi_fig_file = None
+            if "dp_model_devi_out" in op_in["exploration_config"]:
+                dp_model_devi_file = op_in["exploration_config"]["dp_model_devi_out"]
+                data = np.loadtxt(dp_model_devi_file)
+                f_list = data[:,4]
+                x_list = [i for i in range(len(f_list))]
+                plt.figure(figsize=(10, 8), dpi=100)
+                plt.scatter(x_list,f_list)
+                plt.title("max model devi of DP model")
+                plt.xlabel("simu frames")
+                plt.ylabel("max model devi")
+                plt.savefig(dp_model_devi_fig)
+                dp_model_devi_fig_file = op_in["task_path"].joinpath(dp_model_devi_fig)
+                
             if op_in["models"] is not None:
                 # plot bias during simulation
                 bias = np.loadtxt(plumed_output_name)[:,1]
@@ -239,6 +256,7 @@ class RunExplore(OP):
                 "plm_out": op_in["task_path"].joinpath(plumed_output_name),
                 "bias_fig": bias_fig_file,
                 "model_devi_fig": model_devi_fig_file,
+                "dp_model_devi_fig": dp_model_devi_fig_file,
                 "md_log": op_in["task_path"].joinpath(mdrun_log),
                 "trajectory": op_in["task_path"].joinpath(traj_name),
                 "conf_out": op_in["task_path"].joinpath(conf_out),

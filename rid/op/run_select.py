@@ -111,7 +111,7 @@ class RunSelect(OP):
                 save_txt("cls_"+model_devi_name, stds, fmt=model_devi_precision)
                 _selected_idx = select_from_devi(stds, op_in["trust_lvl_1"])
             sel_idx = cls_sel_idx[_selected_idx]
-            save_txt(sel_ndx_name, sel_idx, fmt="%d")
+            np.save(sel_ndx_name, sel_idx)
             sel_data = cls_sel_data[_selected_idx]
             if op_in["slice_mode"] == "gmx":
                 assert op_in["dt"] is not None, "Please provide time step to slice trajectory."

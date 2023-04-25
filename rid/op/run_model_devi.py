@@ -92,12 +92,12 @@ class RunModelDevi(OP):
             stds = make_std(cv_data, models=op_in["models"])
             save_txt("cls_"+model_devi_name, stds, fmt=model_devi_precision)
             
-            _selected_idx = np.loadtxt(op_in["selected_indices"])
+            _selected_idx = np.load(op_in["selected_indices"])
      
             nframes = cv_data.shape[0]
             groups = ["other"]*nframes
             xlist = np.linspace(0,nframes-1,nframes,dtype=int)
-            ylist = [int(j) for j in _selected_idx]
+            ylist = [int(j) for j in _selected_idx]                
             for y_ in ylist:
                 groups[y_] = "train"
             cdict = {"other": 'black',"train": 'red'}

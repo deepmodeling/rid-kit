@@ -25,6 +25,7 @@
 
     "ExploreMDConfig": {
         "nsteps": 50,
+        "type": "gmx",
         "output_freq": 1,
         "temperature": 300,
         "dt": 0.002,
@@ -36,6 +37,7 @@
 
     "LabelMDConfig": {
         "nsteps": 50,
+        "type": "gmx",
         "output_freq": 1,
         "temperature": 300,
         "dt": 0.002,

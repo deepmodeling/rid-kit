@@ -74,6 +74,7 @@ class TestMockedSelect(unittest.TestCase):
         self.task_name = ["000","001","002"]
         self.block_tag = "000"
         self.data_out = "select"
+        self.label_config = {"type":"gmx"}
 
     def tearDown(self):
         clear_dir(self.plm_out[0])
@@ -93,6 +94,7 @@ class TestMockedSelect(unittest.TestCase):
             'select-step',
             template = steps,
             parameters = {
+                "label_config": self.label_config,
                 "trust_lvl_1" : self.trust_lvl_1,
                 "trust_lvl_2": self.trust_lvl_2,
                 "cluster_threshold": self.cluster_threshold,

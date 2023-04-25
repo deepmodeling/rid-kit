@@ -28,7 +28,7 @@ from rid.op.run_select import RunSelect
 from rid.op.run_train import TrainModel
 from rid.constants import (
     tf_model_name,
-    init_conf_name,
+    init_conf_gmx_name,
     data_new,
     data_raw,
     gmx_conf_name,
@@ -85,7 +85,7 @@ def make_mocked_init_data(data_name,data_num):
 def make_mocked_init_confs(numb_confs):
     tmp_confs = []
     for ii in range(numb_confs):
-        ff = Path(init_conf_name.format(idx=ii))
+        ff = Path(init_conf_gmx_name.format(idx=ii))
         ff.write_text(f'This is init conf {ii}')
         tmp_confs.append(ff)
     return tmp_confs
@@ -93,6 +93,12 @@ def make_mocked_init_confs(numb_confs):
 def make_mocked_file(file_name):
     ff = Path(file_name)
     ff.write_text(f'This is mocked %s'%file_name)
+    return ff
+
+def make_mocked_json(filename,fconts):
+    ff = Path(filename)
+    with open(ff,"w") as f:
+        json.dump(fconts,f)
     return ff
 
 class MockedCollectData(CollectData):
@@ -204,12 +210,12 @@ class MockedCheckLabelInputs(CheckLabelInputs):
 
             tags = {}
             for tag in ip["conf_tags"]:
-                if isinstance(tag, Dict):
-                    tags.update(tag)
-                elif isinstance(tag, str):
-                    tags.update(json.loads(tag))
+                if isinstance(tag,Path):
+                    with open(tag,"r") as f:
+                        tags.update(json.load(f))
                 else:
                     raise RuntimeError("Unkown Error.")
+                
             conf_tags = []
             for conf in ip["confs"]:
                 conf_tags.append(str(tags[conf.name]))
@@ -323,6 +329,8 @@ class MockedRunSelect(RunSelect):
                 conf_tags[sel_gro_name.format(walker = int(ip['task_name']),idx=sel)] = f"{ip['task_name']}_{sel}"
                 save_txt(cv_init_label.format(walker = int(ip['task_name']),idx=sel), sel_data[ii])
                 cv_init_list.append(task_path.joinpath(cv_init_label.format(walker = int(ip['task_name']),idx=sel)))
+        with open("conf.json", "w") as f:
+            json.dump(conf_tags,f)
 
         op_out = OPIO(
             {
@@ -330,7 +338,7 @@ class MockedRunSelect(RunSelect):
                "selected_cv_init": cv_init_list,
                "model_devi": task_path.joinpath("cls_"+model_devi_name),
                "selected_indices": task_path.joinpath(sel_ndx_name),
-               "selected_conf_tags": conf_tags
+               "selected_conf_tags": task_path.joinpath("conf.json")
             }
         )
         return op_out

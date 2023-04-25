@@ -14,14 +14,7 @@ from rid.utils import load_txt, save_txt, set_directory
 from pathlib import Path
 import shutil
 from rid.constants import (
-        explore_task_pattern, 
-        gmx_conf_name,
-        gmx_top_name,
-        gmx_mdp_name, 
-        plumed_input_name,
-        plumed_output_name,
-        sel_gro_name,
-        init_conf_name
+        init_conf_gmx_name
     )
 
 class Test_PrepRid(unittest.TestCase):
@@ -34,7 +27,7 @@ class Test_PrepRid(unittest.TestCase):
         data = Path(self.datapath)
         ii=data/self.confs
         for idx in range(self.numb_walkers):
-            os.remove(init_conf_name.format(idx=idx))
+            os.remove(init_conf_gmx_name.format(idx=idx))
     
     def test(self):
         op = PrepRiD()

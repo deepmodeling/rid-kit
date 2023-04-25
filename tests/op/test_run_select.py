@@ -14,16 +14,6 @@ from rid.op.run_select import RunSelect
 from rid.utils import load_txt, save_txt, set_directory
 from pathlib import Path
 import shutil
-from rid.constants import (
-        explore_task_pattern, 
-        gmx_conf_name,
-        gmx_top_name,
-        gmx_mdp_name, 
-        plumed_input_name,
-        plumed_output_name,
-        sel_gro_name,
-        init_conf_name
-    )
 
 class Test_MockedRunSelect(unittest.TestCase):
     def setUp(self):
@@ -56,6 +46,8 @@ class Test_MockedRunSelect(unittest.TestCase):
         model_path1 = ".."/data/"model_000.pb"
         model_path2 = ".."/data/"model_001.pb"
         model_path3 = ".."/data/"model_002.pb"
+        gmx_config = {"type":"gmx","nsteps": 50,"method":"restrained", "output_freq": 1, "temperature": 300, "kappas": [500,500],
+                      "dt": 0.002, "output_mode": "both", "ntmpi": 1, "nt": 8, "max_warning": 0}
 
         op_in1 = OPIO(
             {
@@ -67,6 +59,7 @@ class Test_MockedRunSelect(unittest.TestCase):
                 "trust_lvl_2": 0.03,
                 "xtc_traj": xtc_traj,
                 "topology": top_path,
+                "label_config": gmx_config,
                 "dt": 0.002,
                 "output_freq": 2500,
                 "slice_mode": "gmx"
@@ -82,6 +75,7 @@ class Test_MockedRunSelect(unittest.TestCase):
                 "trust_lvl_2": 0.03,
                 "xtc_traj": xtc_traj,
                 "topology": top_path,
+                "label_config": gmx_config,
                 "dt": 0.002,
                 "output_freq": 2500,
                 "slice_mode": "mdtraj"
@@ -97,6 +91,7 @@ class Test_MockedRunSelect(unittest.TestCase):
                 "trust_lvl_2": 0.03,
                 "xtc_traj": xtc_traj,
                 "topology": top_path,
+                "label_config": gmx_config,
                 "dt": 0.002,
                 "output_freq": 2500,
                 "slice_mode": "gmx"
@@ -112,6 +107,7 @@ class Test_MockedRunSelect(unittest.TestCase):
                 "trust_lvl_2": 0.03,
                 "xtc_traj": xtc_traj,
                 "topology": top_path,
+                "label_config": gmx_config,
                 "dt": 0.002,
                 "output_freq": 2500,
                 "slice_mode": "others"

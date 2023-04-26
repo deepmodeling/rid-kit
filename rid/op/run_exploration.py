@@ -35,6 +35,7 @@ from rid.common.lammps.command import final_dump
 from rid.common.sampler.command import get_grompp_cmd, get_mdrun_cmd
 from rid.common.mol_dpdata import slice_dump
 from rid.select.model_devi import make_std
+from rid.mcmc.walker import s,z
 
 
 logging.basicConfig(
@@ -79,7 +80,8 @@ class RunExplore(OP):
                 "dp_model_devi_fig": Artifact(Path,optional=True, archive = None),
                 "dp_model_devi": Artifact(Path,optional=True, archive = None),
                 "dp_selected_indices": Artifact(Path,optional=True, archive = None),
-                "dp_selected_confs": Artifact(List[Path],optional=True, archive = None),
+                "dp_selected_confs": Artifact(List[Path], archive = None),
+                "projected_fig": Artifact(Path,optional=True, archive = None),
                 "md_log": Artifact(Path, archive = None),
                 "trajectory": Artifact(Path, archive = None),
                 "conf_out": Artifact(Path, archive = None)
@@ -247,12 +249,36 @@ class RunExplore(OP):
                     ix = np.where(groups == g)
                     ax.scatter(x_list[ix], f_list[ix], c = cdict[g], label = g, s = 20)
                 plt.title("max model devi of DP model")
+                plt.legend()
                 plt.xlabel("simu frames")
                 plt.ylabel("max model devi")
                 plt.savefig(dp_model_devi_fig)
                 dp_model_devi_file = op_in["task_path"].joinpath(dp_model_devi_file_name)
                 dp_model_devi_fig_file = op_in["task_path"].joinpath(dp_model_devi_fig)
-                
+            
+            projected_fig_file = None
+            if "proj_info" in op_in["exploration_config"]:
+                proj_info = op_in["exploration_config"]["proj_info"]
+                # plot projected cv fig
+                proj_mode = proj_info["proj_mode"]
+                if proj_mode == "path":
+                    proj_cv_index = proj_info["proj_cv_index"]
+                    proj_lm = proj_info["path_lm"]
+                    path_list = proj_info["path_list"]
+                    cv_data = np.loadtxt("plm.out")[:,2:]
+                    proj_cv_data = cv_data[:,proj_cv_index]                                      
+                    slist = s(proj_cv_data, proj_lm, path_list)
+                    zlist = z(proj_cv_data, proj_lm, path_list)
+                    point_numbers = list(range(len(slist)))
+                    plt.figure(figsize=(10, 8), dpi=100)
+                    plt.scatter(slist,zlist, c = point_numbers)
+                    plt.xlabel("s")
+                    plt.ylabel("z")
+                    plt.title("Trajectory projection")
+                    plt.colorbar(label="steps")
+                    plt.savefig("path.png")
+                    projected_fig_file = op_in["task_path"].joinpath("path.png")
+            
             if op_in["models"] is not None:
                 # plot bias during simulation
                 bias = np.loadtxt(plumed_output_name)[:,1]
@@ -298,6 +324,7 @@ class RunExplore(OP):
                 "dp_model_devi": dp_model_devi_file,
                 "dp_selected_indices": dp_sel_ndx_file,
                 "dp_selected_confs": dp_conf_list,
+                "projected_fig": projected_fig_file,
                 "md_log": op_in["task_path"].joinpath(mdrun_log),
                 "trajectory": op_in["task_path"].joinpath(traj_name),
                 "conf_out": op_in["task_path"].joinpath(conf_out),

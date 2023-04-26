@@ -12,7 +12,8 @@ from dflow.python import (
 from rid.utils import save_txt, set_directory
 from rid.constants import sel_gro_name, sel_lmp_name, cv_init_label, model_devi_name, model_devi_precision, sel_ndx_name
 from rid.select.conf_select import select_from_devi
-from rid.common.mol import slice_xtc, slice_dump
+from rid.common.mol import slice_xtc
+from rid.common.mol_dpdata import slice_dump
 from rid.select.model_devi import make_std
 import json
 

@@ -26,11 +26,14 @@ from rid.constants import (
         bias_fig,
         model_devi_fig,
         dp_model_devi_fig,
+        dp_sel_ndx,
+        sel_lmp_name,
         lmp_input_name
     )
 from rid.utils import run_command, set_directory, list_to_string
 from rid.common.lammps.command import final_dump
 from rid.common.sampler.command import get_grompp_cmd, get_mdrun_cmd
+from rid.common.mol_dpdata import slice_dump
 from rid.select.model_devi import make_std
 
 
@@ -74,6 +77,9 @@ class RunExplore(OP):
                 "bias_fig": Artifact(Path, optional=True, archive = None),
                 "model_devi_fig": Artifact(Path,optional=True, archive = None),
                 "dp_model_devi_fig": Artifact(Path,optional=True, archive = None),
+                "dp_model_devi": Artifact(Path,optional=True, archive = None),
+                "dp_selected_indices": Artifact(Path,optional=True, archive = None),
+                "dp_selected_confs": Artifact(List[Path],optional=True, archive = None),
                 "md_log": Artifact(Path, archive = None),
                 "trajectory": Artifact(Path, archive = None),
                 "conf_out": Artifact(Path, archive = None)
@@ -202,17 +208,49 @@ class RunExplore(OP):
             model_devi_fig_file = None
             
             dp_model_devi_fig_file = None
+            dp_model_devi_file = None
+            dp_sel_ndx_file = None
+            dp_conf_list = []
             if "dp_model_devi_out" in op_in["exploration_config"]:
-                dp_model_devi_file = op_in["exploration_config"]["dp_model_devi_out"]
-                data = np.loadtxt(dp_model_devi_file)
+                # plot DP potential model deviation
+                dp_model_devi_file_name = op_in["exploration_config"]["dp_model_devi_out"]
+                data = np.loadtxt(dp_model_devi_file_name)
                 f_list = data[:,4]
-                x_list = [i for i in range(len(f_list))]
-                plt.figure(figsize=(10, 8), dpi=100)
-                plt.scatter(x_list,f_list)
+                cv_data = np.loadtxt("plm.out")[:,2:]
+                assert (len(cv_data) == len(f_list))
+                trust_lvl_hi = op_in["exploration_config"]["dp_model_devi_f_hi"]
+                trust_lvl_lo = op_in["exploration_config"]["dp_model_devi_f_lo"]
+                max_selection = op_in["exploration_config"]["dp_model_max_selection"]
+                high_devi = np.where((f_list>trust_lvl_lo) & (f_list < trust_lvl_hi))
+                
+                if len(high_devi[0]) > max_selection:
+                    high_devi = np.random.choice(high_devi[0],max_selection,replace=False)
+                else:
+                    high_devi = high_devi[0]
+                np.savetxt(dp_sel_ndx,high_devi,fmt="%d")
+                dp_sel_ndx_file = op_in["task_path"].joinpath(dp_sel_ndx)
+                walker_idx = int(op_in["task_path"].name)
+                slice_dump(dump="out.dump",walker_idx = walker_idx,selected_idx=high_devi, output=sel_lmp_name,style="dpdata")
+                for ii, sel in enumerate(high_devi):
+                    dp_conf_list.append(op_in["task_path"].joinpath(sel_lmp_name.format(walker=walker_idx,idx=sel)))
+                
+                x_list = np.array([i for i in range(len(f_list))])
+                nframes = len(x_list)
+                groups = ["other"]*nframes
+                y_list = [int(j) for j in high_devi]
+                for j in y_list:
+                    groups[j] = "choice"
+                cdict = {"other": 'black', "choice": 'red'}
+                groups = np.array(groups)
+                fig, ax = plt.subplots()
+                for g in ["other","choice"]:
+                    ix = np.where(groups == g)
+                    ax.scatter(x_list[ix], f_list[ix], c = cdict[g], label = g, s = 20)
                 plt.title("max model devi of DP model")
                 plt.xlabel("simu frames")
                 plt.ylabel("max model devi")
                 plt.savefig(dp_model_devi_fig)
+                dp_model_devi_file = op_in["task_path"].joinpath(dp_model_devi_file_name)
                 dp_model_devi_fig_file = op_in["task_path"].joinpath(dp_model_devi_fig)
                 
             if op_in["models"] is not None:
@@ -257,6 +295,9 @@ class RunExplore(OP):
                 "bias_fig": bias_fig_file,
                 "model_devi_fig": model_devi_fig_file,
                 "dp_model_devi_fig": dp_model_devi_fig_file,
+                "dp_model_devi": dp_model_devi_file,
+                "dp_selected_indices": dp_sel_ndx_file,
+                "dp_selected_confs": dp_conf_list,
                 "md_log": op_in["task_path"].joinpath(mdrun_log),
                 "trajectory": op_in["task_path"].joinpath(traj_name),
                 "conf_out": op_in["task_path"].joinpath(conf_out),

@@ -59,6 +59,7 @@ N_grid = 100
 
 # Dp config file
 dp_config_name = "dp_config"
+dp_sel_ndx = "dp_sel.ndx"
 
 # figure file name
 mf_fig = "mf_average.png"

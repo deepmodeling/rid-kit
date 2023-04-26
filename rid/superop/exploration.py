@@ -212,7 +212,7 @@ def _exploration(
             retry_on_transient_error = retry_times,
             slices=Slices("{{item}}",
                 input_artifact=["task_path"],
-                output_artifact=["plm_out", "bias_fig","model_devi_fig", "trajectory", "md_log", "conf_out"]
+                output_artifact=["plm_out", "bias_fig","model_devi_fig", "dp_model_devi_fig", "dp_model_devi", "dp_selected_indices","dp_selected_confs","trajectory", "md_log", "conf_out"]
             ),
             **run_template_config,
         ),
@@ -242,7 +242,7 @@ def _exploration(
                 retry_on_transient_error = retry_times,
                 slices=Slices(sub_path = True,
                     input_artifact=["task_path"],
-                    output_artifact=["plm_out", "bias_fig","model_devi_fig", "trajectory", "md_log", "conf_out"]
+                    output_artifact=["plm_out", "bias_fig","model_devi_fig","dp_model_devi_fig", "dp_model_devi", "dp_selected_indices","dp_selected_confs","trajectory", "md_log", "conf_out"]
                 ),
                 **run_template_config,
             ),

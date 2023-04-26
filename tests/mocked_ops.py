@@ -170,6 +170,7 @@ class MockedRunExplore(RunExplore):
             self,
             ip : OPIO,
     ) -> OPIO:
+        dp_conf_list = []
         assert(ip["task_path"].is_dir())
         print("start run explore !!")
         with set_directory(ip["task_path"]):
@@ -189,6 +190,7 @@ class MockedRunExplore(RunExplore):
                 f.write("gmx trajectory file")
         
         op = OPIO({
+                "dp_selected_confs": dp_conf_list,
                 "plm_out": ip["task_path"].joinpath(plumed_output_name),
                 "md_log": ip["task_path"].joinpath(gmx_mdrun_log),
                 "trajectory": ip["task_path"].joinpath(gmx_xtc_name),

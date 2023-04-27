@@ -109,6 +109,9 @@ def main_parser() -> argparse.ArgumentParser:
     parser_run.add_argument(
         "--machine", "-m", help="Machine configuration.", dest="machine"
     )
+    parser_run.add_argument(
+        "--id", "-d", help="Workflow user defined ID", default = None, dest="id"
+    )
 
     # resubmit
     parser_rerun = subparsers.add_parser(
@@ -127,6 +130,9 @@ def main_parser() -> argparse.ArgumentParser:
     )
     parser_rerun.add_argument(
         "--machine", "-m", help="Machine configuration.", dest="machine"
+    )
+    parser_rerun.add_argument(
+        "--id", "-d", help="Workflow user defined ID", default = None, dest="id"
     )
     parser_rerun.add_argument(
         "--iteration", "-t", help="restart from t-th iteration.", default = None, dest="iteration"
@@ -313,6 +319,7 @@ def main():
             topology = top_file,
             rid_config = args.config,
             machine_config = args.machine,
+            workflow_id_defined = args.id,
             models = models,
             forcefield = forcefield,
             index_file = index_file,
@@ -330,6 +337,7 @@ def main():
             topology = top_file,
             rid_config = args.config,
             machine_config = args.machine,
+            workflow_id_defined = args.id,
             iteration = args.iteration,
             pod = args.pod,
             models = models,

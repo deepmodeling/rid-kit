@@ -120,6 +120,7 @@ def submit_rid(
         topology: Optional[str],
         rid_config: str,
         machine_config: str,
+        workflow_id_defined: Optional[str] = None,
         models: Optional[Union[str, List[str]]] = None,
         forcefield: Optional[str] = None,
         index_file: Optional[str] = None,
@@ -262,6 +263,6 @@ def submit_rid(
             },
             parameters={}
         )
-    wf = Workflow("reinforced-dynamics", pod_gc_strategy="OnPodSuccess", parallelism=50)
+    wf = Workflow("reinforced-dynamics", pod_gc_strategy="OnPodSuccess", parallelism=50, id = workflow_id_defined)
     wf.add(rid_steps)
     wf.submit()

@@ -31,6 +31,7 @@ from .label import label_rid
 from .relabel import relabel_rid
 from .redim import redim_rid
 from .reredim import reredim_rid
+from .download import download_rid
 from .info import information
 from .server import forward_ports
 from .cli import rid_ls, rid_rm
@@ -248,6 +249,30 @@ def main_parser() -> argparse.ArgumentParser:
     parser_reredim.add_argument(
         "--pod", "-p", help="restart from the pod.", default = None, dest="pod"
     )
+    # download
+    parser_download = subparsers.add_parser(
+        "download",
+        help="Download files in RiD workflow",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser_download.add_argument(
+        "WORKFLOW_ID", help="Workflow ID."
+    )
+    parser_download.add_argument(
+        "--pod", "-p", help="The pod in RiD workflow", dest="pod"
+    )
+    parser_download.add_argument(
+        "--file", "-f", help="The file to download inside the step", dest = "file"
+    )
+    parser_download.add_argument(
+        "--iteration_start", "-a", help="download from a-th iteration.", default = 1, dest="iteration_start"
+    )
+    parser_download.add_argument(
+        "--iteration_end", "-e", help="download to e-th iteration.", default = 100, dest="iteration_end"
+    )
+    parser_download.add_argument(
+        "--outputs", "-o", help="output directory of downloading", default = "./", dest="outputs"
+    )
 
     # --version
     parser.add_argument(
@@ -311,8 +336,8 @@ def parse_submit(args):
 
 
 def log_ui():
-    logger.info('The task is displayed on "https://127.0.0.1:2746".')
-    logger.info('Artifacts (Files) are listed on "https://127.0.0.1:9001".')
+    if os.getenv("DFLOW_HOST") is not None:
+        logger.info('The task is displayed on %s.'%os.getenv("DFLOW_HOST"))
 
 
 def main():
@@ -410,6 +435,16 @@ def main():
             pod = args.pod
         )
         log_ui()
+    elif args.command == "download":
+        logger.info("Downloading files ...")
+        download_rid(
+            workflow_id = args.WORKFLOW_ID,
+            pod = args.pod,
+            file = args.file,
+            iteration_start = args.iteration_start,
+            iteration_end = args.iteration_end,
+            outputs = args.outputs
+        )
     elif args.command == "port-forward":
         forward_ports()
     elif args.command == "ls":

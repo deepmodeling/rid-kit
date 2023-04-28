@@ -220,6 +220,9 @@ def main_parser() -> argparse.ArgumentParser:
     parser_redim.add_argument(
         "--machine", "-m", help="Machine configuration.", dest="machine"
     )
+    parser_redim.add_argument(
+        "--id", "-d", help="Workflow user defined ID", default = None, dest="id"
+    )
     
     # resubmit NN dimension reduction.
     parser_reredim = subparsers.add_parser(
@@ -235,6 +238,9 @@ def main_parser() -> argparse.ArgumentParser:
     )
     parser_reredim.add_argument(
         "--machine", "-m", help="Machine configuration.", dest="machine"
+    )
+    parser_reredim.add_argument(
+        "--id", "-d", help="Workflow user defined ID", default = None, dest="id"
     )
     parser_reredim.add_argument(
         "WORKFLOW_ID", help="Workflow ID."
@@ -388,7 +394,8 @@ def main():
         redim_rid(
             rid_config = args.config,
             machine_config = args.machine,
-            models = models
+            models = models,
+            workflow_id_defined = args.id,
         )
         log_ui()
     elif args.command == "reredim":
@@ -398,6 +405,7 @@ def main():
             workflow_id=args.WORKFLOW_ID,
             rid_config = args.config,
             machine_config = args.machine,
+            workflow_id_defined = args.id,
             models = models,
             pod = args.pod
         )

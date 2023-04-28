@@ -25,6 +25,7 @@ def reredim_rid(
         rid_config: str,
         machine_config: str,
         models: Optional[Union[str, List[str]]] = None,
+        workflow_id_defined: Optional[str] = None,
         pod: Optional[str] = None
     ):
     with open(machine_config, "r") as mcg:
@@ -103,6 +104,6 @@ def reredim_rid(
             if restart_flag == 1:
                 succeeded_steps.append(step)
                 
-    wf = Workflow("rid-mcmc-continue", pod_gc_strategy="OnPodSuccess", parallelism=10)
+    wf = Workflow("rid-mcmc-continue", pod_gc_strategy="OnPodSuccess", parallelism=10, id = workflow_id_defined)
     wf.add(rid_steps)
     wf.submit(reuse_step=succeeded_steps)

@@ -1,0 +1,65 @@
+{
+    "name": "rid-mixed-gmx-lmp",
+    "numb_walkers": 2,
+    "numb_iters": 2,
+    "trust_lvl_1": 2,
+    "trust_lvl_2": 4,
+    "init_models": [],
+    
+    "CV": {
+        "mode": "custom",
+        "angular_mask": [0,0,0,0],
+        "weights": [1,1,1,1],
+        "cv_file": ["colvar"]
+    },
+
+    "SelectorConfig": {
+        "numb_cluster_lower": 2,
+        "numb_cluster_upper": 4,
+        "cluster_threshold": 2.0,
+        "max_selection": 6,
+        "numb_cluster_threshold": 3,
+        "slice_mode": "dpdata"
+    },
+
+    "ExploreMDConfig": {
+        "type":"lmp",
+        "inputfile":"input_explore.lammps",
+        "dp_model": ["dp003.pb"],
+        "dt": 0.002,
+        "output_freq": 50,
+        "ntmpi": 1,
+        "nt": 8,
+        "max_warning": 2
+    },
+
+    "LabelMDConfig": {
+        "type":"gmx",
+        "method": "constrained",
+        "inputfile":"input_label.lammps",
+        "dp_model":["dp003.pb"],
+        "dt": 0.002,
+        "output_freq": 50,
+        "kappas": [ 500, 500, 500, 500],
+        "ntmpi": 1,
+        "nt": 8,
+        "max_warning": 2
+    },
+
+    "Train": {
+        "numb_models": 4,
+        "neurons": [20, 20, 20, 20],
+        "resnet": true,
+        "batch_size": 4,
+        "epoches": 20000,
+        "init_lr": 0.008,
+        "decay_steps": 200,
+        "decay_rate": 0.96,
+        "train_thread": 8,
+        "drop_out_rate": 0.2,
+        "numb_threads": 8,
+        "use_mix": false,
+        "restart": false,
+        "decay_steps_inner": 200
+    }
+}

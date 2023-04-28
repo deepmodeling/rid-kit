@@ -23,7 +23,8 @@ from rid.op.mcmc_plot import MCMCPlot
 def redim_rid(
         rid_config: str,
         machine_config: str,
-        models: Optional[Union[str, List[str]]] = None
+        models: Optional[Union[str, List[str]]] = None,
+        workflow_id_defined: Optional[str] = None
     ):
     with open(machine_config, "r") as mcg:
         machine_config_dict = json.load(mcg)
@@ -77,6 +78,6 @@ def redim_rid(
                 "block_tag" : "000"
             },
         )
-    wf = Workflow("rid-mcmc", pod_gc_strategy="OnPodSuccess", parallelism=10)
+    wf = Workflow("rid-mcmc", pod_gc_strategy="OnPodSuccess", parallelism=10, id = workflow_id_defined)
     wf.add(rid_steps)
     wf.submit()

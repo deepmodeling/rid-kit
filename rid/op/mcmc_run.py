@@ -10,7 +10,7 @@ from dflow.python import (
     BigParameter
 )
 from rid.utils import save_txt, set_directory
-from rid.mcmc.walker import Walker,my_hist2d
+from rid.mcmc.walker import Walker,my_hist2d, my_hist2d_path
 from rid.select.model_devi import test_ef
 from rid.common.tensorflow.graph import load_graph
 try:
@@ -77,8 +77,20 @@ class MCMCRun(OP):
         fd = mcmc_config["cv_dimension"]
         ns = mcmc_config["numb_steps"]
         nw = mcmc_config["numb_walkers"]
-        cv1 = mcmc_config["cv_index_1"]
-        cv2 = mcmc_config["cv_index_2"]
+        if "cv_upper_bound" in mcmc_config:
+            cv_upper = mcmc_config["cv_upper_bound"]
+        else:
+            cv_upper = 2*np.pi
+        if "cv_lower_bound" in mcmc_config:
+            cv_lower = mcmc_config["cv_lower_bound"]
+        else:
+            cv_lower = 0
+        proj_info = mcmc_config["proj_info"]
+        proj_mode = proj_info["proj_mode"]
+        proj_cv_index = proj_info["proj_cv_index"]
+        if "path_list" in proj_info:
+            path_list = np.array(proj_info["path_list"])
+            path_lm = proj_info["path_lm"]
         cv_type = mcmc_config["cv_type"]
         bins = mcmc_config["bins"]
         
@@ -100,23 +112,37 @@ class MCMCRun(OP):
 
         with set_directory(task_path):
             with tf.Session(graph = graph) as sess:        
-                walker = Walker(fd, nw, sess, cv_type)
-                for _ in range(100):
+                walker = Walker(fd, nw, sess, cv_type, cv_lower=cv_lower, cv_upper=cv_upper)
+                for _ in range(10000):
                     pp, ee, ff = walker.sample(test_ef)
 
                 for ii in range(ns+1):
                     pp, ee, ff = walker.sample(test_ef)
                     
-                     ##certain 2d
-                    pp_hist_new2d = my_hist2d(pp, xx, yy, delta, cv1, cv2)
-                    pp_hist2d = (pp_hist2d * ii + pp_hist_new2d) / (ii+1)
-                    
-                    if ii == ns:
-                        zz2d = np.transpose(-np.log(pp_hist2d+1e-10), (0,2,1))/beta
-                        # convert ev to kcal/mol
-                        zz2d *= f_cvt/4.184
-                        zz2d = zz2d - np.min(zz2d)
-                        np.savetxt(mcmc_cv_name,zz2d[0])
+                    if proj_mode == "cv":
+                        if len(proj_cv_index) == 2:
+                            cv1 = proj_cv_index[0]
+                            cv2 = proj_cv_index[1]
+                            ##certain 2d
+                            pp_hist_new2d = my_hist2d(pp, xx, yy, delta, cv1, cv2)
+                            pp_hist2d = (pp_hist2d * ii + pp_hist_new2d) / (ii+1)
+                            if ii == ns:
+                                zz2d = np.transpose(-np.log(pp_hist2d+1e-10), (0,2,1))/beta
+                                # convert ev to kcal/mol
+                                zz2d *= f_cvt/4.184
+                                zz2d = zz2d - np.min(zz2d)
+                                np.savetxt(mcmc_cv_name,zz2d[0])
+                    elif proj_mode == "path":
+                        pp_hist_new2d_path = my_hist2d_path(pp, xx, yy, delta, path_lm, path_list, proj_cv_index)
+                        pp_hist2d = (pp_hist2d * ii + pp_hist_new2d_path) / (ii+1)
+                        if ii == ns:
+                            zz2d = np.transpose(-np.log(pp_hist2d+1e-10), (0,2,1))/beta
+                            # convert ev to kcal/mol
+                            zz2d *= f_cvt/4.184
+                            zz2d = zz2d - np.min(zz2d)
+                            np.savetxt(mcmc_cv_name,zz2d[0])
+                        
+                        
             
             
         op_out = OPIO(

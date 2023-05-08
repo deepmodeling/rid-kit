@@ -46,6 +46,7 @@
         "run_select_config": "local_k8s_4",
         "prep_data_config": "local_k8s_3",
         "run_train_config": "local_k8s_5",
+        "model_devi_config": "local_k8s_5",
         "workflow_steps_config": "local_k8s_3"
     }
 }

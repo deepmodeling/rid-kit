@@ -151,6 +151,7 @@ class TestMockedLabel(unittest.TestCase):
 
     def tearDown(self):
         clear_files(self.init_models)
+        clear_files(self.init_conf_tags)
         clear_files(self.init_confs)
         clear_dir(self.center[0])
         clear_dir(self.data_out)

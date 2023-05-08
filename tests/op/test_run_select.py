@@ -43,9 +43,9 @@ class Test_MockedRunSelect(unittest.TestCase):
         cluster_data = data/"cls_sel.out.npy"
         xtc_traj = data/"traj_comp.xtc"
         top_path = data/"topol.top"
-        model_path1 = ".."/data/"model_000.pb"
-        model_path2 = ".."/data/"model_001.pb"
-        model_path3 = ".."/data/"model_002.pb"
+        model_path1 = ".."/data/"models/model_000.pb"
+        model_path2 = ".."/data/"models/model_001.pb"
+        model_path3 = ".."/data/"models/model_002.pb"
         gmx_config = {"type":"gmx","nsteps": 50,"method":"restrained", "output_freq": 1, "temperature": 300, "kappas": [500,500],
                       "dt": 0.002, "output_mode": "both", "ntmpi": 1, "nt": 8, "max_warning": 0}
 

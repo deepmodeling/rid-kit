@@ -1,0 +1,79 @@
+{
+    "resources": {
+        "local_k8s": {
+            "template_config" : {
+                "image": "registry.dp.tech/public/pkufjhdocker/rid-tf-cpu:stable", 
+                "image_pull_policy" : "IfNotPresent",
+                "requests" : {"ephemeral-storage": "4Gi"}
+            }
+        },
+        "bohrium1": {
+            "template_config":{
+                "requests" : {"ephemeral-storage": "4Gi"}
+            },
+            "executor":{
+            "image": "dptechnology/dpdispatcher:latest",
+            "machine_dict":{
+                "batch_type": "Bohrium",
+                "context_type": "Bohrium",
+                "local_root" : "./",
+                "remote_profile":{
+                    "email": "",
+                    "password": "",
+                    "program_id": "",
+                    "input_data":{
+                        "api_version":2,
+                        "job_type": "container",
+                        "job_group_id": "",
+                        "log_file": "tmp_log",
+                        "job_name": "train",
+                        "scass_type":"c12_m92_1 * NVIDIA V100",
+                        "platform": "ali",
+                        "image_name":"registry.dp.tech/public/pkufjhdocker/rid-tf-gpu:stable"
+                        }
+                }
+            },
+            "resources_dict":{
+                "batch_type:": "Bohrium"
+            }
+        }
+        },
+        "bohrium2": {
+            "template_config":{
+                "requests" : {"ephemeral-storage": "4Gi"}
+            },
+            "executor":{
+            "image": "dptechnology/dpdispatcher:latest",
+            "machine_dict":{
+                "batch_type": "Bohrium",
+                "context_type": "Bohrium",
+                "local_root" : "./",
+                "remote_profile":{
+                    "email": "",
+                    "password": "",
+                    "program_id": "",
+                    "input_data":{
+                        "api_version":2,
+                        "job_type": "container",
+                        "job_group_id": "",
+                        "log_file": "tmp_log",
+                        "job_name": "train",
+                        "scass_type":"c12_m92_1 * NVIDIA V100",
+                        "platform": "ali",
+                        "image_name":"registry.dp.tech/public/pkufjhdocker/rid-tf-cpu:stable"
+                        }
+                }
+            },
+            "resources_dict":{
+                "batch_type:": "Bohrium"
+            }
+        }
+        }
+    },
+
+    "tasks": {
+        "mcmc_run_config": "bohrium1",
+        "mcmc_plot_config": "bohrium2",
+        "workflow_steps_config": "local_k8s"
+    }
+}

@@ -132,6 +132,14 @@ The `FILE_NAME` in `train` includes `model`, `train_log`, `train_fig`.
 
 The `FILE_NAME` in `model_devi` includes `model_devi`, `model_devi_png`.
 
+## Reduce the dimension of free energy model
+After the Rid-kit Run, the workflow will generate several numbers of free energy models (.pb). The Rid-kit currently support MCMC to reduce the dimension of the free energy model, for example:
+```bash
+rid redim -i ./test/data/models -c ./rid/template/rid_mcmc_cv_dih.json -m ./rid/template/machine_bohrium_k8s_mcmc.json
+```
+Then you will get the projected free energy surface for ala-dipeptide
+- ![image](docs/pics/mcmc_ala.png)
+
 # Run the Workflow without k8s environment`
 To run the workflow without k8s environment, one can use the `Debug` mode of `Dflow`. In this mode however, one can not monitor the workflow in the `Argo` UI.
 ## Run an example

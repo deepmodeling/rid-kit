@@ -4,12 +4,12 @@
             "template_config" : {
                 "image": "registry.dp.tech/public/pkufjhdocker/rid-tf-cpu:stable", 
                 "image_pull_policy" : "IfNotPresent",
-                "requests" : {"ephemeral-storage": "1Gi"}
+                "requests" : {"ephemeral-storage": "4Gi"}
             }
         },
         "bohrium1": {
             "template_config":{
-                "requests" : {"ephemeral-storage": "1Gi"}
+                "requests" : {"ephemeral-storage": "4Gi"}
             },
             "executor":{
             "image": "dptechnology/dpdispatcher:latest",
@@ -39,7 +39,7 @@
         },
         "bohrium2": {
             "template_config":{
-                "requests" : {"ephemeral-storage": "1Gi"}
+                "requests" : {"ephemeral-storage": "4Gi"}
             },
             "executor":{
             "image": "dptechnology/dpdispatcher:latest",
@@ -69,7 +69,7 @@
         },
         "bohrium3": {
             "template_config":{
-                "requests" : {"ephemeral-storage": "1Gi"}
+                "requests" : {"ephemeral-storage": "4Gi"}
             },
             "executor":{
             "image": "dptechnology/dpdispatcher:latest",
@@ -99,7 +99,7 @@
         },
         "bohrium4": {
             "template_config":{
-                "requests" : {"ephemeral-storage": "1Gi"}
+                "requests" : {"ephemeral-storage": "4Gi"}
             },
             "executor":{
             "image": "dptechnology/dpdispatcher:latest",
@@ -138,6 +138,7 @@
         "run_select_config": "bohrium3",
         "prep_data_config": "local_k8s",
         "run_train_config": "bohrium4",
+        "model_devi_config": "bohrium4",
         "workflow_steps_config": "local_k8s"
     }
 }

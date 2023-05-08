@@ -59,9 +59,13 @@ def clear_dir(data=None):
 
 def clear_files(files=None):
     if files:
-        for file in files:
-            if os.path.exists(file):
-                os.remove(file)
+        if isinstance(files,list):
+            for file in files:
+                if os.path.exists(file):
+                    os.remove(file)
+        elif isinstance(files,Path):
+            if os.path.exists(files):
+                    os.remove(files)
 
 def make_mocked_init_models(numb_models):
     tmp_models = []

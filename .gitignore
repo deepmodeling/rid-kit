@@ -8,3 +8,4 @@ build
 tmp*
 _version.py
 .coverage
+.DS_Store

@@ -12,5 +12,3 @@ myst-parser
 m2r2
 nbsphinx
 sphinx_rtd_theme
-ipython
-ipykernel

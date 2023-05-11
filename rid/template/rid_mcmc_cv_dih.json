@@ -6,6 +6,7 @@
             "cv_dimension": 2,
             "numb_steps": 10000,
             "numb_walkers": 500,
+            "temperature": 300,
             "proj_info": {
                 "proj_mode": "cv",
                 "proj_cv_index": [0,1]

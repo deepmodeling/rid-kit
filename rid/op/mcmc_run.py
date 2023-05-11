@@ -18,15 +18,8 @@ try:
     tf.disable_v2_behavior()
 except ImportError:
     import tensorflow as tf
-from rid.constants import mcmc_1cv_name, mcmc_1cv_dir_name, mcmc_2cv_name
+from rid.constants import mcmc_1cv_name, mcmc_1cv_dir_name, mcmc_2cv_name, kb, f_cvt, kcal2kj
 import os
-    
-# kinetic enery in eV
-kbT = (8.617343E-5) * 300 
-beta = 1.0 / kbT
-
-# ev to kj/mol
-f_cvt = 96.485
 
 class MCMCRun(OP):
     """
@@ -76,9 +69,13 @@ class MCMCRun(OP):
         """
         graph = load_graph(op_in["models"])
         mcmc_config = op_in["mcmc_config"]
+        temperature = mcmc_config["temperature"]
         fd = mcmc_config["cv_dimension"]
         ns = mcmc_config["numb_steps"]
         nw = mcmc_config["numb_walkers"]
+        # kinetic enery in eV
+        kbT = kb * temperature
+        beta = 1.0 / kbT
         if "cv_upper_bound" in mcmc_config:
             cv_upper = mcmc_config["cv_upper_bound"]
         else:
@@ -130,7 +127,7 @@ class MCMCRun(OP):
                     if np.mod(ii,int(ns/5)) == 0:
                         zz = -np.log(pp_hist+1e-7)/beta
                         # convert ev to kcal/mol
-                        zz *= f_cvt/4.184
+                        zz *= f_cvt/kcal2kj
                         zz = zz - np.min(zz)      
                         for jj in range(fd):
                             fp = open(mcmc_1cv_dir_name+"/"+mcmc_1cv_name.format(tag=jj), "a")
@@ -149,7 +146,7 @@ class MCMCRun(OP):
                             if ii == ns:
                                 zz2d = np.transpose(-np.log(pp_hist2d+1e-10), (0,2,1))/beta
                                 # convert ev to kcal/mol
-                                zz2d *= f_cvt/4.184
+                                zz2d *= f_cvt/kcal2kj
                                 zz2d = zz2d - np.min(zz2d)
                                 np.savetxt(mcmc_2cv_name,zz2d[0])
                     elif proj_mode == "path":
@@ -158,7 +155,7 @@ class MCMCRun(OP):
                         if ii == ns:
                             zz2d = np.transpose(-np.log(pp_hist2d+1e-10), (0,2,1))/beta
                             # convert ev to kcal/mol
-                            zz2d *= f_cvt/4.184
+                            zz2d *= f_cvt/kcal2kj
                             zz2d = zz2d - np.min(zz2d)
                             np.savetxt(mcmc_2cv_name,zz2d[0])
                             

@@ -78,11 +78,12 @@ mcmc_1cv_fig = "mcmc_1cv_{tag}.png"
 mcmc_2cv_fig_separate = "mcmc_2cv_{tag}.png"
 
 # Units
-kb = 8.617333E-5
+kb = 8.617333E-5 # ev
 kbT = (8.617333E-5) * 300
 beta = 1.0 / kbT
-f_cvt = 96.485
+f_cvt = 96.485 # ev to kj/mol
 inverse_f_cvt = 1 / f_cvt
+kcal2kj = 4.184
 
 # precision
 model_devi_precision = "%.6e"

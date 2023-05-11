@@ -13,13 +13,6 @@ from rid.utils import save_txt, set_directory
 from rid.constants import mcmc_1cv_dir_name, mcmc_1cv_name, mcmc_2cv_name,mcmc_1cv_fig, mcmc_2cv_fig, mcmc_2cv_fig_separate
 from matplotlib import pyplot as plt
 import os
-    
-# kinetic enery in eV
-kbT = (8.617343E-5) * 300 
-beta = 1.0 / kbT
-
-# ev to kj/mol
-f_cvt = 96.485
 
 class MCMCPlot(OP):
     """

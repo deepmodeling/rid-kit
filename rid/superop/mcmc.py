@@ -128,7 +128,7 @@ def _mcmc(
             slices=Slices("{{item}}",
                 input_parameter=["task_names"],
                 input_artifact=["models"],
-                output_artifact=["mcmc_cv"]
+                output_artifact=["mcmc_1cv", "mcmc_2cv"]
             ),
             **run_template_config,
         ),
@@ -154,7 +154,7 @@ def _mcmc(
                 slices=Slices(sub_path = True,
                     input_parameter=["task_names"],
                     input_artifact=["models"],
-                    output_artifact=["mcmc_cv"]
+                    output_artifact=["mcmc_1cv", "mcmc_2cv"]
                 ),
                 **run_template_config,
             ),
@@ -183,7 +183,8 @@ def _mcmc(
             "mcmc_config" : mcmc_steps.inputs.parameters["mcmc_config"]
         },
         artifacts={
-            "mcmc_cv": mcmc_run.outputs.artifacts['mcmc_cv']
+            "mcmc_1cv": mcmc_run.outputs.artifacts['mcmc_1cv'],
+            "mcmc_2cv": mcmc_run.outputs.artifacts['mcmc_2cv']
         },
         key = step_keys["mcmc_plot"],
         executor = plot_executor,

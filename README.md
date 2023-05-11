@@ -139,6 +139,7 @@ rid redim -i ./test/data/models -c ./rid/template/rid_mcmc_cv_dih.json -m ./rid/
 ```
 Then you will get the projected free energy surface for ala-dipeptide
 - ![image](docs/pics/mcmc_ala.png)
+- ![image](docs/pics/mcmc_ala_1cv.png)
 
 # Run the Workflow without k8s environment`
 To run the workflow without k8s environment, one can use the `Debug` mode of `Dflow`. In this mode however, one can not monitor the workflow in the `Argo` UI.

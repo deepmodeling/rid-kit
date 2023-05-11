@@ -10,8 +10,9 @@ from dflow.python import (
     BigParameter
 )
 from rid.utils import save_txt, set_directory
-from rid.constants import mcmc_cv_name, mcmc_cv_fig, mcmc_cv_fig_separate
+from rid.constants import mcmc_1cv_dir_name, mcmc_1cv_name, mcmc_2cv_name,mcmc_1cv_fig, mcmc_2cv_fig, mcmc_2cv_fig_separate
 from matplotlib import pyplot as plt
+import os
     
 # kinetic enery in eV
 kbT = (8.617343E-5) * 300 
@@ -29,7 +30,8 @@ class MCMCPlot(OP):
     def get_input_sign(cls):
         return OPIOSign(
             {
-                "mcmc_cv": Artifact(List[Path]),
+                "mcmc_1cv": Artifact(List[Path]),
+                "mcmc_2cv": Artifact(List[Path]),
                 "mcmc_config": BigParameter(Dict)
             }
         )
@@ -67,12 +69,42 @@ class MCMCPlot(OP):
         mcmc_config = op_in["mcmc_config"]
         cv_type = mcmc_config["cv_type"]
         bins = mcmc_config["bins"]
+        cv_dim = mcmc_config["cv_dimension"]
         
         task_path = Path("mcmc_fig")
         task_path.mkdir(exist_ok=True, parents=True)
         with set_directory(task_path):
-            fourdata=[]
-            for file in op_in["mcmc_cv"]:
+            fourdata_1cv = []
+            for dir in op_in["mcmc_1cv"]:
+                all_1cv = []
+                for cv_index in range(cv_dim):
+                    file = dir/mcmc_1cv_name.format(tag = cv_index)
+                    pmf = np.loadtxt(file)
+                    pmf = pmf - np.min(pmf)
+                    proj_iterations = pmf.shape[0]
+                    all_1cv.append(pmf)
+                fourdata_1cv.append(all_1cv)
+            avedata_1cv = np.mean(np.array(fourdata_1cv),axis=0)
+            print("avedata shape", avedata_1cv.shape)
+            # make 1cv plot
+            if not os.path.exists(mcmc_1cv_dir_name):
+                os.makedirs(mcmc_1cv_dir_name)
+            if cv_type == "dih":
+                xedges = np.linspace(0, 2*np.pi, bins)
+            elif cv_type == "dis":
+                xedges = np.linspace(0, 10, bins)
+            for cv_index in range(cv_dim):
+                plt.figure(figsize=(8, 6))
+                for proj_iter in range(proj_iterations):
+                    print("xedges shape", xedges.shape)
+                    plt.plot(xedges,avedata_1cv[cv_index][proj_iter], label = proj_iter)
+                plt.xlabel(r'cv')
+                plt.ylabel(r'free energy (kcal/mol)')
+                plt.legend()
+                plt.savefig(mcmc_1cv_dir_name+"/"+mcmc_1cv_fig.format(tag = cv_index),dpi=600,bbox_inches='tight')
+                
+            fourdata_2cv = []
+            for file in op_in["mcmc_2cv"]:
                 pmf = np.loadtxt(file)
                 pmf = pmf - np.min(pmf)
                 allda=[]
@@ -93,33 +125,34 @@ class MCMCPlot(OP):
                 newarray=np.array(allda)
                 idex=np.lexsort([newarray[:,1], newarray[:,0]])
                 sorted_data = newarray[idex,:]
-                fourdata.append(sorted_data[:,2])
-            avedata=np.mean(np.array(fourdata),axis=0)
+                fourdata_2cv.append(sorted_data[:,2])
+            avedata_2cv = np.mean(np.array(fourdata_2cv),axis=0)    
+            # make 2cv plot
             if cv_type == "dih":
                 xedges = np.linspace(0, 2*np.pi, bins)
                 yedges = np.linspace(0, 2*np.pi, bins)
             elif cv_type == "dis":
                 xedges = np.linspace(0, 10, bins)
                 yedges = np.linspace(0, 10, bins)
-            fig = plt.figure(figsize=(8, 6))
+            plt.figure(figsize=(8, 6))
             cmap = plt.cm.get_cmap("jet_r")
-            CS = plt.contourf(xedges,yedges,avedata.reshape(bins,bins),levels = np.linspace(0,6,61),cmap=cmap,extend="max")
+            CS = plt.contourf(xedges,yedges,avedata_2cv.reshape(bins,bins),levels = np.linspace(0,6,61),cmap=cmap,extend="max")
             cbar = plt.colorbar(CS)
             cbar.ax.tick_params(labelsize=8) 
             cbar.ax.set_title('kcal/mol',fontsize=8)
-            plt.xlabel(r'a')
-            plt.ylabel(r'b')
-            plt.savefig(mcmc_cv_fig,dpi=600,bbox_inches='tight')
-            for iii in range(len(fourdata)):
+            plt.xlabel(r'CV index 1')
+            plt.ylabel(r'CV index 2')
+            plt.savefig(mcmc_2cv_fig,dpi=600,bbox_inches='tight')
+            for iii in range(len(fourdata_2cv)):
                 fig = plt.figure(figsize=(8, 6))
                 cmap = plt.cm.get_cmap("jet_r")
-                CS = plt.contourf(xedges,yedges,fourdata[iii].reshape(bins,bins),levels = np.linspace(0,6,61),cmap=cmap,extend="max")
+                CS = plt.contourf(xedges,yedges,fourdata_2cv[iii].reshape(bins,bins),levels = np.linspace(0,6,61),cmap=cmap,extend="max")
                 cbar = plt.colorbar(CS)
                 cbar.ax.tick_params(labelsize=8) 
                 cbar.ax.set_title('kcal/mol',fontsize=8)
-                plt.xlabel(r'a')
-                plt.ylabel(r'b')
-                plt.savefig(mcmc_cv_fig_separate.format(tag=iii),dpi=600,bbox_inches='tight')
+                plt.xlabel(r'CV index 1')
+                plt.ylabel(r'CV index 2')
+                plt.savefig(mcmc_2cv_fig_separate.format(tag=iii),dpi=600,bbox_inches='tight')
                 
         op_out = OPIO(
             {

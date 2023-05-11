@@ -70,9 +70,12 @@ train_fig = "train_{tag}.png"
 dp_model_devi_fig = "dp_model_devi.png"
 
 # MCMC file name
-mcmc_cv_name = "mcmc_cv.dat"
-mcmc_cv_fig = "mcmc_cv.png"
-mcmc_cv_fig_separate = "mcmc_cv_{tag}.png"
+mcmc_1cv_dir_name = "mcmc_1cv"
+mcmc_2cv_name = "mcmc_2cv.dat"
+mcmc_1cv_name = "mcmc_1cv_{tag}.dat"
+mcmc_2cv_fig = "mcmc_2cv.png"
+mcmc_1cv_fig = "mcmc_1cv_{tag}.png"
+mcmc_2cv_fig_separate = "mcmc_2cv_{tag}.png"
 
 # Units
 kb = 8.617333E-5

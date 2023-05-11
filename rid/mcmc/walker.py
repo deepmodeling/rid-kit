@@ -97,6 +97,7 @@ class Walker(object):
                     self._move_scale, acp_ratio))
         return self._position, self._energy, self._force
 
+# project on all 1d points
 def my_hist1d(pp, xx, delta, fd):
     my_hist = np.zeros((fd, len(xx)))
     for ii in range(pp.shape[0]):   ###trj_num
@@ -105,6 +106,7 @@ def my_hist1d(pp, xx, delta, fd):
     my_hist /= (pp.shape[0] * delta)
     return my_hist
 
+# project on specific 2d point
 def my_hist2d(pp, xx, yy, delta, cv1, cv2):
     my_hist = np.zeros((1, len(xx), len(yy)))
     for ii in range(pp.shape[0]):
@@ -112,6 +114,7 @@ def my_hist2d(pp, xx, yy, delta, cv1, cv2):
     my_hist /= (pp.shape[0] * delta * delta)
     return my_hist
 
+# project on path CV
 def my_hist2d_path(pp, xx, yy, delta, lm, xlist, proj_index):
     my_hist = np.zeros((1, len(xx), len(yy)))
     cv = pp[:,proj_index]

@@ -40,7 +40,9 @@ class InitBlock(Steps):
         label_op: OP,
         data_op: OP,
         train_op: OP,
+        model_devi_op: OP,
         train_config: Dict,
+        model_devi_config: Dict,
         upload_python_package = None,
         retry_times = None
     ):
@@ -63,6 +65,7 @@ class InitBlock(Steps):
             "output_freq": InputParameter(type=float, value=2500),
             "slice_mode": InputParameter(type=str, value="gmx"),
             "label_config": InputParameter(type=Dict),
+            "type_map": InputParameter(type=List, value = []),
             "tail": InputParameter(type=float, value=0.9),
             "train_config": InputParameter(type=Dict)
         }        
@@ -107,7 +110,9 @@ class InitBlock(Steps):
             label_op,
             data_op,
             train_op,
+            model_devi_op,
             train_config,
+            model_devi_config,
             upload_python_package = upload_python_package,
             retry_times = retry_times
         )            
@@ -140,7 +145,9 @@ def _first_run_block(
         label_op: OP,
         data_op: OP,
         train_op: OP,
+        model_devi_op: OP,
         train_config : Dict,
+        model_devi_config: Dict,
         upload_python_package : str = None,
         retry_times: int = None
     ):
@@ -173,6 +180,7 @@ def _first_run_block(
         "Selection",
         template=select_op,
         parameters={
+            "label_config": block_steps.inputs.parameters["label_config"],
             "trust_lvl_1" : block_steps.inputs.parameters["trust_lvl_1"],
             "trust_lvl_2": block_steps.inputs.parameters["trust_lvl_2"],
             "cluster_threshold": block_steps.inputs.parameters["cluster_threshold"],
@@ -184,6 +192,7 @@ def _first_run_block(
             "dt": block_steps.inputs.parameters["dt"],
             "output_freq": block_steps.inputs.parameters["output_freq"],
             "slice_mode": block_steps.inputs.parameters["slice_mode"],
+            "type_map": block_steps.inputs.parameters["type_map"],
             "if_make_threshold": True,
             "task_names" : block_steps.inputs.parameters['walker_tags'],
             "block_tag" : block_steps.inputs.parameters['block_tag'],
@@ -205,7 +214,6 @@ def _first_run_block(
             "label_config": block_steps.inputs.parameters['label_config'],
             "cv_config": block_steps.inputs.parameters['cv_config'],
             "tail": block_steps.inputs.parameters['tail'],
-            "conf_tags" : selection.outputs.parameters['selected_conf_tags'],
             "block_tag" : block_steps.inputs.parameters['block_tag'],
         },
         artifacts={
@@ -216,7 +224,8 @@ def _first_run_block(
             "index_file": block_steps.inputs.artifacts['index_file'],
             "inputfile": block_steps.inputs.artifacts['inputfile'],
             "dp_files": block_steps.inputs.artifacts['dp_files'],
-            "cv_file": block_steps.inputs.artifacts['cv_file']
+            "cv_file": block_steps.inputs.artifacts['cv_file'],
+            "conf_tags" : selection.outputs.artifacts['selected_conf_tags']
         },
         key = '{}-label'.format(block_steps.inputs.parameters['block_tag'])
     )
@@ -262,6 +271,38 @@ def _first_run_block(
         **train_config,
     )
     block_steps.add(train)
+    
+    model_devi_config = deepcopy(model_devi_config)
+    model_devi_template_config = model_devi_config.pop('template_config')
+    model_devi_executor = init_executor(model_devi_config.pop('executor'))
+    deviation = Step(
+        "ModelDeviation",
+        template=PythonOPTemplate(
+            model_devi_op,
+            python_packages = upload_python_package,
+            retry_on_transient_error = retry_times,
+            slices=Slices("{{item}}",
+                input_parameter=["trust_lvl_1","task_name"],
+                input_artifact=["plm_out","selected_indices"],
+                output_artifact=["model_devi","model_devi_png"]),
+            **model_devi_template_config,
+        ),
+        parameters={
+            "trust_lvl_1": block_steps.inputs.parameters["trust_lvl_1"],
+            "block_tag" : block_steps.inputs.parameters['block_tag'],
+            "task_name": block_steps.inputs.parameters['walker_tags'],
+        },
+        artifacts={
+            "models" : train.outputs.artifacts["model"],
+            "plm_out": exploration.outputs.artifacts["plm_out"],
+            "selected_indices": selection.outputs.artifacts["selected_indices"]
+        },
+        executor = model_devi_executor,
+        with_param=argo_range(argo_len(block_steps.inputs.parameters["walker_tags"])),
+        key = '{}-model-devi'.format(block_steps.inputs.parameters['block_tag'])+"-{{item}}",
+        **model_devi_config
+    )
+    block_steps.add(deviation)
 
     block_steps.outputs.artifacts["models"]._from = train.outputs.artifacts["model"]
     block_steps.outputs.artifacts["data"]._from = gen_data.outputs.artifacts["data"]
@@ -288,8 +329,10 @@ class IterBlock(Steps):
         data_op: OP,
         adjust_lvl_op: OP,
         train_op: OP,  
+        model_devi_op: OP,
         adjust_lvl_config: Dict,
         train_config: Dict,
+        model_devi_config: Dict,
         upload_python_package = None,
         retry_times = None
     ):
@@ -315,6 +358,7 @@ class IterBlock(Steps):
             "label_config": InputParameter(type=Dict),
             "tail": InputParameter(type=float, value=0.9),
             "train_config": InputParameter(type=Dict),
+            "type_map": InputParameter(type=List, value=[]),
             "adjust_amplifier": InputParameter(type=float, value=1.5),
             "max_level_multiple": InputParameter(type=float, value=8.0),
         }        
@@ -363,8 +407,10 @@ class IterBlock(Steps):
             data_op,
             adjust_lvl_op,
             train_op,
+            model_devi_op,
             adjust_lvl_config,
             train_config,
+            model_devi_config,
             upload_python_package = upload_python_package,
             retry_times = retry_times
         )            
@@ -398,8 +444,10 @@ def _iter_block(
         data_op: OP,
         adjust_lvl_op: OP,
         train_op: OP,
+        model_devi_op: OP,
         adjust_lvl_config : Dict,
         train_config : Dict,
+        model_devi_config: Dict,
         upload_python_package : str = None,
         retry_times: int = None
     ):
@@ -433,6 +481,7 @@ def _iter_block(
         "Selection",
         template=select_op,
         parameters={
+            "label_config": block_steps.inputs.parameters["label_config"],
             "trust_lvl_1" : block_steps.inputs.parameters["init_trust_lvl_1"],
             "trust_lvl_2": block_steps.inputs.parameters["init_trust_lvl_2"],
             "cluster_threshold": block_steps.inputs.parameters["cluster_threshold"],
@@ -442,6 +491,7 @@ def _iter_block(
             "dt": block_steps.inputs.parameters["dt"],
             "output_freq": block_steps.inputs.parameters["output_freq"],
             "slice_mode": block_steps.inputs.parameters["slice_mode"],
+            "type_map": block_steps.inputs.parameters["type_map"],
             "if_make_threshold": False,
             "task_names" : block_steps.inputs.parameters['walker_tags'],
             "block_tag" : block_steps.inputs.parameters['block_tag'],
@@ -497,7 +547,6 @@ def _iter_block(
             "label_config": block_steps.inputs.parameters['label_config'],
             "cv_config": block_steps.inputs.parameters['cv_config'],
             "tail": block_steps.inputs.parameters['tail'],
-            "conf_tags" : selection.outputs.parameters['selected_conf_tags'],
             "block_tag" : block_steps.inputs.parameters['block_tag'],
         },
         artifacts={
@@ -508,7 +557,8 @@ def _iter_block(
             "at": selection.outputs.artifacts["selected_cv_init"],
             "index_file": block_steps.inputs.artifacts['index_file'],
             "dp_files": block_steps.inputs.artifacts['dp_files'],
-            "cv_file": block_steps.inputs.artifacts['cv_file']
+            "cv_file": block_steps.inputs.artifacts['cv_file'],
+            "conf_tags" : selection.outputs.artifacts['selected_conf_tags']
         },
         key = '{}-label'.format(block_steps.inputs.parameters['block_tag'])
     )
@@ -554,6 +604,38 @@ def _iter_block(
         **train_config,
     )
     block_steps.add(train)
+    
+    model_devi_config = deepcopy(model_devi_config)
+    model_devi_template_config = model_devi_config.pop('template_config')
+    model_devi_executor = init_executor(model_devi_config.pop('executor'))
+    deviation = Step(
+        "ModelDeviation",
+        template=PythonOPTemplate(
+            model_devi_op,
+            python_packages = upload_python_package,
+            retry_on_transient_error = retry_times,
+            slices=Slices("{{item}}",
+                input_parameter=["trust_lvl_1","task_name"],
+                input_artifact=["plm_out","selected_indices"],
+                output_artifact=["model_devi","model_devi_png"]),
+            **model_devi_template_config,
+        ),
+        parameters={
+            "trust_lvl_1": block_steps.inputs.parameters["trust_lvl_1"],
+            "block_tag" : block_steps.inputs.parameters['block_tag'],
+            "task_name": block_steps.inputs.parameters['walker_tags'],
+        },
+        artifacts={
+            "models" : train.outputs.artifacts["model"],
+            "plm_out": exploration.outputs.artifacts["plm_out"],
+            "selected_indices": selection.outputs.artifacts["selected_indices"]
+        },
+        executor = model_devi_executor,
+        with_param=argo_range(argo_len(block_steps.inputs.parameters["walker_tags"])),
+        key = '{}-model-devi'.format(block_steps.inputs.parameters['block_tag'])+"-{{item}}",
+        **model_devi_config
+    )
+    block_steps.add(deviation)
 
     block_steps.outputs.artifacts["models"]._from = train.outputs.artifacts["model"]
     block_steps.outputs.artifacts["data"]._from = gen_data.outputs.artifacts["data"]

@@ -8,6 +8,7 @@
 - [Installation of DeepMD potential](#installation-of-dp)
 - [Configure simulations](#configure-simulations)
 - [Configure machine resources](#configure-machine-resources)
+- [Configure MCMC dimension reduction](#configure-mcmc)
 - [Troubleshooting](#troubleshooting)
 
 # About Rid-kit
@@ -33,41 +34,121 @@ export BOHRIUM_PROJECT_ID="<bohrium-project-id>"
 
 ## Install Rid-kit
 Install the latest rid-kit
-```
+
+```bash
 git clone git@github.com:PKUfjh/rid-kit.git
 cd rid-kit
 git checkout dflow
 pip install setuptools_scm
 pip install .
 ```
+
 ## Run an example
 Change to the rid-kit directory
-```
+
+```bash
 cd rid-kit
 ```
+
 Run a example of Ala-dipeptide using dihedral as CVs (change to your own Bohrium account information)
-```
+
+```bash
 rid submit -i ./tests/data/000 -c ./rid/template/rid_gmx_dih.json -m ./rid/template/machine_bohrium_k8s.json
 ```
+
 You can also run the example on a Slurm machine (But you need to configure a conda enviroment on the slurm, see below)
-```
+
+```bash
 rid submit -i ./tests/data/000 -c ./rid/template/rid_gmx_dih.json -m ./rid/template/machine_slurm_k8s.json
 ```
+
 You can also run the example using distance as CVs (This will use constrained md as the mean force calculator)
-```
+
+```bash
 rid submit -i ./tests/data/000 -c ./rid/template/rid_gmx_dis.json -m ./rid/template/machine_bohrium_k8s.json
 ```
+
+You can specify the workflow name by providing WORKFLOW_ID after "-d", for example:
+
+```bash
+rid submit -i ./tests/data/000 -c ./rid/template/rid_gmx_dih.json -m ./rid/template/machine_bohrium_k8s.json -d ala-dipeptide-1
+```
+
+**Note that the defined workflow-id should only contain lower case alphanumeric character, and specifal character "-".**
 
 Note that if you want to use constrained MD as the mean force calculator, apart from setting `method` to be `constrained` in the `label_config`, you should add `[ constraints ]` line corresponding to the `[ moleculartype ]` in your input `topology` file yourself, since gromacs specifies constraints information for each `[ moleculartype ]`.
 
 Also note that, since gromacs only supports constrained MD for `distance CV`, the constrained MD simulation in rid-kit only supports `distance CV` at this moment.
 
-# Run the Workflow without k8s environment
+## Continue from an old workflow
+
+Using `resubmit` to continue from an old workflow
+
+```bash
+# suppose the original workflow id is OLD_ID
+rid resubmit -i ./tests/data/000 -c ./rid/template/rid_gmx_dis.json -m ./rid/template/machine_bohrium_k8s.json OLD_ID -d NEW_ID 
+```
+
+If you want to resubmit from a particular `iteration` and `step`:
+
+```bash
+rid resubmit -i your_dir -c path_to_rid.json -m path_to_machine.json OLD_ID -t ITERATION-ID -p STEP-KEY -d NEW_ID
+```
+
+ The `ITERATION-ID` is just `n`th iteration the workflow has been executed. The `STEP-KEY` in rid includes the following steps: `prep-exploration`, `run-exploration`, `prep-select`, `run-select`, `prep-label`, `run-label`, `collect`, `merge`, `train`, `model-devi`.
+
+## Download files from the workflow
+
+```bash
+rid download WORKFLOW_ID -p STEP-KEY -f FILE_NAME -a ITERATION_START -e ITERATION_END -o OUTPUT_DIR
+```
+
+typically we want the trajectories information from each exploration step, suppose we run a workflow for 20 iterations.
+
+```bash
+rid download WORKFLOW_ID -p run-exploration -f trajectory -a 1 -e 20 -o my_protein_out
+```
+
+`ITERATION_START`(default 1) specifies from which iteration to start download, `ITERATION_END`(default 100) specifies to which iteration to end download. `OUTPUT_DIR`(default "./") is the output directories of the download.
+
+The `STEP-KEY` in rid includes the following steps: `prep-exploration`, `run-exploration`, `prep-select`, `run-select`, `prep-label`, `run-label`, `collect`, `merge`, `train`, `model-devi`.
+
+The `FILE_NAME` in `prep-exploration` includes `task_path`.
+
+The `FILE_NAME` in `run-exploration` includes `trajectory`, `conf_out`,`plm_out`,`md_log`,`bias_fig`, `model_devi_fig`, `dp_model_devi_fig`, `dp_model_devi`, `dp_selected_indices`, `dp_selected_confs`, `projected_fig`.
+
+The `FILE_NAME` in `prep-select` includes `cluster_fig`, `cluster_selection_index`, `cluster_selection_data`.
+
+The `FILE_NAME` in `run-select` includes `selected_confs`, `selected_cv_init`, `model_devi`, `selected_indices`,`selected_conf_tags`.
+
+The `FILE_NAME` in `prep-label` includes `task_path`.
+
+The `FILE_NAME` in `run-label` includes `plm_out`, `cv_forces`, `mf_info`, `mf_fig`,`md_log`.
+
+The `FILE_NAME` in `collect` includes `data_new`.
+
+The `FILE_NAME` in `merge` includes `data_raw`.
+
+The `FILE_NAME` in `train` includes `model`, `train_log`, `train_fig`.
+
+The `FILE_NAME` in `model_devi` includes `model_devi`, `model_devi_png`.
+
+## Reduce the dimension of free energy model
+After the Rid-kit Run, the workflow will generate several numbers of free energy models (.pb). The Rid-kit currently support MCMC to reduce the dimension of the free energy model, for example:
+```bash
+rid redim -i ./test/data/models -c ./rid/template/rid_mcmc_cv_dih.json -m ./rid/template/machine_bohrium_k8s_mcmc.json
+```
+Then you will get the projected free energy surface for ala-dipeptide
+- ![image](docs/pics/mcmc_ala_1cv.png)
+- ![image](docs/pics/mcmc_ala_2cv.png)
+
+# Run the Workflow without k8s environment`
 To run the workflow without k8s environment, one can use the `Debug` mode of `Dflow`. In this mode however, one can not monitor the workflow in the `Argo` UI.
 ## Run an example
-If one wants to run the workflow on the `Slurm` machine locally, type
-```
-DFLOW_DEBUG=1 rid submit -i /tests/data/000 -c /rid/template/rid_gmx_dih.json -m /rid/template/machine_slurm_local.json
+If one wants to run the workflow on the `Slurm` machine locally, change to the rid-kit directory and type (change to your slurm configuration)
+
+```bash
+DFLOW_DEBUG=1 rid submit -i ./tests/data/000 -c ./rid/template/rid_gmx_dih.json -m ./rid/template/machine_slurm_local.json -d ala-dipeptide-1
 ```
 
 # Main procedure of RiD
@@ -92,9 +173,9 @@ A fully connected NN will be trained via sampling data. This network will genera
 
 A more detailed description of RiD is published now, please see:
 
->  [1]  Zhang, L., Wang, H., E, W.. Reinforced dynamics for enhanced sampling in large atomic and molecular systems[J]. The Journal of chemical physics, 2018, 148(12): 124113.
+> [1]  Zhang, L., Wang, H., E, W.. Reinforced dynamics for enhanced sampling in large atomic and molecular systems[J]. The Journal of chemical physics, 2018, 148(12): 124113.
 >  
->  [2]  Wang, D., Wang, Y., Chang, J., Zhang, L., & Wang, H. (2022). Efficient sampling of high-dimensional free energy landscapes using adaptive reinforced dynamics. Nature Computational Science, 2(1), 20-29.
+> [2]  Wang, D., Wang, Y., Chang, J., Zhang, L., & Wang, H. (2022). Efficient sampling of high-dimensional free energy landscapes using adaptive reinforced dynamics. Nature Computational Science, 2(1), 20-29.
 
 # Use Rid-kit
 
@@ -116,6 +197,9 @@ Installation of the DeepMD potential support can be found in
 
 # Configure machine resources
 - [configure machines](docs/source/rid_machine.md)
+
+# Configure mcmc 
+- [configure mcmc dimension reduction](docs/source/mcmc_configuration.md)
 
 # Workflow Synopsis
 

@@ -51,6 +51,7 @@ class ReinforcedDynamicsLoop(Steps):
             "label_config": InputParameter(type=Dict),
             "tail": InputParameter(type=float, value=0.9),
             "train_config": InputParameter(type=Dict),
+            "type_map": InputParameter(type=List, value = []),
             "adjust_amplifier": InputParameter(type=float, value=1.5),
             "max_level_multiple": InputParameter(type=float, value=8.0),
         }
@@ -171,6 +172,7 @@ def _loop (
             "dt": steps.inputs.parameters["dt"],
             "output_freq": steps.inputs.parameters["output_freq"],
             "slice_mode": steps.inputs.parameters["slice_mode"],
+            "type_map": steps.inputs.parameters["type_map"],
             "label_config": steps.inputs.parameters["label_config"],
             "train_config": steps.inputs.parameters["train_config"]
         },
@@ -212,6 +214,7 @@ def _loop (
             "dt": steps.inputs.parameters["dt"],
             "output_freq": steps.inputs.parameters["output_freq"],
             "slice_mode": steps.inputs.parameters["slice_mode"],
+            "type_map": steps.inputs.parameters["type_map"],
             "label_config": steps.inputs.parameters["label_config"],
             "train_config": steps.inputs.parameters["train_config"]
         },
@@ -411,6 +414,7 @@ def _rid(
             "dt": prep_rid.outputs.parameters["dt"],
             "output_freq": prep_rid.outputs.parameters["output_freq"],
             "slice_mode": prep_rid.outputs.parameters["slice_mode"],
+            "type_map": prep_rid.outputs.parameters["type_map"],
             "label_config": prep_rid.outputs.parameters["label_config"],
             "train_config": prep_rid.outputs.parameters["train_config"]
         },
@@ -457,6 +461,7 @@ def _rid(
             "dt": prep_rid.outputs.parameters["dt"],
             "output_freq": prep_rid.outputs.parameters["output_freq"],
             "slice_mode": prep_rid.outputs.parameters["slice_mode"],
+            "type_map": prep_rid.outputs.parameters["type_map"],
             "label_config": prep_rid.outputs.parameters["label_config"],
             "train_config": prep_rid.outputs.parameters["train_config"]
         },

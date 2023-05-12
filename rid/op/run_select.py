@@ -6,13 +6,16 @@ from dflow.python import (
     OPIO,
     OPIOSign,
     Artifact,
-    Parameter
+    Parameter,
+    BigParameter
 )
 from rid.utils import save_txt, set_directory
 from rid.constants import sel_gro_name, sel_lmp_name, cv_init_label, model_devi_name, model_devi_precision, sel_ndx_name
 from rid.select.conf_select import select_from_devi
-from rid.common.mol import slice_xtc, slice_dump
+from rid.common.mol import slice_xtc
+from rid.common.mol_dpdata import slice_dump
 from rid.select.model_devi import make_std
+import json
 
 
 class RunSelect(OP):
@@ -39,6 +42,8 @@ class RunSelect(OP):
                 "trust_lvl_2": float,
                 "xtc_traj": Artifact(Path),
                 "topology": Artifact(Path),
+                "label_config": BigParameter(Dict),
+                "type_map": Parameter(Optional[List], default=[]),
                 "dt": Parameter(Optional[float], default=None),
                 "output_freq": Parameter(Optional[float], default=None),
                 "slice_mode": Parameter(str, default="gmx")
@@ -49,11 +54,11 @@ class RunSelect(OP):
     def get_output_sign(cls):
         return OPIOSign(
             {
-                "selected_confs": Artifact(List[Path]),
-                "selected_cv_init": Artifact(List[Path]),
-                "model_devi": Artifact(Path, optional=True),
-                "selected_indices": Artifact(Path),
-                "selected_conf_tags": Dict
+                "selected_confs": Artifact(List[Path], archive = None),
+                "selected_cv_init": Artifact(List[Path], archive = None),
+                "model_devi": Artifact(Path, optional=True, archive = None),
+                "selected_indices": Artifact(Path, archive = None),
+                "selected_conf_tags": Artifact(Path, archive= None)
             }
         )
 
@@ -107,7 +112,7 @@ class RunSelect(OP):
                 save_txt("cls_"+model_devi_name, stds, fmt=model_devi_precision)
                 _selected_idx = select_from_devi(stds, op_in["trust_lvl_1"])
             sel_idx = cls_sel_idx[_selected_idx]
-            save_txt(sel_ndx_name, sel_idx, fmt="%d")
+            np.save(sel_ndx_name, sel_idx)
             sel_data = cls_sel_data[_selected_idx]
             if op_in["slice_mode"] == "gmx":
                 assert op_in["dt"] is not None, "Please provide time step to slice trajectory."
@@ -119,7 +124,12 @@ class RunSelect(OP):
                 slice_xtc(xtc=op_in["xtc_traj"], top=op_in["topology"],
                         walker_idx = walker_idx, selected_idx=sel_idx, output=sel_gro_name, style="mdtraj")
             elif op_in["slice_mode"] == "dpdata":
-                slice_dump(dump=op_in["xtc_traj"],walker_idx = walker_idx,selected_idx=sel_idx, output=sel_lmp_name, style="dpdata")
+                if op_in["label_config"]["type"] == "gmx":
+                    slice_dump(dump=op_in["xtc_traj"],walker_idx = walker_idx,selected_idx=sel_idx, output=sel_gro_name, type_map = op_in["type_map"], style="dpdata")
+                elif op_in["label_config"]["type"] == "lmp":
+                    slice_dump(dump=op_in["xtc_traj"],walker_idx = walker_idx,selected_idx=sel_idx, output=sel_lmp_name, type_map = op_in["type_map"],style="dpdata")
+                else:
+                    raise ValueError("Invalid labeling type, only support gmx and lmp")
             else:
                 raise RuntimeError("Unknown Style for Slicing Trajectory.")
             conf_list = []
@@ -127,13 +137,19 @@ class RunSelect(OP):
             conf_tags = {}
             for ii, sel in enumerate(sel_idx):
                 if op_in["slice_mode"] == "dpdata":
-                    conf_list.append(task_path.joinpath(sel_lmp_name.format(walker=walker_idx,idx=sel)))
-                    conf_tags[sel_lmp_name.format(walker = walker_idx,idx=sel)] = f"{op_in['task_name']}_{sel}"
+                    if op_in["label_config"]["type"] == "gmx":
+                        conf_list.append(task_path.joinpath(sel_gro_name.format(walker=walker_idx,idx=sel)))
+                        conf_tags[sel_gro_name.format(walker = walker_idx,idx=sel)] = f"{op_in['task_name']}_{sel}"
+                    elif op_in["label_config"]["type"] == "lmp":
+                        conf_list.append(task_path.joinpath(sel_lmp_name.format(walker=walker_idx,idx=sel)))
+                        conf_tags[sel_lmp_name.format(walker = walker_idx,idx=sel)] = f"{op_in['task_name']}_{sel}"
                 elif op_in["slice_mode"] == "gmx" or op_in["slice_mode"] == "mdtraj" :
                     conf_list.append(task_path.joinpath(sel_gro_name.format(walker=walker_idx,idx=sel)))
                     conf_tags[sel_gro_name.format(walker = walker_idx,idx=sel)] = f"{op_in['task_name']}_{sel}"
                 save_txt(cv_init_label.format(walker=walker_idx,idx=sel), sel_data[ii])
                 cv_init_list.append(task_path.joinpath(cv_init_label.format(walker=walker_idx,idx=sel)))
+            with open("conf.json", "w") as f:
+                json.dump(conf_tags,f)
             
         op_out = OPIO(
             {
@@ -141,7 +157,7 @@ class RunSelect(OP):
                "selected_cv_init": cv_init_list,
                "model_devi": task_path.joinpath("cls_"+model_devi_name),
                "selected_indices": task_path.joinpath(sel_ndx_name),
-               "selected_conf_tags": conf_tags
+               "selected_conf_tags": task_path.joinpath("conf.json")
             }
         )
         return op_out

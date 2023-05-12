@@ -25,6 +25,7 @@ Contents
    Installation with DP potential <install_dp>
    Configure simulations <rid_configuration>
    Configure machine resources <rid_machine>
+   Configure mcmc dimension reduction <mcmc_configuration>
    Rid API <api/api>
    Trouble Shooting <troubleshooting/index> 
 

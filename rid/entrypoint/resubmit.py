@@ -24,6 +24,7 @@ def resubmit_rid(
         topology: Optional[str],
         rid_config: str,
         machine_config: str,
+        workflow_id_defined: Optional[str] = None,
         iteration: Optional[str] = None,
         pod: Optional[str] = None,
         models: Optional[Union[str, List[str]]] = None,
@@ -50,6 +51,7 @@ def resubmit_rid(
         run_select_config = normalized_resources[tasks["run_select_config"]],
         prep_data_config = normalized_resources[tasks["prep_data_config"]],
         run_train_config = normalized_resources[tasks["run_train_config"]],
+        model_devi_config = normalized_resources[tasks["model_devi_config"]],
         workflow_steps_config = normalized_resources[tasks["workflow_steps_config"]],
         retry_times=None
     )
@@ -197,6 +199,6 @@ def resubmit_rid(
                 
                 if restart_flag == 1:
                     succeeded_steps.append(step)
-    wf = Workflow("reinforced-dynamics-continue", pod_gc_strategy="OnPodSuccess", parallelism=50)
+    wf = Workflow("reinforced-dynamics-continue", pod_gc_strategy="OnPodSuccess", parallelism=50, id = workflow_id_defined)
     wf.add(rid_steps)
     wf.submit(reuse_step=succeeded_steps)

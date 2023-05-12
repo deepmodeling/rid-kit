@@ -13,16 +13,6 @@ from rid.op.prep_select import PrepSelect
 from rid.utils import load_txt, save_txt, set_directory
 from pathlib import Path
 import shutil
-from rid.constants import (
-        explore_task_pattern, 
-        gmx_conf_name,
-        gmx_top_name,
-        gmx_mdp_name, 
-        plumed_input_name,
-        plumed_output_name,
-        sel_gro_name,
-        init_conf_name
-    )
 
 class Test_PrepSelect(unittest.TestCase):
     def setUp(self):

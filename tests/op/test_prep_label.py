@@ -14,14 +14,7 @@ from rid.utils import load_txt, save_txt, set_directory
 from pathlib import Path
 import shutil
 from rid.constants import (
-        explore_task_pattern, 
-        gmx_conf_name,
-        gmx_top_name,
-        gmx_mdp_name, 
-        plumed_input_name,
-        plumed_output_name,
-        sel_gro_name,
-        init_conf_name
+        plumed_input_name
     )
 class Test_CheckLabelInputs(unittest.TestCase):
     def setUp(self) -> None:
@@ -31,11 +24,12 @@ class Test_CheckLabelInputs(unittest.TestCase):
         op = CheckLabelInputs()
         data = Path(self.datapath)
         conf_path = data/"conf.gro"
+        conf_tags_path = data/"conf.json"
         
         op_in1 = OPIO(
             {
                 "confs": [conf_path],
-                "conf_tags": [{"conf.gro": "000"}]
+                "conf_tags": [conf_tags_path]
             }
         )
         op_in2 = OPIO(

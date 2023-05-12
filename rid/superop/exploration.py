@@ -128,7 +128,11 @@ def _exploration(
     run_template_config = run_config.pop('template_config')
     prep_executor = init_executor(prep_config.pop('executor'))
     run_executor = init_executor(run_config.pop('executor'))
-    prep_exploration = Step(
+    prep_merge = False
+    if prep_executor is not None:
+        prep_merge = prep_executor.merge_sliced_step
+    if prep_merge:
+        prep_exploration = Step(
         'prep-exploration',
         template=PythonOPTemplate(
             prep_exploration_op,
@@ -159,11 +163,48 @@ def _exploration(
         key = step_keys["prep_exploration"]+"-{{item}}",
         with_param=argo_range(argo_len(exploration_steps.inputs.parameters['task_names'])),
         executor = prep_executor,
-        **prep_config,
+        **prep_config
+    )
+    else:
+        prep_exploration = Step(
+            'prep-exploration',
+            template=PythonOPTemplate(
+                prep_exploration_op,
+                python_packages = upload_python_package,
+                retry_on_transient_error = retry_times,
+                slices=Slices(sub_path = True,
+                    input_parameter=["task_name", "trust_lvl_1", "trust_lvl_2"],
+                    input_artifact=["conf"],
+                    output_artifact=["task_path"],
+                    output_parameter=["cv_dim"]
+                ),
+                **prep_template_config,
+            ),
+            parameters={
+                "trust_lvl_1" : exploration_steps.inputs.parameters['trust_lvl_1'],
+                "trust_lvl_2": exploration_steps.inputs.parameters['trust_lvl_2'],
+                "exploration_config" : exploration_steps.inputs.parameters['exploration_config'],
+                "cv_config" : exploration_steps.inputs.parameters['cv_config'],
+                "task_name": exploration_steps.inputs.parameters['task_names'],
+                "block_tag": exploration_steps.inputs.parameters["block_tag"]
+            },
+            artifacts={
+                "models" : exploration_steps.inputs.artifacts['models'],
+                "topology" :exploration_steps.inputs.artifacts['topology'],
+                "conf" : exploration_steps.inputs.artifacts['confs'],
+                "cv_file": exploration_steps.inputs.artifacts['cv_file']
+            },
+            key = step_keys["prep_exploration"]+"-{{item.order}}",
+            executor = prep_executor,
+            **prep_config
     )
     exploration_steps.add(prep_exploration)
 
-    run_exploration = Step(
+    run_merge = False
+    if run_executor is not None:
+        run_merge = run_executor.merge_sliced_step
+    if run_merge:
+        run_exploration = Step(
         'run-exploration',
         template=PythonOPTemplate(
             run_exploration_op,
@@ -171,7 +212,7 @@ def _exploration(
             retry_on_transient_error = retry_times,
             slices=Slices("{{item}}",
                 input_artifact=["task_path"],
-                output_artifact=["plm_out", "bias_fig","model_devi_fig", "trajectory", "md_log", "conf_out"]
+                output_artifact=["plm_out", "bias_fig","model_devi_fig", "dp_model_devi_fig", "dp_model_devi", "dp_selected_indices","dp_selected_confs","projected_fig","trajectory", "md_log", "conf_out"]
             ),
             **run_template_config,
         ),
@@ -190,8 +231,37 @@ def _exploration(
         key = step_keys["run_exploration"]+"-{{item}}",
         executor = run_executor,
         with_param=argo_range(argo_len(exploration_steps.inputs.parameters['task_names'])),
-        **run_config,
+        **run_config
     )
+    else:
+        run_exploration = Step(
+            'run-exploration',
+            template=PythonOPTemplate(
+                run_exploration_op,
+                python_packages = upload_python_package,
+                retry_on_transient_error = retry_times,
+                slices=Slices(sub_path = True,
+                    input_artifact=["task_path"],
+                    output_artifact=["plm_out", "bias_fig","model_devi_fig","dp_model_devi_fig", "dp_model_devi", "dp_selected_indices","dp_selected_confs","projected_fig","trajectory", "md_log", "conf_out"]
+                ),
+                **run_template_config,
+            ),
+            parameters={
+                "exploration_config" : exploration_steps.inputs.parameters["exploration_config"]
+            },
+            artifacts={
+                "task_path" : prep_exploration.outputs.artifacts["task_path"],
+                "forcefield": exploration_steps.inputs.artifacts['forcefield'],
+                "models" : exploration_steps.inputs.artifacts['models'],
+                "index_file": exploration_steps.inputs.artifacts['index_file'],
+                "dp_files": exploration_steps.inputs.artifacts['dp_files'],
+                "cv_file": exploration_steps.inputs.artifacts['cv_file'],
+                "inputfile": exploration_steps.inputs.artifacts['inputfile']
+            },
+            key = step_keys["run_exploration"]+"-{{item.order}}",
+            executor = run_executor,
+            **run_config,
+        )
     exploration_steps.add(run_exploration)
 
     exploration_steps.outputs.parameters["cv_dim"].value_from_parameter = prep_exploration.outputs.parameters["cv_dim"]

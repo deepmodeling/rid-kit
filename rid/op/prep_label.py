@@ -3,7 +3,8 @@ from dflow.python import (
     OPIO,
     OPIOSign,
     Artifact,
-    Parameter
+    Parameter,
+    BigParameter
 )
 
 import json
@@ -29,7 +30,7 @@ class CheckLabelInputs(OP):
         return OPIOSign(
             {
                 "confs": Artifact(List[Path], optional=True),
-                "conf_tags": Parameter(List, default=[])
+                "conf_tags": Artifact(List[Path], optional=True)
             }
         )
 
@@ -38,7 +39,7 @@ class CheckLabelInputs(OP):
         return OPIOSign(
             {
                 "if_continue": int,
-                "conf_tags": List
+                "conf_tags": BigParameter(List)
             }
         )
 
@@ -69,10 +70,9 @@ class CheckLabelInputs(OP):
 
             tags = {}
             for tag in op_in["conf_tags"]:
-                if isinstance(tag, Dict):
-                    tags.update(tag)
-                elif isinstance(tag, str):
-                    tags.update(json.loads(tag))
+                if isinstance(tag,Path):
+                    with open(tag,"r") as f:
+                        tags.update(json.load(f))
                 else:
                     raise RuntimeError("Unkown Error.")
             
@@ -104,9 +104,9 @@ class PrepLabel(OP):
                 "topology": Artifact(Path, optional=True),
                 "conf": Artifact(Path),
                 "cv_file": Artifact(List[Path], optional=True),
-                "label_config": Dict,
-                "cv_config": Dict,
-                "task_name": str,
+                "label_config": BigParameter(Dict),
+                "cv_config": BigParameter(Dict),
+                "task_name": BigParameter(str),
                 "at": Artifact(Path, optional=True)
             }
         )
@@ -115,7 +115,7 @@ class PrepLabel(OP):
     def get_output_sign(cls):
         return OPIOSign(
             {
-                "task_path": Artifact(Path),
+                "task_path": Artifact(Path, archive = None),
             }
         )
 

@@ -338,6 +338,9 @@ def parse_submit(args):
 def log_ui():
     if os.getenv("DFLOW_HOST") is not None:
         logger.info('The task is displayed on %s.'%os.getenv("DFLOW_HOST"))
+    else:
+        logger.info('The task is displayed on "https://127.0.0.1:2746".')
+        logger.info('Artifacts (Files) are listed on "https://127.0.0.1:9001".')
 
 
 def main():

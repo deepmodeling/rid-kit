@@ -78,7 +78,8 @@
         "rcoulomb-switch": 0,
         "nstenergy": 1000,
         "nt": 12,
-        "max_warning": 3
+        "max_warning": 3,
+        "std_threshold": 5.0
     },
 
     "Train": {

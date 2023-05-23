@@ -68,6 +68,7 @@ model_devi_fig = "model_devi.png"
 cluster_fig = "cluster.png"
 train_fig = "train_{tag}.png"
 dp_model_devi_fig = "dp_model_devi.png"
+mf_std_fig = "mf_std.png"
 
 # MCMC file name
 mcmc_1cv_dir_name = "mcmc_1cv"

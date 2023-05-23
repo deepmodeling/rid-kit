@@ -66,7 +66,8 @@
         "output_mode": "both",
         "ntmpi": 1,
         "nt": 8,
-        "max_warning": 2
+        "max_warning": 2,
+        "std_threshold": 5.0
     },
 
     "Train": {

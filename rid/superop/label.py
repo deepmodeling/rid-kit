@@ -30,6 +30,7 @@ class Label(Steps):
         check_input_op: OP,
         prep_op: OP,
         run_op: OP,
+        stats_op: OP,
         prep_config: Dict,
         run_config: Dict,
         upload_python_package = None,
@@ -40,6 +41,7 @@ class Label(Steps):
             "label_config": InputParameter(type=Dict),
             "cv_config": InputParameter(type=Dict),
             "tail": InputParameter(type=float, value=0.9),
+            "std_threshold": InputParameter(type=float, value=5.0),
             "block_tag" : InputParameter(type=str, value="")
         }        
         self._input_artifacts = {
@@ -77,6 +79,7 @@ class Label(Steps):
             "check_label_inputs": "{}-check-label-inputs".format(self.inputs.parameters["block_tag"]),
             "prep_label": "{}-prep-label".format(self.inputs.parameters["block_tag"]),
             "run_label": "{}-run-label".format(self.inputs.parameters["block_tag"]),
+            "label_stats": "{}-label-stats".format(self.inputs.parameters["block_tag"])
         }
 
         self = _label(
@@ -85,6 +88,7 @@ class Label(Steps):
             check_input_op,
             prep_op,
             run_op,
+            stats_op,
             prep_config = prep_config,
             run_config = run_config,
             upload_python_package = upload_python_package,
@@ -118,6 +122,7 @@ def _label(
         check_label_input_op : OP,
         prep_label_op : OP,
         run_label_op : OP,
+        label_stats_op: OP,
         prep_config : Dict,
         run_config : Dict,
         upload_python_package : str = None,
@@ -231,7 +236,7 @@ def _label(
             slices=Slices("{{item}}",
                 input_parameter=["task_name"],
                 input_artifact=["task_path","at"],
-                output_artifact=["plm_out","cv_forces","mf_info","mf_fig","md_log"]),
+                output_artifact=["plm_out","cv_forces","mf_info","mf_fig","md_log","trajectory"]),
             **run_template_config,
         ),
         parameters={
@@ -267,7 +272,7 @@ def _label(
                 pool_size=1,
                 input_parameter=["task_name"],
                 input_artifact=["task_path","at"],
-                output_artifact=["plm_out","cv_forces","mf_info","mf_fig","md_log"]),
+                output_artifact=["plm_out","cv_forces","mf_info","mf_fig","md_log", "trajectory"]),
             **run_template_config,
         ),
         parameters={
@@ -292,8 +297,29 @@ def _label(
         **run_config
     )
     label_steps.add(run_label)
+    
+    label_outputs_stats = Step(
+        'label-outputs-stats',
+        template=PythonOPTemplate(
+            label_stats_op,
+            python_packages = upload_python_package,
+            retry_on_transient_error = retry_times,
+            **prep_template_config,
+        ),
+        parameters={
+            "std_threshold": label_steps.inputs.parameters["std_threshold"]
+        },
+        artifacts={
+            "cv_forces": run_label.outputs.artifacts["cv_forces"],
+            "mf_info": run_label.outputs.artifacts["mf_info"]
+        },
+        key = step_keys["label_stats"],
+        executor = prep_executor,
+        **prep_config,
+    )
+    label_steps.add(label_outputs_stats)
 
-    label_steps.outputs.artifacts["cv_forces"]._from = run_label.outputs.artifacts["cv_forces"]
+    label_steps.outputs.artifacts["cv_forces"]._from = label_outputs_stats.outputs.artifacts["cv_forces"]
     label_steps.outputs.artifacts["md_log"]._from = run_label.outputs.artifacts["md_log"]
     
     return label_steps

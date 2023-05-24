@@ -75,8 +75,31 @@ class MCMCPlot(OP):
                     file = dir/mcmc_1cv_name.format(tag = cv_index)
                     pmf = np.loadtxt(file)
                     pmf = pmf - np.min(pmf)
+                    allda=[]
                     proj_iterations = pmf.shape[0]
-                    all_1cv.append(pmf)
+                    if cv_type == "dih":
+                        xedges = np.linspace(0, 2*np.pi, bins)
+                        for i in range(bins):
+                            temp = []
+                            # this is to change to dihedral dimension to (-pi,pi) which corresponds to the gmx output
+                            if xedges[i]>=np.pi:
+                                temp.append(xedges[i] - np.pi*2)
+                            else:
+                                temp.append(xedges[i] + np.pi*2/(bins-1))
+                            if i == (bins - 1):
+                                temp.append(pmf[:,0])
+                            else:
+                                temp.append(pmf[:,i])
+                            temp = np.array(temp)
+                            allda.append(temp)
+                    newarray=np.array(allda)
+                    idex=np.argsort(newarray[:,0])
+                    sorted_data = newarray[idex,:]
+                    print("sorted data shape",sorted_data.shape)
+                    sorted_data = np.stack(sorted_data[:,1])
+                    all_1cv.append(sorted_data)
+                all_1cv = np.array(all_1cv)
+                print("all_1cv shape", all_1cv.shape)
                 fourdata_1cv.append(all_1cv)
             avedata_1cv = np.mean(np.array(fourdata_1cv),axis=0)
             print("avedata shape", avedata_1cv.shape)
@@ -91,7 +114,7 @@ class MCMCPlot(OP):
                 plt.figure(figsize=(8, 6))
                 for proj_iter in range(proj_iterations):
                     print("xedges shape", xedges.shape)
-                    plt.plot(xedges,avedata_1cv[cv_index][proj_iter], label = proj_iter)
+                    plt.plot(xedges,avedata_1cv[cv_index][:,proj_iter], label = proj_iter)
                 plt.xlabel(r'cv')
                 plt.ylabel(r'free energy (kcal/mol)')
                 plt.legend()

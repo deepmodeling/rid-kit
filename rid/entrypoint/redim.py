@@ -24,6 +24,7 @@ def redim_rid(
         rid_config: str,
         machine_config: str,
         models: Optional[Union[str, List[str]]] = None,
+        plm_out: Optional[Union[str, List[str]]] = None,
         workflow_id_defined: Optional[str] = None
     ):
     with open(machine_config, "r") as mcg:
@@ -62,6 +63,13 @@ def redim_rid(
         models_artifact = None
     else:
         models_artifact = upload_artifact([Path(p) for p in model_list], archive=None)
+        
+    plm_artifact =  None
+    if len(plm_out) != 0:
+        if isinstance(plm_out, str):
+            plm_artifact = upload_artifact(Path(plm_out), archive=None)
+        elif isinstance(plm_out, list):
+            plm_artifact = upload_artifact([Path(p) for p in plm_out], archive=None)
     
     task_names = []
     for index in range(len(model_list)):
@@ -70,7 +78,8 @@ def redim_rid(
     rid_steps = Step("rid-mcmc",
             mcmc_op,
             artifacts={
-                "models": models_artifact
+                "models": models_artifact,
+                "plm_out": plm_artifact
             },
             parameters={
                 "mcmc_config": mcmc_config,

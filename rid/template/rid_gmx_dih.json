@@ -1,7 +1,7 @@
 {
     "name": "test",
-    "numb_walkers": 2,
-    "numb_iters": 2,
+    "numb_walkers": 4,
+    "numb_iters": 5,
     "trust_lvl_1": 2,
     "trust_lvl_2": 3,
     "init_models": [],
@@ -15,7 +15,7 @@
     },
 
     "ExploreMDConfig": {
-        "nsteps": 50000,
+        "nsteps": 500000,
         "type": "gmx",
         "temperature": 300,
         "output_freq": 500,
@@ -67,7 +67,7 @@
         "nt": 8,
         "max_warning": 2,
         "kappas": [ 500, 500 ],
-        "std_threshold": 1.0
+        "std_threshold": 1.5
     },
 
     "Train": {

@@ -310,6 +310,7 @@ def parse_submit(args):
     top_file = None
     forcefield = None
     index_file = None
+    plm_files = []
     dp_files = []
     models = []
     data_file = None
@@ -329,10 +330,12 @@ def parse_submit(args):
             index_file = file
         elif os.path.basename(file).endswith("json") or os.path.basename(file).endswith("raw"):
             dp_files.append(file)
+        elif os.path.basename(file).endswith("out"):
+            plm_files.append(file)
         else:
             otherfiles.append(file)
         
-    return confs, top_file, models, forcefield, index_file, data_file, dp_files, otherfiles
+    return confs, top_file, models, forcefield, index_file, data_file, dp_files, plm_files, otherfiles
 
 
 def log_ui():
@@ -347,7 +350,7 @@ def main():
     args = parse_args()
     if args.command == "submit":
         logger.info("Preparing RiD ...")
-        confs, top_file, models, forcefield, index_file, data_file, dp_files, otherfiles = parse_submit(args)
+        confs, top_file, models, forcefield, index_file, data_file, dp_files,plm_files, otherfiles = parse_submit(args)
         submit_rid(
             confs = confs,
             topology = top_file,
@@ -364,7 +367,7 @@ def main():
         log_ui()
     elif args.command == "resubmit":
         logger.info("Preparing RiD ...")
-        confs, top_file, models, forcefield, index_file, data_file, dp_files, otherfiles = parse_submit(args)
+        confs, top_file, models, forcefield, index_file, data_file, dp_files,plm_files, otherfiles = parse_submit(args)
         resubmit_rid(
             workflow_id=args.WORKFLOW_ID,
             confs = confs,
@@ -387,7 +390,7 @@ def main():
         return None
     elif args.command == "label":
         logger.info("Labeling MD ...")
-        confs, top_file, models, forcefield, index_file, data_files, dp_files, otherfiles = parse_submit(args)
+        confs, top_file, models, forcefield, index_file, data_file, dp_files,plm_files, otherfiles = parse_submit(args)
         label_rid(
             confs = confs,
             topology = top_file,
@@ -402,7 +405,7 @@ def main():
         log_ui()
     elif args.command == "relabel":
         logger.info("Labeling MD ...")
-        confs, top_file, models, forcefield, index_file, data_files, dp_files, otherfiles = parse_submit(args)
+        confs, top_file, models, forcefield, index_file, data_file, dp_files,plm_files, otherfiles = parse_submit(args)
         relabel_rid(
             workflow_id=args.WORKFLOW_ID,
             confs = confs,
@@ -418,23 +421,25 @@ def main():
         log_ui()
     elif args.command == "redim":
         logger.info("Preparing MCMC ...")
-        confs, top_file, models, forcefield, index_file, data_file, dp_files, otherfiles = parse_submit(args)
+        confs, top_file, models, forcefield, index_file, data_file, dp_files,plm_files, otherfiles = parse_submit(args)
         redim_rid(
             rid_config = args.config,
             machine_config = args.machine,
             models = models,
+            plm_out = plm_files,
             workflow_id_defined = args.id,
         )
         log_ui()
     elif args.command == "reredim":
         logger.info("Preparing MCMC ...")
-        confs, top_file, models, forcefield, index_file, data_file, dp_files, otherfiles = parse_submit(args)
+        confs, top_file, models, forcefield, index_file, data_file, dp_files,plm_files, otherfiles = parse_submit(args)
         reredim_rid(
             workflow_id=args.WORKFLOW_ID,
             rid_config = args.config,
             machine_config = args.machine,
             workflow_id_defined = args.id,
             models = models,
+            plm_out = plm_files,
             pod = args.pod
         )
         log_ui()

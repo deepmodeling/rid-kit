@@ -25,6 +25,7 @@ class MCMCPlot(OP):
             {
                 "mcmc_1cv": Artifact(List[Path]),
                 "mcmc_2cv": Artifact(List[Path]),
+                "plm_out": Artifact(List[Path], optional=True),
                 "mcmc_config": BigParameter(Dict)
             }
         )
@@ -83,7 +84,7 @@ class MCMCPlot(OP):
             if not os.path.exists(mcmc_1cv_dir_name):
                 os.makedirs(mcmc_1cv_dir_name)
             if cv_type == "dih":
-                xedges = np.linspace(0, 2*np.pi, bins)
+                xedges = np.linspace(-np.pi, np.pi, bins)
             elif cv_type == "dis":
                 xedges = np.linspace(0, 10, bins)
             for cv_index in range(cv_dim):
@@ -110,9 +111,21 @@ class MCMCPlot(OP):
                 for i in range(bins):
                     for j in range(bins):
                         temp = []
-                        temp.append(xedges[i])
-                        temp.append(yedges[j])
-                        temp.append(pmf[i][j])
+                        # this is to change to dihedral dimension to (-pi,pi) which corresponds to the gmx output
+                        if xedges[i]>=np.pi:
+                            temp.append(xedges[i] - np.pi*2)
+                        else:
+                            temp.append(xedges[i] + np.pi*2/(bins-1))
+                        if yedges[j]>=np.pi:
+                            temp.append(yedges[j] - np.pi*2)
+                        else:
+                            temp.append(yedges[j] + np.pi*2/(bins-1))
+                        if j == (bins -1):
+                            temp.append(pmf[i][0])
+                        elif i == (bins - 1):
+                            temp.append(pmf[0][j])
+                        else:
+                            temp.append(pmf[i][j])
                         temp = np.array(temp)
                         allda.append(temp)
                 newarray=np.array(allda)
@@ -122,17 +135,30 @@ class MCMCPlot(OP):
             avedata_2cv = np.mean(np.array(fourdata_2cv),axis=0)    
             # make 2cv plot
             if cv_type == "dih":
-                xedges = np.linspace(0, 2*np.pi, bins)
-                yedges = np.linspace(0, 2*np.pi, bins)
+                xedges = np.linspace(-np.pi, np.pi, bins)
+                yedges = np.linspace(-np.pi, np.pi, bins)
             elif cv_type == "dis":
                 xedges = np.linspace(0, 10, bins)
                 yedges = np.linspace(0, 10, bins)
             plt.figure(figsize=(8, 6))
             cmap = plt.cm.get_cmap("jet_r")
             CS = plt.contourf(xedges,yedges,avedata_2cv.reshape(bins,bins),levels = np.linspace(0,6,61),cmap=cmap,extend="max")
+            
+            if op_in["plm_out"] is not None:
+                for cv_output in op_in["plm_out"]:
+                    cv_point = np.loadtxt(cv_output)
+                    assert cv_point.shape[1] == 2
+                    point_numbers = list(range(len(cv_point[1:,0])))
+                    P1 = plt.scatter(cv_point[1:,0], cv_point[1:,1], s = 2, marker = 'o', c = point_numbers)
+                    P_init = plt.scatter(cv_point[0,0], cv_point[0,1], s = 20, marker = 'x', c = "k")
             cbar = plt.colorbar(CS)
             cbar.ax.tick_params(labelsize=8) 
             cbar.ax.set_title('kcal/mol',fontsize=8)
+            if op_in["plm_out"] is not None:
+                plt.legend([P_init],["init"])
+                cbar2 = plt.colorbar(P1)
+                cbar2.ax.tick_params(labelsize=4) 
+                cbar2.ax.set_title('steps',fontsize=6)
             plt.xlabel(r'CV index 1')
             plt.ylabel(r'CV index 2')
             plt.savefig(mcmc_2cv_fig,dpi=600,bbox_inches='tight')
@@ -140,9 +166,21 @@ class MCMCPlot(OP):
                 fig = plt.figure(figsize=(8, 6))
                 cmap = plt.cm.get_cmap("jet_r")
                 CS = plt.contourf(xedges,yedges,fourdata_2cv[iii].reshape(bins,bins),levels = np.linspace(0,6,61),cmap=cmap,extend="max")
+                if op_in["plm_out"] is not None:
+                    for cv_output in op_in["plm_out"]:
+                        cv_point = np.loadtxt(cv_output)
+                        assert cv_point.shape[1] == 2
+                        point_numbers = list(range(len(cv_point[1:,0])))
+                        P1 = plt.scatter(cv_point[1:,0], cv_point[1:,1], s = 2, marker = 'o', c = point_numbers)
+                        P_init = plt.scatter(cv_point[0,0], cv_point[0,1], s = 20, marker = 'x', c = "k")
                 cbar = plt.colorbar(CS)
                 cbar.ax.tick_params(labelsize=8) 
                 cbar.ax.set_title('kcal/mol',fontsize=8)
+                if op_in["plm_out"] is not None:
+                    plt.legend([P_init],["init"])
+                    cbar2 = plt.colorbar(P1)
+                    cbar2.ax.tick_params(labelsize=4) 
+                    cbar2.ax.set_title('steps',fontsize=6)
                 plt.xlabel(r'CV index 1')
                 plt.ylabel(r'CV index 2')
                 plt.savefig(mcmc_2cv_fig_separate.format(tag=iii),dpi=600,bbox_inches='tight')

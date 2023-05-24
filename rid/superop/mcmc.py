@@ -41,7 +41,8 @@ class MCMC(Steps):
             "block_tag" : InputParameter(type=str, value="")
         }        
         self._input_artifacts = {
-            "models" : InputArtifact()
+            "models" : InputArtifact(),
+            "plm_out": InputArtifact()
         }
         self._output_parameters = {}
         self._output_artifacts = {
@@ -184,7 +185,8 @@ def _mcmc(
         },
         artifacts={
             "mcmc_1cv": mcmc_run.outputs.artifacts['mcmc_1cv'],
-            "mcmc_2cv": mcmc_run.outputs.artifacts['mcmc_2cv']
+            "mcmc_2cv": mcmc_run.outputs.artifacts['mcmc_2cv'],
+            "plm_out":  mcmc_steps.inputs.artifacts['plm_out']
         },
         key = step_keys["mcmc_plot"],
         executor = plot_executor,

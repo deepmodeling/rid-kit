@@ -31,6 +31,7 @@ from .label import label_rid
 from .relabel import relabel_rid
 from .redim import redim_rid
 from .reredim import reredim_rid
+from .train import train_rid
 from .download import download_rid
 from .info import information
 from .server import forward_ports
@@ -200,10 +201,13 @@ def main_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser_train.add_argument(
-        "--data", "-d", help="Training data."
+        "--mol", "-i", help="Training data.", dest="mol",
     )
     parser_train.add_argument(
-        "--config", "-c", help="RiD configuration."
+       "--config", "-c", help="RiD configuration.", dest="config"
+    )
+    parser_train.add_argument(
+         "--machine", "-m", help="Machine configuration.", dest="machine"
     )
 
     # NN dimension reduction.
@@ -443,6 +447,14 @@ def main():
             pod = args.pod
         )
         log_ui()
+    elif args.command == "train":
+        logger.info("Training RiD FES ...")
+        confs, top_file, models, forcefield, index_file, data_file, dp_files,plm_files, otherfiles = parse_submit(args)
+        train_rid(
+            data = data_file,
+            rid_config = args.config,
+            machine_config = args.machine
+        )
     elif args.command == "download":
         logger.info("Downloading files ...")
         download_rid(

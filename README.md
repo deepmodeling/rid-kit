@@ -139,8 +139,8 @@ After the Rid-kit Run, the workflow will generate several numbers of free energy
 rid redim -i ./test/data/models -c ./rid/template/rid_mcmc_cv_dih.json -m ./rid/template/machine_bohrium_k8s_mcmc.json
 ```
 Then you will get the projected free energy surface for ala-dipeptide
-- ![image](docs/pics/mcmc_ala_1cv.png)
-- ![image](docs/pics/mcmc_ala_2cv.png)
+![image1](docs/pics/mcmc_ala_1cv.png) | ![image2](docs/pics/mcmc_ala_2cv.png)
+---|---
 
 # Run the Workflow without k8s environment`
 To run the workflow without k8s environment, one can use the `Debug` mode of `Dflow`. In this mode however, one can not monitor the workflow in the `Argo` UI.

@@ -205,9 +205,11 @@ This section configures the parameters in `Selection` step. In `Selection` step,
 This section configures the parameters in `Label` step. Currently, rid-kit supports two methods of labeling: `"restrained"` and `"constrained"`, stand for `restrained MD` and `constrained MD` respectively. Most settings are quite similar to those in `Exploration` Step. The simulation time is usually different between `Exploration` and `Label` steps, while the simulation time for `Exploration` has more freedom, the simulation time for `Label` step has to be chosen with care (longer enough to ensure convergence and shorter enough to avoid wasting). Our experience is that `100ps` is enough for `torsion mode` in `restrained MD method`, `1ns` is enough for `distance mode` in `constrained MD method`.  
 
 ### restrained method
-Set `"method": "restrained"` to use restrained MD as mean force calculator. The only different parameters with `Exploration` step is `kappas`.
+Set `"method": "restrained"` to use restrained MD as mean force calculator. The only different parameters with `Exploration` step is `kappas` and `std_threshold`.
 
 * **`kappas`** `(List[int])` A list of force constants ($\kappa$) of harmonic restraints. The length of the list is equal to the number of CVs.
+
+* **`std_threshold`** `(float)`(default 5.0, the unit is consistent with the mean force) A number represents the mean force standard deviation threshold, beyond which the mean force is neglected and will not be used in the dataset for training free energy model. You should test labeling MD for your own system to determine an appropriate number for this threshold.
 
 ### constrained method
 Set `"method": "constrained"` to use constrained MD as mean force calculator. Currently rid-kit only supports distance CV to use this method. The other parameters is the same with `Exploration` step.
@@ -236,7 +238,8 @@ Set `"method": "constrained"` to use constrained MD as mean force calculator. Cu
         "ntmpi": 1,
         "nt": 8,
         "max_warning": 2,
-        "kappas": [ 500, 500 ]
+        "kappas": [ 500, 500 ],
+        "std_threshold": 2.0
     }
 ```
 ```JSON
@@ -260,7 +263,8 @@ Set `"method": "constrained"` to use constrained MD as mean force calculator. Cu
         "output_mode": "both",
         "ntmpi": 1,
         "nt": 8,
-        "max_warning": 2
+        "max_warning": 2,
+        "std_threshold": 10.0
 }
 ```
 
@@ -304,95 +308,6 @@ This section configures the parameters in `Train` step. `RiD-kit` is based on `T
 }
 ```
 
-## A full Example of `rid.json`
+## Full Examples of `rid.json`
 
-You can find a full example of `rid.json` within `"rid-kit/rid/template"`. Or you can copy one from following:
-
-```JSON
-{
-    "name": "test",
-    "numb_walkers": 2,
-    "numb_iters": 2,
-    "trust_lvl_1": 2,
-    "trust_lvl_2": 3,
-    "init_models": [],
-    
-    "CV": {
-        "mode": "torsion",
-        "selected_resid": [ 1, 2 ],
-        "angular_mask": [ 1, 1 ],
-        "weights": [ 1, 1 ],
-        "cv_file":[""]
-    },
-
-    "ExploreMDConfig": {
-        "nsteps": 50000,
-        "type": "gmx",
-        "temperature": 300,
-        "output_freq": 500,
-        "ref-t": "300 300",
-        "verlet-buffer-tolerance":"-1",
-        "rlist": 1,
-        "rvdw": 0.9,
-        "rvdw-switch": 0,
-        "rcoulomb": 0.9,
-        "rcoulomb-switch": 0,
-        "epsilon-r":1,
-        "epsilon-rf":80,
-        "dt": 0.002,
-        "fourierspacing": "0.12",
-        "output_mode": "single",
-        "ntmpi": 1,
-        "nt": 8,
-        "max_warning": 2
-    },
-
-    "SelectorConfig": {
-        "numb_cluster_lower": 12,
-        "numb_cluster_upper": 22,
-        "cluster_threshold": 1.5,
-        "max_selection": 30,
-        "numb_cluster_threshold": 6,
-        "slice_mode": "gmx"
-    },
-
-    "LabelMDConfig": {
-        "nsteps": 50000,
-        "temperature":300,
-        "method": "restrained",
-        "type": "gmx",
-        "output_freq": 100,
-        "ref-t": "300 300",
-        "rlist": 1,
-        "verlet-buffer-tolerance":"-1",
-        "rvdw": 0.9,
-        "rvdw-switch": 0,
-        "rcoulomb": 0.9,
-        "rcoulomb-switch": 0,
-        "epsilon-r":1,
-        "epsilon-rf":80,
-        "dt": 0.002,
-        "fourierspacing": "0.12",
-        "output_mode": "single",
-        "ntmpi": 1,
-        "nt": 8,
-        "max_warning": 2,
-        "kappas": [ 500, 500 ]
-    },
-
-    "Train": {
-        "numb_models": 4,
-        "neurons": [ 200, 200, 200, 200 ],
-        "resnet": true,
-        "batch_size": 128,
-        "epoches": 8000,
-        "init_lr": 0.0008,
-        "decay_steps": 120,
-        "decay_rate": 0.96,
-        "drop_out_rate": 0,
-        "numb_threads": 8,
-        "use_mix": false,
-        "restart": false
-    }
-}
-```
+You can find full examples of `rid.json` within `"rid-kit/rid/template"`.

@@ -6,6 +6,7 @@
 - [Use Rid-kit](#use-rid-kit)
 - [Installation of enviroment](#installation-of-enviroment)
 - [Installation of DeepMD potential](#installation-of-dp)
+- [Preparing files in the input directory](#preparing-files-in-the-input-directory)
 - [Configure simulations](#configure-simulations)
 - [Configure machine resources](#configure-machine-resources)
 - [Configure MCMC dimension reduction](#configure-mcmc)
@@ -142,6 +143,8 @@ Then you will get the projected free energy surface for ala-dipeptide
 ![image1](docs/pics/mcmc_ala_1cv.png) | ![image2](docs/pics/mcmc_ala_2cv.png)
 ---|---
 
+You can also include .out file representing the CV output information inside the directory specified by `-i` parameter, this will plot the CV output upon the free energy surface, in fact the CV output is plotted in the above example.
+
 # Run the Workflow without k8s environment`
 To run the workflow without k8s environment, one can use the `Debug` mode of `Dflow`. In this mode however, one can not monitor the workflow in the `Argo` UI.
 ## Run an example
@@ -191,7 +194,11 @@ Installation of the computation enviroment can be found in
 # Installation-of-dp
 Installation of the DeepMD potential support can be found in
 - [Installation of dp](docs/source/install_dp.md)
-  
+
+# Preparing files in the input directory
+Rules for preparing files in the input directory can be found in
+- [Preparing files](docs/source/prepare_files.md)
+
 # Configure simulations
 - [configure simulations](docs/source/rid_configuration.md)
 

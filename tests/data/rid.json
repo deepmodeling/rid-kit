@@ -45,7 +45,8 @@
         "ntmpi": 1,
         "nt": 8,
         "max_warning": 0,
-        "kappas": [ 500, 500 ]
+        "kappas": [ 500, 500 ],
+        "std_threshold": 2.0
     },
 
     "Train": {

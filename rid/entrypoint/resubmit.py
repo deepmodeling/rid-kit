@@ -183,10 +183,11 @@ def resubmit_rid(
                 if pod_key is not None:
                     pod_key_list = pod_key.split("-")
                     pod_iter = int(pod_key_list[1])
-                    pod_step = "-".join(pod_key_list[2:-1])
+                    pod_step_1 = "-".join(pod_key_list[2:-1])
+                    pod_step_2 = "-".join(pod_key_list[2:])
                     if iteration is not None:
                         if pod is not None:
-                            if pod_iter == int(iteration) and pod_step == pod:
+                            if pod_iter == int(iteration) and (pod_step_1 == pod or pod_step_2 == pod):
                                 restart_flag = 0
                         else:
                             if pod_iter == int(iteration):

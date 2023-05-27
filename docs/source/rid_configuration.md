@@ -212,7 +212,12 @@ Set `"method": "restrained"` to use restrained MD as mean force calculator. The 
 * **`std_threshold`** `(float)`(default 5.0, the unit is consistent with the mean force) A number represents the mean force standard deviation threshold, beyond which the mean force is neglected and will not be used in the dataset for training free energy model. You should test labeling MD for your own system to determine an appropriate number for this threshold.
 
 ### constrained method
-Set `"method": "constrained"` to use constrained MD as mean force calculator. Currently rid-kit only supports distance CV to use this method. The other parameters is the same with `Exploration` step.
+Set `"method": "constrained"` to use constrained MD as mean force calculator. Currently rid-kit only supports distance CV to use this method, also only `gmx` type is supported to perform constrained MD simulation. The other parameters is the same with `Exploration` step.
+
+Note that if you want to use constrained MD as the mean force calculator, apart from setting `method` to be `constrained` in the `label_config`, you should add `[ constraints ]` line corresponding to the `[ moleculartype ]` in your input `topology` file yourself, since gromacs specifies constraints information for each `[ moleculartype ]`.
+
+Also note that, since gromacs only supports constrained MD for `distance CV`, the constrained MD simulation in rid-kit only supports `distance CV` at this moment.
+
 
 ### Example
 

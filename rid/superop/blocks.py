@@ -286,7 +286,7 @@ def _first_run_block(
             slices=Slices("{{item}}",
                 input_parameter=["trust_lvl_1","task_name"],
                 input_artifact=["plm_out","selected_indices"],
-                output_artifact=["model_devi","model_devi_png"]),
+                output_artifact=["model_devi","model_devi_fig"]),
             **model_devi_template_config,
         ),
         parameters={
@@ -621,7 +621,7 @@ def _iter_block(
             slices=Slices("{{item}}",
                 input_parameter=["trust_lvl_1","task_name"],
                 input_artifact=["plm_out","selected_indices"],
-                output_artifact=["model_devi","model_devi_png"]),
+                output_artifact=["model_devi","model_devi_fig"]),
             **model_devi_template_config,
         ),
         parameters={

@@ -10,7 +10,7 @@ from dflow.python import (
     BigParameter
 )
 from rid.utils import save_txt, set_directory
-from rid.constants import sel_gro_name, cv_init_label, model_devi_name, model_devi_precision, sel_ndx_name
+from rid.constants import sel_gro_name, cv_init_label, model_devi_name, model_devi_precision, sel_ndx_name, new_model_devi_fig
 from rid.select.conf_select import select_from_devi
 from rid.common.mol import get_distance_from_atomid
 from rid.select.model_devi import make_std
@@ -22,11 +22,6 @@ class RunModelDevi(OP):
     """
     `RunModelDevi` calculates model deviations for each chosen representive cluster frames from `PrepSelect` and select 
     ones with high uncertainty from them.
-    As rid-kit is based on `Gromacs`, please provide trajectories in `.xtc` format (single-point precision) and NN models in 
-    `.pb` format. 
-    Warning: We highly recommend use `slice_mode = "gmx"` due to the inconsistent format convention of `mdtraj` that may lead to topology
-    mismatch of next label steps. If you use `mdtraj` mode, please make sure the name conventions of molecules in Gromacs topology 
-    files satisfy PDB standards. This could happen in some old Gromcas version.
     """
 
     @classmethod
@@ -47,7 +42,7 @@ class RunModelDevi(OP):
         return OPIOSign(
             {
                 "model_devi": Artifact(Path, optional=True, archive = None),
-                "model_devi_png": Artifact(Path, optional=True, archive = None)
+                "model_devi_fig": Artifact(Path, optional=True, archive = None)
             }
         )
 
@@ -113,16 +108,16 @@ class RunModelDevi(OP):
             plt.legend()
             plt.title("prediction error")
             fig.set_size_inches(8, 6, forward=True)
-            plt.savefig("model_devi.png")
+            plt.savefig(new_model_devi_fig)
                 
         model_devi_fig_path = None
-        if os.path.exists(task_path.joinpath("model_devi.png")):
-            model_devi_fig_path = task_path.joinpath("model_devi.png")
+        if os.path.exists(task_path.joinpath(new_model_devi_fig)):
+            model_devi_fig_path = task_path.joinpath(new_model_devi_fig)
             
         op_out = OPIO(
             {
                "model_devi": task_path.joinpath("cls_"+model_devi_name),
-               "model_devi_png": model_devi_fig_path
+               "model_devi_fig": model_devi_fig_path
             }
         )
         return op_out

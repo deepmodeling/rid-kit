@@ -64,6 +64,15 @@ class MCMCPlot(OP):
         cv_type = mcmc_config["cv_type"]
         bins = mcmc_config["bins"]
         cv_dim = mcmc_config["cv_dimension"]
+        proj_info = mcmc_config["proj_info"]
+        proj_mode = proj_info["proj_mode"]
+        
+        if proj_mode == "cv":
+            proj_1d_num = cv_dim
+        elif proj_mode == "path":
+            proj_1d_num = 2
+        else:
+            raise ValueError("Invalid cv type")
         
         task_path = Path("mcmc_fig")
         task_path.mkdir(exist_ok=True, parents=True)
@@ -71,7 +80,7 @@ class MCMCPlot(OP):
             fourdata_1cv = []
             for dir in op_in["mcmc_1cv"]:
                 all_1cv = []
-                for cv_index in range(cv_dim):
+                for cv_index in range(proj_1d_num):
                     file = dir/mcmc_1cv_name.format(tag = cv_index)
                     pmf = np.loadtxt(file)
                     pmf = pmf - np.min(pmf)
@@ -92,6 +101,14 @@ class MCMCPlot(OP):
                                 temp.append(pmf[:,i])
                             temp = np.array(temp)
                             allda.append(temp)
+                    elif cv_type == "dis":
+                        xedges = np.linspace(0, 10, bins)
+                        for i in range(bins):
+                            temp = []
+                            temp.append(xedges[i])
+                            temp.append(pmf[:,i])
+                            temp = np.array(temp)
+                            allda.append(temp)
                     newarray=np.array(allda)
                     idex=np.argsort(newarray[:,0])
                     sorted_data = newarray[idex,:]
@@ -106,20 +123,30 @@ class MCMCPlot(OP):
             # make 1cv plot
             if not os.path.exists(mcmc_1cv_dir_name):
                 os.makedirs(mcmc_1cv_dir_name)
-            if cv_type == "dih":
-                xedges = np.linspace(-np.pi, np.pi, bins)
-            elif cv_type == "dis":
-                xedges = np.linspace(0, 10, bins)
-            for cv_index in range(cv_dim):
-                plt.figure(figsize=(8, 6))
-                for proj_iter in range(proj_iterations):
-                    print("xedges shape", xedges.shape)
-                    plt.plot(xedges,avedata_1cv[cv_index][:,proj_iter], label = proj_iter)
-                plt.xlabel(r'cv')
-                plt.ylabel(r'free energy (kcal/mol)')
-                plt.legend()
-                plt.savefig(mcmc_1cv_dir_name+"/"+mcmc_1cv_fig.format(tag = cv_index),dpi=600,bbox_inches='tight')
-                
+
+            for cv_index in range(proj_1d_num):
+                if proj_mode == "cv":
+                    if cv_type == "dih":
+                        xedges = np.linspace(-np.pi, np.pi, bins)
+                    elif cv_type == "dis":
+                        xedges = np.linspace(0, 10, bins)
+                    plt.figure(figsize=(8, 6))
+                    for proj_iter in range(proj_iterations):
+                        plt.plot(xedges,avedata_1cv[cv_index][:,proj_iter], label = proj_iter)
+                    plt.xlabel(r'cv')
+                    plt.ylabel(r'free energy (kcal/mol)')
+                    plt.legend()
+                    plt.savefig(mcmc_1cv_dir_name+"/"+mcmc_1cv_fig.format(tag = cv_index),dpi=600,bbox_inches='tight')
+                elif proj_mode == "path":
+                    path_edges = [np.linspace(0, 10, bins),np.linspace(-10, 0, bins)]
+                    plt.figure(figsize=(8, 6))
+                    for proj_iter in range(proj_iterations):
+                        plt.plot(path_edges[cv_index],avedata_1cv[cv_index][:,proj_iter], label = proj_iter)
+                    plt.xlabel(r'cv')
+                    plt.ylabel(r'free energy (kcal/mol)')
+                    plt.legend()
+                    plt.savefig(mcmc_1cv_dir_name+"/"+mcmc_1cv_fig.format(tag = cv_index),dpi=600,bbox_inches='tight')
+                    
             fourdata_2cv = []
             for file in op_in["mcmc_2cv"]:
                 pmf = np.loadtxt(file)
@@ -128,29 +155,37 @@ class MCMCPlot(OP):
                 if cv_type == "dih":
                     xedges = np.linspace(0, 2*np.pi, bins)
                     yedges = np.linspace(0, 2*np.pi, bins)
+                    for i in range(bins):
+                        for j in range(bins):
+                            temp = []
+                            # this is to change to dihedral dimension to (-pi,pi) which corresponds to the gmx output
+                            if xedges[i]>=np.pi:
+                                temp.append(xedges[i] - np.pi*2)
+                            else:
+                                temp.append(xedges[i] + np.pi*2/(bins-1))
+                            if yedges[j]>=np.pi:
+                                temp.append(yedges[j] - np.pi*2)
+                            else:
+                                temp.append(yedges[j] + np.pi*2/(bins-1))
+                            if j == (bins -1):
+                                temp.append(pmf[i][0])
+                            elif i == (bins - 1):
+                                temp.append(pmf[0][j])
+                            else:
+                                temp.append(pmf[i][j])
+                            temp = np.array(temp)
+                            allda.append(temp)
                 elif cv_type == "dis":
                     xedges = np.linspace(0, 10, bins)
                     yedges = np.linspace(0, 10, bins)
-                for i in range(bins):
-                    for j in range(bins):
-                        temp = []
-                        # this is to change to dihedral dimension to (-pi,pi) which corresponds to the gmx output
-                        if xedges[i]>=np.pi:
-                            temp.append(xedges[i] - np.pi*2)
-                        else:
-                            temp.append(xedges[i] + np.pi*2/(bins-1))
-                        if yedges[j]>=np.pi:
-                            temp.append(yedges[j] - np.pi*2)
-                        else:
-                            temp.append(yedges[j] + np.pi*2/(bins-1))
-                        if j == (bins -1):
-                            temp.append(pmf[i][0])
-                        elif i == (bins - 1):
-                            temp.append(pmf[0][j])
-                        else:
+                    for i in range(bins):
+                        for j in range(bins):
+                            temp = []
+                            temp.append(xedges[i])
+                            temp.append(yedges[j])
                             temp.append(pmf[i][j])
-                        temp = np.array(temp)
-                        allda.append(temp)
+                            temp = np.array(temp)
+                            allda.append(temp)
                 newarray=np.array(allda)
                 idex=np.lexsort([newarray[:,1], newarray[:,0]])
                 sorted_data = newarray[idex,:]
@@ -161,8 +196,12 @@ class MCMCPlot(OP):
                 xedges = np.linspace(-np.pi, np.pi, bins)
                 yedges = np.linspace(-np.pi, np.pi, bins)
             elif cv_type == "dis":
-                xedges = np.linspace(0, 10, bins)
-                yedges = np.linspace(0, 10, bins)
+                if proj_mode == "cv":
+                    xedges = np.linspace(0, 10, bins)
+                    yedges = np.linspace(0, 10, bins)
+                elif proj_mode == "path":
+                    xedges = np.linspace(0, 10, bins)
+                    yedges = np.linspace(-10, 0, bins)
             plt.figure(figsize=(8, 6))
             cmap = plt.cm.get_cmap("jet_r")
             CS = plt.contourf(xedges,yedges,avedata_2cv.reshape(bins,bins),levels = np.linspace(0,6,61),cmap=cmap,extend="max")

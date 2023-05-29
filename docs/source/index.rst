@@ -20,11 +20,11 @@ Contents
 .. toctree::
    :maxdepth: 2
 
-   Tutorial <tutorial>
+   Use Rid-kit with Local k8s <tutorial>
    Prepare files for simulations <prepare_files>
    Configure simulations <rid_configuration>
    Configure machine resources <rid_machine>
-   Download files from simulation <rid-download>
+   Download files from simulation <rid_download>
    Configure mcmc dimension reduction <mcmc_configuration>
    Installation of environment on Slurm  <install>
    Installation with DeepMD potential support <install_dp>

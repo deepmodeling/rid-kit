@@ -101,9 +101,10 @@ def reredim_rid(
             pod_key = step["key"]
             if pod_key is not None:
                 pod_key_list = pod_key.split("-")
-                pod_step = "-".join(pod_key_list[1:-1])
+                pod_step_1 = "-".join(pod_key_list[1:-1])
+                pod_step_2 = "-".join(pod_key_list[1:])
                 if pod is not None:
-                    if pod_step == pod:
+                    if pod_step_1 == pod or pod_step_2 == pod:
                         restart_flag = 0
                 else:
                     if step["phase"] != "Succeeded":

@@ -27,6 +27,7 @@ except ImportError:
 
 from .submit import submit_rid
 from .resubmit import resubmit_rid
+from .explore import explore_rid
 from .label import label_rid
 from .relabel import relabel_rid
 from .redim import redim_rid
@@ -145,8 +146,8 @@ def main_parser() -> argparse.ArgumentParser:
     
     # Explore
     parser_exp = subparsers.add_parser(
-        "mdrun",
-        help="Submit RiD workflow",
+        "explore",
+        help="Exploration MD",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser_exp.add_argument(
@@ -390,8 +391,20 @@ def main():
         )
         log_ui()
     elif args.command == "explore":
-        logger.info("RiD Exploration.")
-        return None
+        logger.info("RiD Exploration ..")
+        confs, top_file, models, forcefield, index_file, data_file, dp_files,plm_files, otherfiles = parse_submit(args)
+        explore_rid(
+            confs = confs,
+            topology = top_file,
+            rid_config = args.config,
+            machine_config = args.machine,
+            models = models,
+            forcefield = forcefield,
+            index_file = index_file,
+            dp_files = dp_files,
+            otherfiles = otherfiles
+        )
+        log_ui()
     elif args.command == "label":
         logger.info("Labeling MD ...")
         confs, top_file, models, forcefield, index_file, data_file, dp_files,plm_files, otherfiles = parse_submit(args)

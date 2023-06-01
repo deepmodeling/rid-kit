@@ -204,7 +204,9 @@ class MCMCPlot(OP):
                     yedges = np.linspace(-10, 0, bins)
             plt.figure(figsize=(8, 6))
             cmap = plt.cm.get_cmap("jet_r")
-            CS = plt.contourf(xedges,yedges,avedata_2cv.reshape(bins,bins),levels = np.linspace(0,6,61),cmap=cmap,extend="max")
+            # Define percentiles for the levels
+            upper_perc = np.percentile(np.unique(avedata_2cv), 95)
+            CS = plt.contourf(xedges,yedges,avedata_2cv.reshape(bins,bins),levels = np.linspace(0,upper_perc,101),cmap=cmap,extend="max")
             
             if op_in["plm_out"] is not None:
                 for cv_output in op_in["plm_out"]:
@@ -227,7 +229,9 @@ class MCMCPlot(OP):
             for iii in range(len(fourdata_2cv)):
                 fig = plt.figure(figsize=(8, 6))
                 cmap = plt.cm.get_cmap("jet_r")
-                CS = plt.contourf(xedges,yedges,fourdata_2cv[iii].reshape(bins,bins),levels = np.linspace(0,6,61),cmap=cmap,extend="max")
+                # Define percentiles for the levels
+                upper_perc = np.percentile(np.unique(fourdata_2cv[iii]), 95)
+                CS = plt.contourf(xedges,yedges,fourdata_2cv[iii].reshape(bins,bins),levels = np.linspace(0,upper_perc,101),cmap=cmap,extend="max")
                 if op_in["plm_out"] is not None:
                     for cv_output in op_in["plm_out"]:
                         cv_point = np.loadtxt(cv_output)

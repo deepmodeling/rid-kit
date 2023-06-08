@@ -205,7 +205,7 @@ class MCMCPlot(OP):
             plt.figure(figsize=(8, 6))
             cmap = plt.cm.get_cmap("jet_r")
             # Define percentiles for the levels
-            upper_perc = np.percentile(np.unique(avedata_2cv), 95)
+            upper_perc = np.percentile(np.unique(fourdata_2cv[0]), 99)
             CS = plt.contourf(xedges,yedges,avedata_2cv.reshape(bins,bins),levels = np.linspace(0,upper_perc,101),cmap=cmap,extend="max")
             
             if op_in["plm_out"] is not None:
@@ -230,7 +230,7 @@ class MCMCPlot(OP):
                 fig = plt.figure(figsize=(8, 6))
                 cmap = plt.cm.get_cmap("jet_r")
                 # Define percentiles for the levels
-                upper_perc = np.percentile(np.unique(fourdata_2cv[iii]), 95)
+                upper_perc = np.percentile(np.unique(fourdata_2cv[iii]), 99)
                 CS = plt.contourf(xedges,yedges,fourdata_2cv[iii].reshape(bins,bins),levels = np.linspace(0,upper_perc,101),cmap=cmap,extend="max")
                 if op_in["plm_out"] is not None:
                     for cv_output in op_in["plm_out"]:

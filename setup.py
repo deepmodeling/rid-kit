@@ -14,10 +14,11 @@ readme_file = Path(__file__).parent / "README.md"
 readme = readme_file.read_text(encoding="utf-8")
 
 setuptools.setup(
-    name='rid',
+    name='rid-kit',
     author="Yanze Wang, Jiahao Fan",
+    author_email="yanze039@mit.edu,jiahaofan@pku.edu.cn",
     use_scm_version={'write_to': 'rid/_version.py'},
-    author_email="yanze039@mit.edu;jiahaofan@pku.edu.cn",
+    version='{{VERSION_PLACEHOLDER}}',
     description="RiD package for enhanced sampling",
     setup_requires=['setuptools_scm'],
     long_description=readme,

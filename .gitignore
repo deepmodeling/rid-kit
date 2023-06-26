@@ -1,7 +1,7 @@
 __pycache__
 *.pyc
 .nfs*
-rid.egg-info
+rid_kit.egg-info
 *.egg
 dist
 build

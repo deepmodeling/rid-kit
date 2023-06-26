@@ -27,10 +27,12 @@ except ImportError:
 
 from .submit import submit_rid
 from .resubmit import resubmit_rid
+from .explore import explore_rid
 from .label import label_rid
 from .relabel import relabel_rid
 from .redim import redim_rid
 from .reredim import reredim_rid
+from .train import train_rid
 from .download import download_rid
 from .info import information
 from .server import forward_ports
@@ -144,8 +146,8 @@ def main_parser() -> argparse.ArgumentParser:
     
     # Explore
     parser_exp = subparsers.add_parser(
-        "mdrun",
-        help="Submit RiD workflow",
+        "explore",
+        help="Exploration MD",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser_exp.add_argument(
@@ -200,10 +202,13 @@ def main_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser_train.add_argument(
-        "--data", "-d", help="Training data."
+        "--mol", "-i", help="Training data.", dest="mol",
     )
     parser_train.add_argument(
-        "--config", "-c", help="RiD configuration."
+       "--config", "-c", help="RiD configuration.", dest="config"
+    )
+    parser_train.add_argument(
+         "--machine", "-m", help="Machine configuration.", dest="machine"
     )
 
     # NN dimension reduction.
@@ -310,6 +315,7 @@ def parse_submit(args):
     top_file = None
     forcefield = None
     index_file = None
+    plm_files = []
     dp_files = []
     models = []
     data_file = None
@@ -329,22 +335,27 @@ def parse_submit(args):
             index_file = file
         elif os.path.basename(file).endswith("json") or os.path.basename(file).endswith("raw"):
             dp_files.append(file)
+        elif os.path.basename(file).endswith("out"):
+            plm_files.append(file)
         else:
             otherfiles.append(file)
         
-    return confs, top_file, models, forcefield, index_file, data_file, dp_files, otherfiles
+    return confs, top_file, models, forcefield, index_file, data_file, dp_files, plm_files, otherfiles
 
 
 def log_ui():
     if os.getenv("DFLOW_HOST") is not None:
         logger.info('The task is displayed on %s.'%os.getenv("DFLOW_HOST"))
+    else:
+        logger.info('The task is displayed on "https://127.0.0.1:2746".')
+        logger.info('Artifacts (Files) are listed on "https://127.0.0.1:9001".')
 
 
 def main():
     args = parse_args()
     if args.command == "submit":
         logger.info("Preparing RiD ...")
-        confs, top_file, models, forcefield, index_file, data_file, dp_files, otherfiles = parse_submit(args)
+        confs, top_file, models, forcefield, index_file, data_file, dp_files,plm_files, otherfiles = parse_submit(args)
         submit_rid(
             confs = confs,
             topology = top_file,
@@ -361,7 +372,7 @@ def main():
         log_ui()
     elif args.command == "resubmit":
         logger.info("Preparing RiD ...")
-        confs, top_file, models, forcefield, index_file, data_file, dp_files, otherfiles = parse_submit(args)
+        confs, top_file, models, forcefield, index_file, data_file, dp_files,plm_files, otherfiles = parse_submit(args)
         resubmit_rid(
             workflow_id=args.WORKFLOW_ID,
             confs = confs,
@@ -380,11 +391,23 @@ def main():
         )
         log_ui()
     elif args.command == "explore":
-        logger.info("RiD Exploration.")
-        return None
+        logger.info("RiD Exploration ..")
+        confs, top_file, models, forcefield, index_file, data_file, dp_files,plm_files, otherfiles = parse_submit(args)
+        explore_rid(
+            confs = confs,
+            topology = top_file,
+            rid_config = args.config,
+            machine_config = args.machine,
+            models = models,
+            forcefield = forcefield,
+            index_file = index_file,
+            dp_files = dp_files,
+            otherfiles = otherfiles
+        )
+        log_ui()
     elif args.command == "label":
         logger.info("Labeling MD ...")
-        confs, top_file, models, forcefield, index_file, data_files, dp_files, otherfiles = parse_submit(args)
+        confs, top_file, models, forcefield, index_file, data_file, dp_files,plm_files, otherfiles = parse_submit(args)
         label_rid(
             confs = confs,
             topology = top_file,
@@ -399,7 +422,7 @@ def main():
         log_ui()
     elif args.command == "relabel":
         logger.info("Labeling MD ...")
-        confs, top_file, models, forcefield, index_file, data_files, dp_files, otherfiles = parse_submit(args)
+        confs, top_file, models, forcefield, index_file, data_file, dp_files,plm_files, otherfiles = parse_submit(args)
         relabel_rid(
             workflow_id=args.WORKFLOW_ID,
             confs = confs,
@@ -415,26 +438,36 @@ def main():
         log_ui()
     elif args.command == "redim":
         logger.info("Preparing MCMC ...")
-        confs, top_file, models, forcefield, index_file, data_file, dp_files, otherfiles = parse_submit(args)
+        confs, top_file, models, forcefield, index_file, data_file, dp_files,plm_files, otherfiles = parse_submit(args)
         redim_rid(
             rid_config = args.config,
             machine_config = args.machine,
             models = models,
+            plm_out = plm_files,
             workflow_id_defined = args.id,
         )
         log_ui()
     elif args.command == "reredim":
         logger.info("Preparing MCMC ...")
-        confs, top_file, models, forcefield, index_file, data_file, dp_files, otherfiles = parse_submit(args)
+        confs, top_file, models, forcefield, index_file, data_file, dp_files,plm_files, otherfiles = parse_submit(args)
         reredim_rid(
             workflow_id=args.WORKFLOW_ID,
             rid_config = args.config,
             machine_config = args.machine,
             workflow_id_defined = args.id,
             models = models,
+            plm_out = plm_files,
             pod = args.pod
         )
         log_ui()
+    elif args.command == "train":
+        logger.info("Training RiD FES ...")
+        confs, top_file, models, forcefield, index_file, data_file, dp_files,plm_files, otherfiles = parse_submit(args)
+        train_rid(
+            data = data_file,
+            rid_config = args.config,
+            machine_config = args.machine
+        )
     elif args.command == "download":
         logger.info("Downloading files ...")
         download_rid(

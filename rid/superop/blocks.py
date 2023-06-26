@@ -61,6 +61,7 @@ class InitBlock(Steps):
             "numb_cluster_upper": InputParameter(type=float),
             "numb_cluster_lower": InputParameter(type=float),
             "max_selection": InputParameter(type=int),
+            "std_threshold": InputParameter(type=float, value=5.0),
             "dt": InputParameter(type=float, value=0.02),
             "output_freq": InputParameter(type=float, value=2500),
             "slice_mode": InputParameter(type=str, value="gmx"),
@@ -215,6 +216,7 @@ def _first_run_block(
             "cv_config": block_steps.inputs.parameters['cv_config'],
             "tail": block_steps.inputs.parameters['tail'],
             "block_tag" : block_steps.inputs.parameters['block_tag'],
+            "std_threshold": block_steps.inputs.parameters["std_threshold"]
         },
         artifacts={
             "topology": block_steps.inputs.artifacts["topology"],
@@ -284,7 +286,7 @@ def _first_run_block(
             slices=Slices("{{item}}",
                 input_parameter=["trust_lvl_1","task_name"],
                 input_artifact=["plm_out","selected_indices"],
-                output_artifact=["model_devi","model_devi_png"]),
+                output_artifact=["model_devi","model_devi_fig"]),
             **model_devi_template_config,
         ),
         parameters={
@@ -352,6 +354,7 @@ class IterBlock(Steps):
             "weights": InputParameter(type=Optional[Union[np.ndarray, List]]),
             "max_selection": InputParameter(type=int),
             "numb_cluster_threshold": InputParameter(type=float, value=30),
+            "std_threshold": InputParameter(type=float, value=5.0),
             "dt": InputParameter(type=float, value=0.02),
             "output_freq": InputParameter(type=float, value=2500),
             "slice_mode": InputParameter(type=str, value="gmx"),
@@ -548,6 +551,7 @@ def _iter_block(
             "cv_config": block_steps.inputs.parameters['cv_config'],
             "tail": block_steps.inputs.parameters['tail'],
             "block_tag" : block_steps.inputs.parameters['block_tag'],
+            "std_threshold": block_steps.inputs.parameters["std_threshold"]
         },
         artifacts={
             "topology": block_steps.inputs.artifacts["topology"],
@@ -617,7 +621,7 @@ def _iter_block(
             slices=Slices("{{item}}",
                 input_parameter=["trust_lvl_1","task_name"],
                 input_artifact=["plm_out","selected_indices"],
-                output_artifact=["model_devi","model_devi_png"]),
+                output_artifact=["model_devi","model_devi_fig"]),
             **model_devi_template_config,
         ),
         parameters={

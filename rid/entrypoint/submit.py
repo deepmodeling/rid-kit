@@ -22,6 +22,7 @@ from rid.op.run_exploration import RunExplore
 from rid.superop.label import Label
 from rid.op.prep_label import PrepLabel, CheckLabelInputs
 from rid.op.run_label import RunLabel
+from rid.op.label_stats import LabelStats
 from rid.superop.selector import Selector
 from rid.op.prep_select import PrepSelect
 from rid.op.run_select import RunSelect
@@ -61,6 +62,7 @@ def prep_rid_op(
         CheckLabelInputs,
         PrepLabel,
         RunLabel,
+        LabelStats,
         prep_label_config,
         run_label_config,
         retry_times=retry_times)

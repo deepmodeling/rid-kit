@@ -43,7 +43,8 @@
         "kappas": [ 500, 500, 500, 500],
         "ntmpi": 1,
         "nt": 8,
-        "max_warning": 2
+        "max_warning": 2,
+        "std_threshold": 1.5
     },
 
     "Train": {

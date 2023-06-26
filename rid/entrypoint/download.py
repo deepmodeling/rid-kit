@@ -26,6 +26,14 @@ def download_rid(workflow_id, pod, file, iteration_start, iteration_end, outputs
                 elif step['key'] == "iter-%03d-%s"%(index,pod):
                     print("downloading "+step["key"])
                     download_artifact(step.outputs.artifacts[file], path="%s/iter%s"%(outputs,index))
+                elif step["key"] == "000-%s-0"%pod:
+                    print("downloading "+step["key"])
+                    download_artifact(step.outputs.artifacts[file], path="%s"%outputs)
+                    break
+                elif step["key"] == "000-%s"%pod:
+                    print("downloading "+step["key"])
+                    download_artifact(step.outputs.artifacts[file], path="%s"%outputs)
+                    break
 
 # with open("time_profile.txt","w") as f:
 #     for step in all_steps:

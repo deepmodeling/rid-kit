@@ -23,6 +23,7 @@ from rid.op.prep_label import PrepLabel
 from rid.op.prep_label import CheckLabelInputs
 from rid.op.run_exploration import RunExplore
 from rid.op.run_label import RunLabel
+from rid.op.label_stats import LabelStats
 from rid.op.prep_select import PrepSelect
 from rid.op.run_select import RunSelect
 from rid.op.run_train import TrainModel
@@ -47,7 +48,8 @@ from rid.constants import (
     cv_init_label,
     model_devi_precision,
     train_log,
-    train_fig
+    train_fig,
+    mf_std_fig
 )
 
 upload_packages.append(__file__)
@@ -272,13 +274,36 @@ class MockedRunLabel(RunLabel):
                 f.write("gmx md log file")
             with open(cv_force_out,"w") as f:
                 f.write('1.000000e+00 2.000000e+00\n')
+            with open("mf_info.out", "w") as f:
+                f.write("mean force information file")
+            with open(gmx_xtc_name, "w") as f:
+                f.write("gmx trajectory")
         
         op = OPIO({
                 "plm_out": ip["task_path"].joinpath(plumed_output_name),
+                "trajectory": ip["task_path"].joinpath(gmx_xtc_name),
                 "md_log": ip["task_path"].joinpath(gmx_mdrun_log),
                 "cv_forces": ip["task_path"].joinpath(cv_force_out),
                 "mf_fig": ip["task_path"].joinpath(mf_fig),
-                
+                "mf_info": ip["task_path"].joinpath("mf_info.out")
+            })
+        return op
+    
+class MockedLabelStats(LabelStats):
+    @OP.exec_sign_check
+    def execute(
+            self,
+            ip : OPIO,
+    ) -> OPIO:
+        cv_forces_list = [_ for _ in ip["cv_forces"] if _ is not None]
+        task_path = Path("label_std")
+        task_path.mkdir(exist_ok=True, parents=True)
+        with set_directory(task_path):
+            with open(mf_std_fig, "w") as f:
+                f.write("mean force std fig")
+        op = OPIO({
+                "mf_std_fig":  task_path.joinpath(mf_std_fig),
+                "cv_forces": list(cv_forces_list)  
             })
         return op
     

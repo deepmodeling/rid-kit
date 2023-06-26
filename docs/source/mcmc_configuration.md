@@ -46,8 +46,8 @@
 * **`"numb_steps"`** `int` An integer to represent the number of steps for MCMC run.
 * **`"numb_walkers"`** `int` Number of parallel walkers used in the MCMC run.
 * **`"temperature"`**  `int` Temperature used in the RiD run and MCMC simulation.
-* **`"cv_upper_bound"`** `Optional[(List[float])]` Upper bound for each dimension of CVs, this is usually set for distance CVs.
-* **`"cv_lower_bound"`** `Optional[(List[float])]` Lower bound for each dimension of CVs, this is usually set for distance CVs.
+* **`"cv_upper_bound"`** `Optional[(List[float])]` Upper bound of the initial value in MCMC for each dimension of CVs, this is usually set for distance CVs.
+* **`"cv_lower_bound"`** `Optional[(List[float])]` Lower bound of the initial value in MCMC for each dimension of CVs, this is usually set for distance CVs.
 * **`"proj_mode"`** `str` The mode for projecting 2D CV, support `cv` and `path` mode. `cv` mode representing the common projection on the selected CV index, `path` mode representing the projection on the user defined path CV.
 * **`"proj_cv_index"`** `(List[int])` Projected index for the 2D CV. Note that 1D projection is done for all CVs.
 * **`"cv_type"`** `str` CV type for projection, support `dih` and `dis`, representing dihedral CVs and distance CVs.

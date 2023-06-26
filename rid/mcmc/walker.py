@@ -114,7 +114,20 @@ def my_hist2d(pp, xx, yy, delta, cv1, cv2):
     my_hist /= (pp.shape[0] * delta * delta)
     return my_hist
 
-# project on path CV
+# project on all path CV 1d
+def my_hist1d_path(pp, xx, delta, lm, xlist, proj_index):
+    my_hist = np.zeros((2, len(xx)))
+    cv = pp[:,proj_index]
+    slist = s(cv, lm, xlist)
+    zlist = z(cv, lm, xlist)
+    for ii in range(cv.shape[0]):
+        if 0 < slist[ii] < 10 and -10 < zlist[ii] < 0:
+            my_hist[0, np.int((slist[ii])//delta)] += 1
+            my_hist[1, np.int((zlist[ii]+10)//delta)] += 1
+    my_hist /= (pp.shape[0] * delta)
+    return my_hist
+
+# project on path CV 2d
 def my_hist2d_path(pp, xx, yy, delta, lm, xlist, proj_index):
     my_hist = np.zeros((1, len(xx), len(yy)))
     cv = pp[:,proj_index]

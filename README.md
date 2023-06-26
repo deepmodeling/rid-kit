@@ -1,26 +1,32 @@
 # Table of contents
 - [About Rid-kit](#about-rid-kit)
-- [Quick Start](#quick-start)
-- [Run the workflow without k8s enviroment](#run-the-workflow-without-k8s-environment)
+- [Use Rid-kit with Bohrium k8s](#use-rid-kit-with-bohrium-k8s)
+  - [Quick Start](#quick-start)
+- [Use Rid-kit with Local k8s](#use-rid-kit-with-local-k8s)
+- [Use Rid-kit without k8s environment](#use-rid-kit-without-k8s-environment)
 - [Main procedure of RiD](#main-procedure-of-rid)
-- [Use Rid-kit](#use-rid-kit)
-- [Installation of enviroment](#installation-of-enviroment)
-- [Installation of DeepMD potential](#installation-of-dp)
+- [Preparing files in the input directory](#preparing-files-in-the-input-directory)
 - [Configure simulations](#configure-simulations)
 - [Configure machine resources](#configure-machine-resources)
+- [Download files](#download-files-from-the-workflow)
 - [Configure MCMC dimension reduction](#configure-mcmc)
+- [Installation of environment on Slurm](#installation-of-environment-on-slurm)
+- [Installation with DeepMD potential support](#installation-with-deepmd-potential-support)
 - [Troubleshooting](#troubleshooting)
 
 # About Rid-kit
 Rid-kit is a package written in Python, designed to do enhanced sampling using reinforced dynamics. It aims to learn the free energy surface on the fly during MD run, and uses it as the bias potential during the next MD run. Its advantage is the ability to use a large number of CVs (100), thus can be used to simulate conformational changes of big molecules such as in the problem of protein folding.
 
+Rid-kit is based on [dflow](https://github.com/deepmodeling/dflow), one can decide whether to use a k8s environment to run a workflow. It is recommended to use k8s environment to run the workflow unless it is not doable anyway. 
+
 For more information, check the [documentation](https://rid-kit-dflow.readthedocs.io/en/latest/).
 
-# Quick start
-Rid-kit is based on [dflow](https://github.com/deepmodeling/dflow), one can decide whether to use a k8s environment to run a workflow. It is recommended to use k8s enviroment to run the workflow unless it is not doable anyway. The dflow team provide a community version of k8s [deepmodeling k8s](https://workflows.deepmodeling.com/), making the use of Rid-kit very convenient. To use the community version of k8s, one first need to register a Bohrium account in [Bohrium](https://bohrium.dp.tech/login) and learn a few concepts (job, jobgroup, project id) in the Bohrium website documents. Then the use of rid-kit is very easy.
+# Use Rid-kit with Bohrium k8s
+## Quick start
+The dflow team provide a community version of k8s [deepmodeling k8s](https://workflows.deepmodeling.com/), making the use of Rid-kit very convenient. To use the community version of k8s, one first need to register a Bohrium account in [Bohrium](https://bohrium.dp.tech/login) and learn a few concepts (job, jobgroup, project id) in the Bohrium website documents. Then the use of rid-kit is very easy.
 
-## Set the enviroment variables
-Just set the enviroment variables based on your personal Bohrium account information by
+### Set the environment variables
+Just set the environment variables based on your personal Bohrium account information by
 
 ```
 export DFLOW_HOST=https://workflows.deepmodeling.com
@@ -32,40 +38,31 @@ export BOHRIUM_PASSWORD="<bohrium-password>"
 export BOHRIUM_PROJECT_ID="<bohrium-project-id>"
 ```
 
-## Install Rid-kit
+### Install Rid-kit
 Install the latest rid-kit
 
 ```bash
-git clone git@github.com:PKUfjh/rid-kit.git
-cd rid-kit
-git checkout dflow
 pip install setuptools_scm
-pip install .
+pip install -U rid-kit
 ```
 
-## Run an example
+### Run an example
 Change to the rid-kit directory
 
 ```bash
 cd rid-kit
 ```
 
-Run a example of Ala-dipeptide using dihedral as CVs (change to your own Bohrium account information)
+Run a example of Ala-dipeptide on Bohrium using dihedral as CVs (change to your own Bohrium account information)
 
 ```bash
 rid submit -i ./tests/data/000 -c ./rid/template/rid_gmx_dih.json -m ./rid/template/machine_bohrium_k8s.json
 ```
 
-You can also run the example on a Slurm machine (But you need to configure a conda enviroment on the slurm, see below)
+You can also run the example on a Slurm machine (But you need to configure a conda environment on the slurm, see [Installation](docs/source/install.md))
 
 ```bash
 rid submit -i ./tests/data/000 -c ./rid/template/rid_gmx_dih.json -m ./rid/template/machine_slurm_k8s.json
-```
-
-You can also run the example using distance as CVs (This will use constrained md as the mean force calculator)
-
-```bash
-rid submit -i ./tests/data/000 -c ./rid/template/rid_gmx_dis.json -m ./rid/template/machine_bohrium_k8s.json
 ```
 
 You can specify the workflow name by providing WORKFLOW_ID after "-d", for example:
@@ -76,11 +73,10 @@ rid submit -i ./tests/data/000 -c ./rid/template/rid_gmx_dih.json -m ./rid/templ
 
 **Note that the defined workflow-id should only contain lower case alphanumeric character, and specifal character "-".**
 
-Note that if you want to use constrained MD as the mean force calculator, apart from setting `method` to be `constrained` in the `label_config`, you should add `[ constraints ]` line corresponding to the `[ moleculartype ]` in your input `topology` file yourself, since gromacs specifies constraints information for each `[ moleculartype ]`.
+You can also specify other types of CVs such as distance or any customized CVs, for detailed explanation you can check 
+- [configure simulations](docs/source/rid_configuration.md)
 
-Also note that, since gromacs only supports constrained MD for `distance CV`, the constrained MD simulation in rid-kit only supports `distance CV` at this moment.
-
-## Continue from an old workflow
+### Continue from an old workflow
 
 Using `resubmit` to continue from an old workflow
 
@@ -95,9 +91,9 @@ If you want to resubmit from a particular `iteration` and `step`:
 rid resubmit -i your_dir -c path_to_rid.json -m path_to_machine.json OLD_ID -t ITERATION-ID -p STEP-KEY -d NEW_ID
 ```
 
- The `ITERATION-ID` is just `n`th iteration the workflow has been executed. The `STEP-KEY` in rid includes the following steps: `prep-exploration`, `run-exploration`, `prep-select`, `run-select`, `prep-label`, `run-label`, `collect`, `merge`, `train`, `model-devi`.
+ The `ITERATION-ID`(start from 1) is just `n`th iteration the workflow has been executed. The `STEP-KEY` in rid includes the following steps: `prep-exploration`, `run-exploration`, `prep-select`, `run-select`, `prep-label`, `run-label`, `label-stats`, `collect-data`, `merge-data`, `train`, `model-devi`.
 
-## Download files from the workflow
+### Download files from the workflow
 
 ```bash
 rid download WORKFLOW_ID -p STEP-KEY -f FILE_NAME -a ITERATION_START -e ITERATION_END -o OUTPUT_DIR
@@ -109,40 +105,27 @@ typically we want the trajectories information from each exploration step, suppo
 rid download WORKFLOW_ID -p run-exploration -f trajectory -a 1 -e 20 -o my_protein_out
 ```
 
-`ITERATION_START`(default 1) specifies from which iteration to start download, `ITERATION_END`(default 100) specifies to which iteration to end download. `OUTPUT_DIR`(default "./") is the output directories of the download.
+Detained explanation for other files in the Rid run can be found as follows:
+- [Download files](docs/source/rid_download.md)
 
-The `STEP-KEY` in rid includes the following steps: `prep-exploration`, `run-exploration`, `prep-select`, `run-select`, `prep-label`, `run-label`, `collect`, `merge`, `train`, `model-devi`.
-
-The `FILE_NAME` in `prep-exploration` includes `task_path`.
-
-The `FILE_NAME` in `run-exploration` includes `trajectory`, `conf_out`,`plm_out`,`md_log`,`bias_fig`, `model_devi_fig`, `dp_model_devi_fig`, `dp_model_devi`, `dp_selected_indices`, `dp_selected_confs`, `projected_fig`.
-
-The `FILE_NAME` in `prep-select` includes `cluster_fig`, `cluster_selection_index`, `cluster_selection_data`.
-
-The `FILE_NAME` in `run-select` includes `selected_confs`, `selected_cv_init`, `model_devi`, `selected_indices`,`selected_conf_tags`.
-
-The `FILE_NAME` in `prep-label` includes `task_path`.
-
-The `FILE_NAME` in `run-label` includes `plm_out`, `cv_forces`, `mf_info`, `mf_fig`,`md_log`.
-
-The `FILE_NAME` in `collect` includes `data_new`.
-
-The `FILE_NAME` in `merge` includes `data_raw`.
-
-The `FILE_NAME` in `train` includes `model`, `train_log`, `train_fig`.
-
-The `FILE_NAME` in `model_devi` includes `model_devi`, `model_devi_png`.
-
-## Reduce the dimension of free energy model
+### Reduce the dimension of free energy model
 After the Rid-kit Run, the workflow will generate several numbers of free energy models (.pb). The Rid-kit currently support MCMC to reduce the dimension of the free energy model, for example:
 ```bash
 rid redim -i ./test/data/models -c ./rid/template/rid_mcmc_cv_dih.json -m ./rid/template/machine_bohrium_k8s_mcmc.json
 ```
 Then you will get the projected free energy surface for ala-dipeptide
-- ![image](docs/pics/mcmc_ala_1cv.png)
-- ![image](docs/pics/mcmc_ala_2cv.png)
+![image1](docs/pics/mcmc_ala_1cv.png) | ![image2](docs/pics/mcmc_ala_2cv.png)
+---|---
 
-# Run the Workflow without k8s environment`
+You can also include .out file representing the CV output information inside the directory specified by `-i` parameter, this will plot the CV output upon the free energy surface.
+
+# Use Rid-kit with Local k8s
+
+A tutorial on using Rid-kit with k8s environment configured by your own can be found as follows:
+
+- [Tutorial](docs/source/tutorial.md)
+
+# Use Rid-kit without k8s environment
 To run the workflow without k8s environment, one can use the `Debug` mode of `Dflow`. In this mode however, one can not monitor the workflow in the `Argo` UI.
 ## Run an example
 If one wants to run the workflow on the `Slurm` machine locally, change to the rid-kit directory and type (change to your slurm configuration)
@@ -177,21 +160,10 @@ A more detailed description of RiD is published now, please see:
 >  
 > [2]  Wang, D., Wang, Y., Chang, J., Zhang, L., & Wang, H. (2022). Efficient sampling of high-dimensional free energy landscapes using adaptive reinforced dynamics. Nature Computational Science, 2(1), 20-29.
 
-# Use Rid-kit
+# Preparing files in the input directory
+Rules for preparing files in the input directory can be found in
+- [Preparing files](docs/source/prepare_files.md)
 
-A tutorial on using Rid-kit can be found as follows:
-
-- [Tutorial](/docs/source/tutorial.ipynb)
-
-# Enviroment settings
-
-Installation of the computation enviroment can be found in
-- [Installation](docs/source/install.md)
-
-# Installation-of-dp
-Installation of the DeepMD potential support can be found in
-- [Installation of dp](docs/source/install_dp.md)
-  
 # Configure simulations
 - [configure simulations](docs/source/rid_configuration.md)
 
@@ -200,6 +172,14 @@ Installation of the DeepMD potential support can be found in
 
 # Configure mcmc 
 - [configure mcmc dimension reduction](docs/source/mcmc_configuration.md)
+
+# Installation of environment on Slurm
+If you sumit the RiD workflow to Bohrium, you do not need to install the enviroment yourself, rather Bohrium will pull the docker images to do the computation. But if you submit the workflow to Slurm machine, you will have to install the computation environment, details of the installation can be found in
+- [Installation](docs/source/install.md)
+
+# Installation with DeepMD potential support
+Installation of the computation environment with DeepMD potential support on slurm machines can be found in
+- [Installation of dp](docs/source/install_dp.md)
 
 # Workflow Synopsis
 

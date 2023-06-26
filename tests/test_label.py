@@ -42,7 +42,8 @@ from mocked_ops import (
     make_mocked_json,
     MockedCheckLabelInputs,
     MockedPrepLabel,
-    MockedRunLabel
+    MockedRunLabel,
+    MockedLabelStats
 )
 
 from dflow.python import upload_packages
@@ -162,6 +163,7 @@ class TestMockedLabel(unittest.TestCase):
             MockedCheckLabelInputs,
             MockedPrepLabel,
             MockedRunLabel,
+            MockedLabelStats,
             prep_config = default_config,
             run_config = default_config
         )

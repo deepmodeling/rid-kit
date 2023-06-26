@@ -10,7 +10,7 @@ from dflow.python import (
     BigParameter
 )
 from rid.utils import save_txt, set_directory
-from rid.mcmc.walker import Walker, my_hist1d, my_hist2d, my_hist2d_path
+from rid.mcmc.walker import Walker, my_hist1d, my_hist2d, my_hist1d_path, my_hist2d_path
 from rid.select.model_devi import test_ef
 from rid.common.tensorflow.graph import load_graph
 try:
@@ -102,7 +102,10 @@ class MCMCRun(OP):
         elif cv_type == "dis":
             xx = np.linspace(0,10, bins)
             yy = np.linspace(0,10, bins)
-            pp_hist = np.zeros((fd, len(xx)))
+            if proj_mode == "cv":
+                pp_hist = np.zeros((fd, len(xx)))
+            elif proj_mode == "path":
+                pp_hist = np.zeros((2, len(xx)))
             pp_hist2d = np.zeros((1, len(xx), len(yy)))
             delta = 10.0 / (bins-1)
         else:
@@ -120,36 +123,56 @@ class MCMCRun(OP):
 
                 for ii in range(ns+1):
                     pp, ee, ff = walker.sample(test_ef)
-                    pp_hist_new = my_hist1d(pp, xx, delta, fd)
-                    pp_hist = (pp_hist * ii + pp_hist_new) / (ii+1)
-                    if not os.path.exists(mcmc_1cv_dir_name):
-                        os.makedirs(mcmc_1cv_dir_name)
-                    if np.mod(ii,int(ns/5)) == 0:
-                        zz = -np.log(pp_hist+1e-7)/beta
-                        # convert ev to kcal/mol
-                        zz *= f_cvt/kcal2kj
-                        zz = zz - np.min(zz)      
-                        for jj in range(fd):
-                            fp = open(mcmc_1cv_dir_name+"/"+mcmc_1cv_name.format(tag=jj), "a")
-                            for temp in zz[jj]:
-                                fp.write(str(temp)+'    ')
-                            fp.write('\n')
-                            fp.close()
                         
                     if proj_mode == "cv":
-                        if len(proj_cv_index) == 2:
-                            cv1 = proj_cv_index[0]
-                            cv2 = proj_cv_index[1]
-                            ##certain 2d
-                            pp_hist_new2d = my_hist2d(pp, xx, yy, delta, cv1, cv2)
-                            pp_hist2d = (pp_hist2d * ii + pp_hist_new2d) / (ii+1)
-                            if ii == ns:
-                                zz2d = np.transpose(-np.log(pp_hist2d+1e-10), (0,2,1))/beta
-                                # convert ev to kcal/mol
-                                zz2d *= f_cvt/kcal2kj
-                                zz2d = zz2d - np.min(zz2d)
-                                np.savetxt(mcmc_2cv_name,zz2d[0])
+                        # project on 1D CV
+                        pp_hist_new = my_hist1d(pp, xx, delta, fd)
+                        pp_hist = (pp_hist * ii + pp_hist_new) / (ii+1)
+                        if not os.path.exists(mcmc_1cv_dir_name):
+                            os.makedirs(mcmc_1cv_dir_name)
+                        if np.mod(ii,int(ns/5)) == 0:
+                            zz = -np.log(pp_hist+1e-7)/beta
+                            # convert ev to kcal/mol
+                            zz *= f_cvt/kcal2kj
+                            zz = zz - np.min(zz)      
+                            for jj in range(fd):
+                                fp = open(mcmc_1cv_dir_name+"/"+mcmc_1cv_name.format(tag=jj), "a")
+                                for temp in zz[jj]:
+                                    fp.write(str(temp)+'    ')
+                                fp.write('\n')
+                                fp.close()
+                        # project on 2D CV
+                        assert len(proj_cv_index) == 2
+                        cv1 = proj_cv_index[0]
+                        cv2 = proj_cv_index[1]
+                        ##certain 2d
+                        pp_hist_new2d = my_hist2d(pp, xx, yy, delta, cv1, cv2)
+                        pp_hist2d = (pp_hist2d * ii + pp_hist_new2d) / (ii+1)
+                        if ii == ns:
+                            zz2d = np.transpose(-np.log(pp_hist2d+1e-10), (0,2,1))/beta
+                            # convert ev to kcal/mol
+                            zz2d *= f_cvt/kcal2kj
+                            zz2d = zz2d - np.min(zz2d)
+                            np.savetxt(mcmc_2cv_name,zz2d[0])
                     elif proj_mode == "path":
+                        # project on 1D CV
+                        pp_hist_new = my_hist1d_path(pp, xx, delta, path_lm, path_list, proj_cv_index)
+                        pp_hist = (pp_hist * ii + pp_hist_new) / (ii+1)
+                        if not os.path.exists(mcmc_1cv_dir_name):
+                            os.makedirs(mcmc_1cv_dir_name)
+                        if np.mod(ii,int(ns/5)) == 0:
+                            zz = -np.log(pp_hist+1e-7)/beta
+                            # convert ev to kcal/mol
+                            zz *= f_cvt/kcal2kj
+                            zz = zz - np.min(zz)    
+                            # iterate over 2 path CV  
+                            for jj in range(2):
+                                fp = open(mcmc_1cv_dir_name+"/"+mcmc_1cv_name.format(tag=jj), "a")
+                                for temp in zz[jj]:
+                                    fp.write(str(temp)+'    ')
+                                fp.write('\n')
+                                fp.close()
+                        # project on 2D CV
                         pp_hist_new2d_path = my_hist2d_path(pp, xx, yy, delta, path_lm, path_list, proj_cv_index)
                         pp_hist2d = (pp_hist2d * ii + pp_hist_new2d_path) / (ii+1)
                         if ii == ns:

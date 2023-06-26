@@ -25,6 +25,7 @@ def reredim_rid(
         rid_config: str,
         machine_config: str,
         models: Optional[Union[str, List[str]]] = None,
+        plm_out: Optional[Union[str, List[str]]] = None,
         workflow_id_defined: Optional[str] = None,
         pod: Optional[str] = None
     ):
@@ -64,6 +65,14 @@ def reredim_rid(
         models_artifact = None
     else:
         models_artifact = upload_artifact([Path(p) for p in model_list], archive=None)
+        
+    plm_artifact =  None
+    if len(plm_out) != 0:
+        if isinstance(plm_out, str):
+            plm_artifact = upload_artifact(Path(plm_out), archive=None)
+        elif isinstance(plm_out, list):
+            plm_artifact = upload_artifact([Path(p) for p in plm_out], archive=None)
+    
     
     task_names = []
     for index in range(len(model_list)):
@@ -72,7 +81,8 @@ def reredim_rid(
     rid_steps = Step("rid-mcmc",
             mcmc_op,
             artifacts={
-                "models": models_artifact
+                "models": models_artifact,
+                "plm_out": plm_artifact
             },
             parameters={
                 "mcmc_config": mcmc_config,
@@ -91,9 +101,10 @@ def reredim_rid(
             pod_key = step["key"]
             if pod_key is not None:
                 pod_key_list = pod_key.split("-")
-                pod_step = "-".join(pod_key_list[1:-1])
+                pod_step_1 = "-".join(pod_key_list[1:-1])
+                pod_step_2 = "-".join(pod_key_list[1:])
                 if pod is not None:
-                    if pod_step == pod:
+                    if pod_step_1 == pod or pod_step_2 == pod:
                         restart_flag = 0
                 else:
                     if step["phase"] != "Succeeded":

@@ -98,6 +98,7 @@ class PrepRiD(OP):
                 "numb_cluster_lower": int,
                 "max_selection": int,
                 "numb_cluster_threshold": int,
+                "std_threshold": float,
                 "dt": float,
                 "output_freq": float,
                 "slice_mode": str,
@@ -191,6 +192,8 @@ class PrepRiD(OP):
         cluster_threshold = selection_config.pop("cluster_threshold")
         cluster_threshold_list = [cluster_threshold for _ in range(numb_walkers)]
         
+        std_threshold = label_config["std_threshold"]
+        
         if "type_map" in selection_config:
             type_map = selection_config["type_map"]
         else:
@@ -216,6 +219,7 @@ class PrepRiD(OP):
                 "numb_cluster_lower": selection_config.pop("numb_cluster_lower"),
                 "max_selection": selection_config.pop("max_selection"),
                 "numb_cluster_threshold": selection_config.pop("numb_cluster_threshold"),
+                "std_threshold": std_threshold,
                 "dt": dt,
                 "output_freq": output_freq,
                 "slice_mode": selection_config.pop("slice_mode"),

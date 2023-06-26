@@ -1,6 +1,6 @@
 # Tutorial
 
-In this tutorial, we will learn how to deploy `RiD-kit` with `dflow` and `kubenete` and run a simple case of alanine dipeptide.
+In this tutorial, we will learn how to deploy `RiD-kit` with your own `Kubenetes` enviroment and run a simple case of alanine dipeptide.
 
 
 ## Installation of `dflow` and `rid-kit`
@@ -192,4 +192,4 @@ If you want to resubmit from a particular `iteration` and `step`:
 rid resubmit -i your_dir -c path_to_rid.json -m path_to_machine.json OLD_ID -t ITERATION-ID -p STEP-KEY -d NEW_ID
 ```
 
-The `Workflow-ID` is something like `reinforced-dynamics-jq4jn` appeared in the argo UI. If the workflow is archived, its name will appear as somethinig like `a8463748-e15a-4f2c-882b-bfd981a76dac`. If you want to resubmit a archived workflow, you have to provide the archived ID rather than the initial ID. The `ITERATION-ID` is just `n`th iteration the workflow has been executed. The `STEP-KEY` in rid includes the following steps: `prep-exploration`, `run-exploration`, `prep-select`, `run-select`, `prep-label`, `run-label`, `post-label`, `collect`, `merge`, `train`.
+The `Workflow-ID` is something like `reinforced-dynamics-jq4jn` appeared in the argo UI. If the workflow is archived, its name will appear as somethinig like `a8463748-e15a-4f2c-882b-bfd981a76dac`. If you want to resubmit a archived workflow, you have to provide the archived ID rather than the initial ID. The `ITERATION-ID` is just `n`th iteration the workflow has been executed. The `STEP-KEY` in rid includes the following steps: `prep-exploration`, `run-exploration`, `prep-select`, `run-select`, `prep-label`, `run-label`, `label-stats`, `collect-data`, `merge-data`, `train`, `model-devi`.

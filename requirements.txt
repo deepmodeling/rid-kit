@@ -1,7 +1,8 @@
 protobuf==3.20.1
 scikit-learn
 pydflow
-tensorflow==2.8.0
+tensorflow==2.6.2
+pandas==1.4.4
 google
 mdtraj
 dpdata

@@ -42,11 +42,8 @@ export BOHRIUM_PROJECT_ID="<bohrium-project-id>"
 Install the latest rid-kit
 
 ```bash
-git clone git@github.com:PKUfjh/rid-kit.git
-cd rid-kit
-git checkout dflow
 pip install setuptools_scm
-pip install .
+pip install -U rid-kit
 ```
 
 ### Run an example

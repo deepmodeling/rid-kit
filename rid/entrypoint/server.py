@@ -41,16 +41,16 @@ def forward_ports():
         logger.info('Port "agro-server" has been launched and running.')
     else:
         port = PORTS["argo"]
-        os.system(f"nohup kubectl -n {argo_namespace} port-forward deployment/argo-server {port}:{port} --address 0.0.0.0 > /tmp/argo-server.out 2>&1 &")
+        os.system(f"nohup minikube kubectl -- -n {argo_namespace} port-forward deployment/argo-server {port}:{port} --address 0.0.0.0 > /tmp/argo-server.out 2>&1 &")
     
     if port_status["minio-server"] == 1:
         logger.info('Port "minio-server" has been launched and running.')
     else:
         port = PORTS["minio-server"]
-        os.system(f"nohup kubectl -n {argo_namespace} port-forward deployment/minio {port}:{port} --address 0.0.0.0 > /tmp/minio-server.out 2>&1 &")
+        os.system(f"nohup minikube kubectl -- -n {argo_namespace} port-forward deployment/minio {port}:{port} --address 0.0.0.0 > /tmp/minio-server.out 2>&1 &")
     
     if port_status["minio-ui"] == 1:
         logger.info('Port "minio-ui" has been launched and running.')
     else:
         port = PORTS["minio-ui"]
-        os.system(f"nohup kubectl -n {argo_namespace} port-forward deployment/minio {port}:{port} --address 0.0.0.0 > /tmp/minio-ui.out 2>&1 &")
+        os.system(f"nohup minikube kubectl -- -n {argo_namespace} port-forward deployment/minio {port}:{port} --address 0.0.0.0 > /tmp/minio-ui.out 2>&1 &")

@@ -1,7 +1,7 @@
 {
     "name": "test",
-    "numb_walkers": 2,
-    "numb_iters": 2,
+    "numb_walkers": 4,
+    "numb_iters": 5,
     "trust_lvl_1": 2,
     "trust_lvl_2": 3,
     "init_models": [],
@@ -18,7 +18,7 @@
         "nsteps": 50000,
         "type": "gmx",
         "temperature": 300,
-        "output_freq": 500,
+        "output_freq": 50,
         "ref-t": "300 300",
         "verlet-buffer-tolerance":"-1",
         "rlist": 1,
@@ -50,7 +50,7 @@
         "temperature":300,
         "method": "restrained",
         "type": "gmx",
-        "output_freq": 100,
+        "output_freq": 50,
         "ref-t": "300 300",
         "rlist": 1,
         "verlet-buffer-tolerance":"-1",
@@ -66,19 +66,20 @@
         "ntmpi": 1,
         "nt": 8,
         "max_warning": 2,
-        "kappas": [ 500, 500 ]
+        "kappas": [ 500, 500 ],
+        "std_threshold": 1.5
     },
 
     "Train": {
         "numb_models": 4,
-        "neurons": [ 200, 200, 200, 200 ],
+        "neurons": [40, 40, 40, 40],
         "resnet": true,
         "batch_size": 128,
         "epoches": 8000,
         "init_lr": 0.0008,
         "decay_steps": 120,
         "decay_rate": 0.96,
-        "drop_out_rate": 0,
+        "drop_out_rate": 0.1,
         "numb_threads": 8,
         "use_mix": false,
         "restart": false

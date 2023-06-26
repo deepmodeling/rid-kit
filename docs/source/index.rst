@@ -20,13 +20,16 @@ Contents
 .. toctree::
    :maxdepth: 2
 
-   Tutorial <tutorial>
-   Environment settings  <install>
-   Installation with DP potential <install_dp>
+   Use Rid-kit with Local k8s <tutorial>
+   Prepare files for simulations <prepare_files>
    Configure simulations <rid_configuration>
    Configure machine resources <rid_machine>
-   Rid API <api/api>
+   Download files from simulation <rid_download>
+   Configure mcmc dimension reduction <mcmc_configuration>
+   Installation of environment on Slurm  <install>
+   Installation with DeepMD potential support <install_dp>
    Trouble Shooting <troubleshooting/index> 
+   Rid API <api/api>
 
 Indices and tables
 ==================

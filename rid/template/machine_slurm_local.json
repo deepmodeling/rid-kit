@@ -57,6 +57,7 @@
         "run_select_config": "local_machine",
         "prep_data_config": "local_machine",
         "run_train_config": "local_machine",
+        "model_devi_config": "local_machine",
         "workflow_steps_config": "local_machine_cpu"
     }
 }

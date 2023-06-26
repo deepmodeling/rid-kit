@@ -1,13 +1,14 @@
 # rid task name format
 argo_namespace = "argo"
 walker_tag_fmt = "{idx:03d}"
-init_conf_name = "conf_{idx:03d}.gro"
+init_conf_gmx_name = "conf_{idx:03d}.gro"
+init_conf_lmp_name = "conf_{idx:03d}.lmp"
 init_input_name = "input_{idx:03d}.lammps"
 explore_task_pattern = "{:03d}"
 explore_task_file = "explore_{walker:03d}.pkl"
 cluster_selection_data_name = "cls_sel.out.npy"
 cluster_selection_index_name = "cls_sel.ndx.npy"
-sel_ndx_name = "sel.ndx"
+sel_ndx_name = "sel.ndx.npy"
 cv_init_label = "cv_init_{walker:03d}_{idx:d}.out"
 model_devi_name = "model_devi.txt"
 label_task_pattern = "{:03d}"
@@ -58,20 +59,33 @@ N_grid = 100
 
 # Dp config file
 dp_config_name = "dp_config"
+dp_sel_ndx = "dp_sel.ndx"
 
 # figure file name
 mf_fig = "mf_average.png"
 bias_fig = "bias.png"
 model_devi_fig = "model_devi.png"
+new_model_devi_fig = "new_model_devi.png"
 cluster_fig = "cluster.png"
 train_fig = "train_{tag}.png"
+dp_model_devi_fig = "dp_model_devi.png"
+mf_std_fig = "mf_std.png"
+
+# MCMC file name
+mcmc_1cv_dir_name = "mcmc_1cv"
+mcmc_2cv_name = "mcmc_2cv.dat"
+mcmc_1cv_name = "mcmc_1cv_{tag}.dat"
+mcmc_2cv_fig = "mcmc_2cv.png"
+mcmc_1cv_fig = "mcmc_1cv_{tag}.png"
+mcmc_2cv_fig_separate = "mcmc_2cv_{tag}.png"
 
 # Units
-kb = 8.617333E-5
+kb = 8.617333E-5 # ev
 kbT = (8.617333E-5) * 300
 beta = 1.0 / kbT
-f_cvt = 96.485
+f_cvt = 96.485 # ev to kj/mol
 inverse_f_cvt = 1 / f_cvt
+kcal2kj = 4.184
 
 # precision
 model_devi_precision = "%.6e"

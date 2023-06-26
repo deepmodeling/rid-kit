@@ -7,7 +7,8 @@ from dflow.python import (
     OPIO,
     OPIOSign,
     Artifact,
-    Parameter
+    Parameter,
+    BigParameter
 )
 from rid.constants import (
         gmx_conf_name,
@@ -54,10 +55,10 @@ class RunLabel(OP):
             {
                 "task_path": Artifact(Path),
                 "forcefield": Artifact(Path, optional=True),
-                "label_config": Dict,
-                "cv_config": Dict,
+                "label_config": BigParameter(Dict),
+                "cv_config": BigParameter(Dict),
                 "at": Artifact(Path, optional=True),
-                "task_name": str,
+                "task_name": BigParameter(str),
                 "tail": Parameter(float, default=0.9),
                 "index_file": Artifact(Path, optional=True),
                 "dp_files": Artifact(List[Path], optional=True),
@@ -70,11 +71,12 @@ class RunLabel(OP):
     def get_output_sign(cls):
         return OPIOSign(
             {
-                "plm_out": Artifact(Path),
-                "cv_forces": Artifact(Path),
-                "mf_info": Artifact(Path,optional=True),
-                "mf_fig": Artifact(Path),
-                "md_log": Artifact(Path)
+                "plm_out": Artifact(Path, archive = None),
+                "trajectory": Artifact(Path, archive = None),
+                "cv_forces": Artifact(Path, archive = None),
+                "mf_info": Artifact(Path,optional=True, archive = None),
+                "mf_fig": Artifact(Path, archive = None),
+                "md_log": Artifact(Path, archive = None)
             }
         )
 
@@ -181,15 +183,17 @@ class RunLabel(OP):
         traj_path = None
         if op_in["label_config"]["type"] == "gmx":
             mdrun_log = gmx_mdrun_log
-            if os.path.exists(op_in["task_path"].joinpath(gmx_xtc_name)):
-                traj_path = op_in["task_path"].joinpath(gmx_xtc_name)
+            if "traj_output" in op_in["label_config"] and op_in["label_config"]["traj_output"] == "True":
+                if os.path.exists(op_in["task_path"].joinpath(gmx_xtc_name)):
+                    traj_path = op_in["task_path"].joinpath(gmx_xtc_name)
             if op_in["label_config"]["method"] == "constrained":
                 frame_coords = op_in["task_path"].joinpath(gmx_coord_name)
                 frame_forces = op_in["task_path"].joinpath(gmx_force_name)
         elif op_in["label_config"]["type"] == "lmp":
             mdrun_log = lmp_mdrun_log
-            if os.path.exists(op_in["task_path"].joinpath("out.dump")):
-                traj_path = op_in["task_path"].joinpath("out.dump")
+            if "traj_output" in op_in["label_config"] and op_in["label_config"]["traj_output"] == "True":
+                if os.path.exists(op_in["task_path"].joinpath("out.dump")):
+                    traj_path = op_in["task_path"].joinpath("out.dump")
         
         conf = None
         topology = None
@@ -218,6 +222,7 @@ class RunLabel(OP):
         op_out = OPIO(
             {
                 "plm_out": plm_out,
+                "trajectory": traj_path,
                 "cv_forces": mf_out["cv_forces"],
                 "mf_info":  mf_out["mf_info"],
                 "mf_fig": Path(op_in["task_name"]).joinpath(mf_fig),

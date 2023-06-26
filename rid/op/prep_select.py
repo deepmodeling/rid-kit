@@ -53,9 +53,9 @@ class PrepSelect(OP):
             {
                 "numb_cluster": int,
                 "cluster_threshold": float,
-                "cluster_fig": Artifact(Path),
-                "cluster_selection_index": Artifact(Path),
-                "cluster_selection_data": Artifact(Path)
+                "cluster_fig": Artifact(Path, archive = None),
+                "cluster_selection_index": Artifact(Path, archive = None),
+                "cluster_selection_data": Artifact(Path, archive = None)
             }
         )
 

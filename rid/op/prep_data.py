@@ -43,10 +43,11 @@ class CollectData(OP):
         ) -> OPIO:
         cv_forces = []
         for idx in range(len(op_in["cv_forces"])):
-            cv_force = load_txt(op_in["cv_forces"][idx])
-            cv_forces = np.append(cv_forces, cv_force)
+            if op_in["cv_forces"][idx]:
+                cv_force = load_txt(op_in["cv_forces"][idx])
+                cv_forces = np.append(cv_forces, cv_force)
         if op_in["cv_forces"]:
-            cv_forces = np.reshape(cv_forces, [len(op_in["cv_forces"]), -1])
+            cv_forces = np.reshape(cv_forces, [-1, len(cv_force)])
             data = cv_forces
         else:
             data = np.array([])

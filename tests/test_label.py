@@ -39,9 +39,11 @@ from mocked_ops import (
     make_mocked_init_data,
     make_mocked_init_models,
     make_mocked_init_confs,
+    make_mocked_json,
     MockedCheckLabelInputs,
     MockedPrepLabel,
-    MockedRunLabel
+    MockedRunLabel,
+    MockedLabelStats
 )
 
 from dflow.python import upload_packages
@@ -140,7 +142,8 @@ class TestMockedLabel(unittest.TestCase):
         self.kappas = [500.]*3
         self.angular_mask = [0,0,0]
         self.tail = 0.9
-        self.conf_tags = [{"conf_000.gro":"000_000"},{"conf_001.gro":"001_001"},{"conf_002.gro":"002_002"}]
+        self.init_conf_tags = make_mocked_json("conf.json", {"conf_000.gro":"000_000", "conf_001.gro":"001_001", "conf_002.gro":"002_002"})
+        self.conf_tags = upload_artifact(self.init_conf_tags)
         self.label_config = label_config
         self.cv_config = cv_config
         self.data_out = "label"
@@ -149,6 +152,7 @@ class TestMockedLabel(unittest.TestCase):
 
     def tearDown(self):
         clear_files(self.init_models)
+        clear_files(self.init_conf_tags)
         clear_files(self.init_confs)
         clear_dir(self.center[0])
         clear_dir(self.data_out)
@@ -159,6 +163,7 @@ class TestMockedLabel(unittest.TestCase):
             MockedCheckLabelInputs,
             MockedPrepLabel,
             MockedRunLabel,
+            MockedLabelStats,
             prep_config = default_config,
             run_config = default_config
         )
@@ -169,10 +174,10 @@ class TestMockedLabel(unittest.TestCase):
                 "label_config" : self.label_config,
                 "cv_config" : self.cv_config,
                 "tail": self.tail,
-                "conf_tags": self.conf_tags,
                 "block_tag" : self.block_tag
             },
             artifacts = {
+                "conf_tags": self.conf_tags,
                 "models" : None,
                 "forcefield": None,
                 "topology" : None,

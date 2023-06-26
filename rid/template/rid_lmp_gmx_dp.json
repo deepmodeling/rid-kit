@@ -1,0 +1,101 @@
+{
+    "name": "rid-mixed-gmx-lmp",
+    "numb_walkers": 2,
+    "numb_iters": 2,
+    "trust_lvl_1": 2,
+    "trust_lvl_2": 4,
+    "init_models": [],
+    
+    "CV": {
+        "mode": "custom",
+        "selected_atomid":[[161,165],[124,156],[124,161],[156,165],[107,161],[139,161],[153,161],[121,162],[121,163],[121,164],[138,161],[154,161],[153,165]],
+        "angular_mask": [0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "weights": [1,1,1,1,1,1,1,1,1,1,1,1,1],
+        "units": "A",
+        "cv_file": ["colvar", "plmpath.pdb"]
+    },
+
+    "SelectorConfig": {
+        "numb_cluster_lower": 6,
+        "numb_cluster_upper": 10,
+        "cluster_threshold": 2.0,
+        "max_selection": 20,
+        "numb_cluster_threshold": 5,
+        "slice_mode": "dpdata",
+        "type_map": ["Si", "O", "H", "Hf", "Cl"]
+    },
+
+    "ExploreMDConfig": {
+        "type": "lmp",
+        "temperature": 372,
+        "dp_model": ["1a0.pb","1a1.pb","1a2.pb","1a3.pb"],
+        "dp_model_devi_out": "model_devi.out",
+        "dp_model_devi_f_lo": 0.14,
+        "dp_model_devi_f_hi": 0.26,
+        "dp_model_max_selection": 20,
+        "proj_info": {
+            "proj_mode": "path",
+            "proj_cv_index": [0,1,2,3],
+            "path_list": [[2.38722,0.99005,3.99886,2.08580],[2.64067,1.20917,3.73831,1.86004],[2.90639,1.50430,3.47935,1.65185],
+            [3.18130,1.83919,3.22240,1.46871],[3.46322,2.19574,2.96795,1.32108],[3.75057,2.56491,2.71672,1.22191],
+            [4.04218,2.94198,2.46968,1.18344],[4.33720,3.32424,2.22824,1.21147],[4.63498,3.71010,1.99443,1.30170]],
+            "path_lm": 0.25
+        },
+        "inputfile":"input_explore.lammps",
+        "dt": 0.001,
+        "nsteps": 10000,
+        "output_freq": 100,
+        "ntmpi": 1,
+        "nt": 12,
+        "max_warning": 2
+    },
+
+    "LabelMDConfig": {
+        "type": "gmx",
+        "method": "constrained",
+        "temperature": 372,
+        "dp_model": ["1a0.pb"],
+        "nsteps": 10000,
+        "ref-t": "372 0",
+        "gen-vel": "yes",
+        "gen-temp": "372",
+        "tc-grps": "top bottom",
+        "dt": 0.001,
+        "tau-t": "0.05 0.05",
+        "constraints": "none", 
+        "comm-grps": "top",
+        "output_freq": 100,
+        "output_mode": "both",
+        "freezegrps": "bottom",
+        "freezedim": "Y Y Y",
+        "pcoupl": "no",
+        "ntmpi": 1,
+        "coulombtype": "cutoff",
+        "rlist": 1,
+        "rvdw": 0.7,
+        "rvdw-switch": 0,
+        "rcoulomb": 0.7,
+        "rcoulomb-switch": 0,
+        "nstenergy": 1000,
+        "nt": 12,
+        "max_warning": 3,
+        "std_threshold": 5.0
+    },
+
+    "Train": {
+        "numb_models": 4,
+        "neurons": [120, 120, 120, 120],
+        "resnet": true,
+        "batch_size": 4096,
+        "epoches": 30000,
+        "init_lr": 0.001,
+        "decay_steps": 200,
+        "decay_rate": 0.96,
+        "train_thread": 8,
+        "drop_out_rate": 0.1,
+        "numb_threads": 8,
+        "use_mix": false,
+        "restart": false,
+        "decay_steps_inner": 200
+    }
+}

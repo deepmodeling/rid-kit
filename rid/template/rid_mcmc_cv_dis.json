@@ -1,0 +1,20 @@
+{
+        "name": "rid-mcmc",
+        "init_models": ["model_000.pb","model_001.pb","model_002.pb","model_003.pb"],
+        
+        "MCMC_Config": {
+            "cv_dimension": 20,
+            "numb_steps": 100000,
+            "numb_walkers": 2000,
+            "temperature": 300,
+            "cv_upper_bound": [4.5,5.0,6.0,4.2,4.0,4.0,3.5,4.0,4.0,3.5,3.2,3.0,3.5,3.5,4.0,4.5,4.5,3.75,3.8,4.0],
+            "cv_lower_bound": [1.0,2.0,3.5,2.8,2.5,2.0,1.2,1.5,1.5,1.0,1.8,0.5,1.0,1.0,1.5,1.5,1.5,1.75,2.2,2.6],
+            "proj_info": {
+                "proj_mode": "cv",
+                "proj_cv_index": [0,1]
+            },
+            "cv_type": "dis",
+            "bins": 101
+        }
+    
+}

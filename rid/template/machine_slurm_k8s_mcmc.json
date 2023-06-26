@@ -1,0 +1,50 @@
+{
+    "resources": {
+        "local_k8s": {
+            "template_config" : {
+                "image": "registry.dp.tech/public/pkufjhdocker/rid-tf-cpu:stable", 
+                "image_pull_policy" : "IfNotPresent",
+                "requests" : {"ephemeral-storage": "4Gi"}
+            }
+        },
+        "remote_slurm": {
+            "template_config":{
+                "requests" : {"ephemeral-storage": "4Gi"}
+            },
+            "executor":{
+            "image": "dptechnology/dpdispatcher:latest",
+            "machine_dict":{
+                "batch_type": "Slurm",
+                "context_type": "SSHContext",
+                "local_root" : "./",
+                "remote_root": "",
+                "remote_profile":{
+                    "hostname": "",
+                    "username": "",
+                    "password": "",
+                    "port": "",
+                    "timeout": 20
+                }
+            },
+            "resources_dict":{
+                "number_node": 1,
+                "cpu_per_node": 8,
+                "gpu_per_node": 1,
+                "queue_name": "",
+                "group_size": 1,
+                "custom_flags": [
+                    "#SBATCH --time=120:00:00",
+                    "#SBATCH --exclude=3090-[000,007]"
+                   ],
+                "source_list": ["/path/to/rid.env"]
+            }
+        }
+        }
+    },
+
+    "tasks": {
+        "mcmc_run_config": "remote_slurm",
+        "mcmc_plot_config": "remote_slurm",
+        "workflow_steps_config": "local_k8s"
+    }
+}

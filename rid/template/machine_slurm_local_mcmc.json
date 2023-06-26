@@ -1,0 +1,56 @@
+{
+    "resources": {
+        "local_machine": {
+            "executor":{
+            "image": "dptechnology/dpdispatcher:latest",
+            "merge_sliced_step": "True",
+            "machine_dict":{
+                "batch_type": "Slurm",
+                "context_type": "Local",
+                "local_root" : "./",
+                "remote_root": ""
+            },
+            "resources_dict":{
+                "number_node": 1,
+                "cpu_per_node": 8,
+                "gpu_per_node": 1,
+                "queue_name": "GPU",
+                "group_size": 1,
+                "custom_flags": [
+                    "#SBATCH --time=120:00:00"
+                   ],
+                "source_list": ["/path/to/rid.env"]
+            }
+        }
+        },
+        "local_machine_cpu": {
+            "executor":{
+            "image": "dptechnology/dpdispatcher:latest",
+            "merge_sliced_step": "True",
+            "machine_dict":{
+                "batch_type": "Slurm",
+                "context_type": "Local",
+                "local_root" : "./",
+                "remote_root": ""
+            },
+            "resources_dict":{
+                "number_node": 1,
+                "cpu_per_node": 8,
+                "gpu_per_node": 0,
+                "queue_name": "C032M0128G",
+                "group_size": 1,
+                "custom_flags": [
+                    "#SBATCH --time=120:00:00"
+                   ],
+                "source_list": ["/path/to/rid.env"]
+            }
+        }
+        }
+    },
+
+    "tasks": {
+        "mcmc_run_config": "remote_slurm",
+        "mcmc_plot_config": "remote_slurm",
+        "workflow_steps_config": "local_k8s"
+    }
+}

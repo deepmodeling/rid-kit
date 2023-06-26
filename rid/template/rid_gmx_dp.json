@@ -81,7 +81,8 @@
         "nstenergy": 100,
         "nt": 8,
         "max_warning": 3,
-        "kappas": [500, 500]
+        "kappas": [500, 500],
+        "std_threshold": 5.0
     },
 
     "Train": {

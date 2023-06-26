@@ -51,15 +51,27 @@ export PLUMED_KERNEL=${CONDA_PREFIX}/lib/libplumedKernel.@SOEXT@
 ### Install gromacs 2022.4
 Note that in order to compile gromacs with GPU support, you need to have CUDA toolkit installed. In slurm enviroment, if the software is managed by `Enviroment Module`, one can load CUDA toolkits such as `module load cuda/11.4`. Also note that in most slurm environment, there is no network connection at computing node, but if you want to compile gromacs without fftw installed, you will have to compile it on login-in node where network connection is on.
 
+However if the network is not on in the slurm machine, you can first compile fftw manually by
+```bash
+cd fftw-3.3.8
+./configure --prefix=$CONDA_PREFIX
+make
+make install
+```
+
 ```bash
 tar -xzvf gromacs-2022.4.tar.gz
 cd gromacs-2022.4
 plumed patch -p # make sure you use the correct gromacs version
 mkdir build
 cd build
+# if the network is on
 cmake .. -DGMX_BUILD_OWN_FFTW=ON \
                 -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
                 -DGMX_GPU=CUDA
+# if the network is off
+cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
+            -DGMX_GPU=CUDA
 make -j 4
 make install
 ```

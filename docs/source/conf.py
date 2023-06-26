@@ -25,6 +25,8 @@ author = 'Yanze Wang, Jiahao Fan'
 # The full version, including alpha/beta/rc tags
 release = '2.0'
 
+nbsphinx_allow_errors = True
+
 
 # -- General configuration ---------------------------------------------------
 

@@ -10,6 +10,16 @@ add-apt-repository -y ppa:ubuntu-toolchain-r/test
 apt-get update
 apt-get install -y libstdc++6
 ```
+Or in slurm machine you might encounter this error in conda enviroment
+```
+/data1/ddwang/software/anaconda3/envs/rid-drop/lib/libgrpc.so.20: undefined reference to `std::__throw_bad_array_new_length()@GLIBCXX_3.4.29'
+/data1/ddwang/software/anaconda3/envs/rid-drop/lib/libtensorflow_framework.so.2: undefined reference to `std::__cxx11::basic_ostringstream<char, std::char_traits<char>, std::allocator<char> >::basic_ostringstream()@GLIBCXX_3.4.26'
+/data1/ddwang/software/anaconda3/envs/rid-drop/lib/libtensorflow_cc.so.2: undefined reference to `std::__cxx11::basic_stringstream<char, std::char_traits<char>, std::allocator<char> >::basic_stringstream()@GLIBCXX_3.4.26'
+```
+Try to install libgcc in conda
+```
+conda install libgcc
+```
 
 **You may encounter the error when compiling gromacs**
 ```

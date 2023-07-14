@@ -2,6 +2,7 @@ name: rid python package test
 
 on:
   - pull_request
+  - push
 
 jobs:
   Unittest:

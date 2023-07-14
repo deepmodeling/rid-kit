@@ -159,6 +159,9 @@ def main_parser() -> argparse.ArgumentParser:
     parser_exp.add_argument(
         "--machine", "-m", help="Machine configuration.", dest="machine"
     )
+    parser_exp.add_argument(
+        "--id", "-d", help="Workflow user defined ID", default = None, dest="id"
+    )
     
     # Label
     parser_label = subparsers.add_parser(
@@ -174,6 +177,9 @@ def main_parser() -> argparse.ArgumentParser:
     )
     parser_label.add_argument(
         "--machine", "-m", help="Machine configuration.", dest="machine"
+    )
+    parser_label.add_argument(
+        "--id", "-d", help="Workflow user defined ID", default = None, dest="id"
     )
     
     # Relabel
@@ -194,6 +200,9 @@ def main_parser() -> argparse.ArgumentParser:
     parser_relabel.add_argument(
         "--machine", "-m", help="Machine configuration.", dest="machine"
     )
+    parser_relabel.add_argument(
+        "--id", "-d", help="Workflow user defined ID", default = None, dest="id"
+    )
     
     # train
     parser_train = subparsers.add_parser(
@@ -209,6 +218,9 @@ def main_parser() -> argparse.ArgumentParser:
     )
     parser_train.add_argument(
          "--machine", "-m", help="Machine configuration.", dest="machine"
+    )
+    parser_train.add_argument(
+        "--id", "-d", help="Workflow user defined ID", default = None, dest="id"
     )
 
     # NN dimension reduction.
@@ -398,6 +410,7 @@ def main():
             topology = top_file,
             rid_config = args.config,
             machine_config = args.machine,
+            workflow_id_defined = args.id,
             models = models,
             forcefield = forcefield,
             index_file = index_file,
@@ -413,6 +426,7 @@ def main():
             topology = top_file,
             rid_config = args.config,
             machine_config = args.machine,
+            workflow_id_defined = args.id,
             models = models,
             forcefield = forcefield,
             index_file = index_file,
@@ -429,6 +443,7 @@ def main():
             topology = top_file,
             rid_config = args.config,
             machine_config = args.machine,
+            workflow_id_defined = args.id,
             models = models,
             forcefield = forcefield,
             index_file = index_file,
@@ -466,7 +481,8 @@ def main():
         train_rid(
             data = data_file,
             rid_config = args.config,
-            machine_config = args.machine
+            machine_config = args.machine,
+            workflow_id_defined = args.id
         )
     elif args.command == "download":
         logger.info("Downloading files ...")

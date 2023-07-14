@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 from rid.utils import load_json
+from typing import Optional
 from copy import deepcopy
 
 from dflow import (
@@ -29,7 +30,8 @@ from rid.constants import model_tag_fmt
 def train_rid(
         data: str,
         rid_config: str,
-        machine_config: str
+        machine_config: str,
+        workflow_id_defined: Optional[str] = None
     ):
     with open(machine_config, "r") as mcg:
         machine_config_dict = json.load(mcg)
@@ -81,6 +83,6 @@ def train_rid(
         key = "run-train"+"-{{item}}",
         **run_train_config,
     )
-    wf = Workflow("rid-train", pod_gc_strategy="OnPodSuccess", parallelism=10)
+    wf = Workflow("rid-train", pod_gc_strategy="OnPodSuccess", parallelism=10, id = workflow_id_defined)
     wf.add(train_steps)
     wf.submit()

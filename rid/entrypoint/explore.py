@@ -31,6 +31,7 @@ def explore_rid(
         topology: Optional[str],
         rid_config: str,
         machine_config: str,
+        workflow_id_defined: Optional[str] = None,
         models: Optional[Union[str, List[str]]] = None,
         forcefield: Optional[str] = None,
         index_file: Optional[str] = None,
@@ -190,7 +191,7 @@ def explore_rid(
                 "block_tag" : "iter-001"
             },
         )
-    wf = Workflow("rid-exploration", pod_gc_strategy="OnPodSuccess", parallelism=50)
+    wf = Workflow("rid-exploration", pod_gc_strategy="OnPodSuccess", parallelism=50, id = workflow_id_defined)
     wf.add(prep_rid)
     wf.add(exploration_steps)
     wf.submit()

@@ -55,6 +55,7 @@ cd rid-kit
 
 Run a example of Ala-dipeptide on Bohrium using dihedral as CVs (change to your own Bohrium account information)
 
+**Note** that the **program_id** information in machine.json file should be **int** type rather than **string** type
 ```bash
 rid submit -i ./tests/data/000 -c ./rid/template/rid_gmx_dih.json -m ./rid/template/machine_bohrium_k8s.json
 ```

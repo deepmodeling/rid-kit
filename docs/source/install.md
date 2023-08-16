@@ -12,8 +12,14 @@ The `enviroment` of rid-kit software is a bit complex, it uses `dflow` to manage
 ### Install tensorflow's C++ interface and other necessary packages
 We recommend using conda to manage the python enviroment. 
 Use the command
+```bash
+conda create -n rid-drop python=3.9 libtensorflow_cc=2.6.2=*cuda110* tensorflow=2.6.2=*cuda110* -c conda-forge
 ```
-conda create -n rid-drop python=3.9 libtensorflow_cc=2.6.2=*cuda110* tensorflow=2.6.2=*cuda110* nccl mdtraj matplotlib==3.6.1 scikit-learn cmake dpdata parmed cython -c conda-forge
+```bash
+conda activate rid-drop
+conda install mdtraj nccl -c conda-forge
+pip install cmake cython
+pip install matplotlib parmed scikit-learn dpdata
 ```
 to get the compiled libtensorflow_cc and other necessary packages.
 After installation, activate the enviroment and set library path

@@ -128,6 +128,13 @@ A tutorial on using Rid-kit with k8s environment configured by your own can be f
 
 # Use Rid-kit without k8s environment
 To run the workflow without k8s environment, one can use the `Debug` mode of `Dflow`. In this mode however, one can not monitor the workflow in the `Argo` UI.
+## Install the computation environment
+If you want to run Rid-kit on a local machine or server, without `k8s` enviroment, you need to configure a conda environment on your machine, see [Installation](docs/source/install.md))
+## Install the latest rid-kit
+```bash
+pip install setuptools_scm
+pip install -U rid-kit
+```
 ## Run an example
 If one wants to run the workflow on the `Slurm` machine locally, change to the rid-kit directory and type (change to your slurm configuration)
 

@@ -86,6 +86,7 @@ Set the enviroment variables
 source ${CONDA_PREFIX}/bin/GMXRC
 ```
 
+**If you want to install Lammps into your enviroment, you can execute the following part, otherwise neglect it**
 ### Install Lammps-stable_23Jun2022_update1
 ```bash
 tar -xzvf stable_23Jun2022_update1.tar.gz

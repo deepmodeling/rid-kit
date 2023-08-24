@@ -38,6 +38,8 @@ export BOHRIUM_PASSWORD="<bohrium-password>"
 export BOHRIUM_PROJECT_ID="<bohrium-project-id>"
 ```
 
+**Note** that the "bohrium-project-id" is the specific ID related to your own Bohrium account, which can be created in [Bohrium Project](https://bohrium.dp.tech/projects) after login into your own account. You can create multiple project IDs for your account.
+
 ### Install Rid-kit
 Install the latest rid-kit
 
@@ -53,9 +55,12 @@ Change to the rid-kit directory
 cd rid-kit
 ```
 
-Run a example of Ala-dipeptide on Bohrium using dihedral as CVs (change to your own Bohrium account information)
+Run a example of Ala-dipeptide on Bohrium using dihedral as CVs:
 
-**Note** that the **program_id** information in machine.json file should be **int** type rather than **string** type
+In "machine_bohrium_k8s.json" file, set "email", "password" and "program_id" to your own **Bohrium account** information. 
+**Note** that the **program_id** information in machine.json file should be **int** type rather than **string** type.
+
+Then run this command to submit the jobs
 ```bash
 rid submit -i ./tests/data/000 -c ./rid/template/rid_gmx_dih.json -m ./rid/template/machine_bohrium_k8s.json
 ```

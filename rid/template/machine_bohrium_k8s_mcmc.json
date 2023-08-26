@@ -27,7 +27,7 @@
                         "job_group_id": "",
                         "log_file": "tmp_log",
                         "job_name": "train",
-                        "scass_type":"c12_m92_1 * NVIDIA V100",
+                        "scass_type":"c8_m32_1 * NVIDIA V100",
                         "platform": "ali",
                         "image_name":"registry.dp.tech/public/pkufjhdocker/rid-tf-gpu:stable"
                         }
@@ -58,7 +58,7 @@
                         "job_group_id": "",
                         "log_file": "tmp_log",
                         "job_name": "train",
-                        "scass_type":"c12_m92_1 * NVIDIA V100",
+                        "scass_type":"c8_m32_1 * NVIDIA V100",
                         "platform": "ali",
                         "image_name":"registry.dp.tech/public/pkufjhdocker/rid-tf-cpu:stable"
                         }

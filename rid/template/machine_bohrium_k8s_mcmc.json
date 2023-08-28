@@ -24,7 +24,6 @@
                     "input_data":{
                         "api_version":2,
                         "job_type": "container",
-                        "job_group_id": "",
                         "log_file": "tmp_log",
                         "job_name": "train",
                         "scass_type":"c8_m32_1 * NVIDIA V100",
@@ -55,7 +54,6 @@
                     "input_data":{
                         "api_version":2,
                         "job_type": "container",
-                        "job_group_id": "",
                         "log_file": "tmp_log",
                         "job_name": "train",
                         "scass_type":"c8_m32_1 * NVIDIA V100",

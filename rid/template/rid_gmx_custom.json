@@ -1,0 +1,86 @@
+{
+    "name": "test",
+    "numb_walkers": 4,
+    "numb_iters": 5,
+    "trust_lvl_1": 2,
+    "trust_lvl_2": 3,
+    "init_models": [],
+    
+    "CV": {
+        "mode": "custom",
+        "angular_mask": [ 1, 1 ],
+        "weights": [ 1, 1 ],
+        "cv_file":["plumed.dat"]
+    },
+
+    "ExploreMDConfig": {
+        "nsteps": 50000,
+        "type": "gmx",
+        "temperature": 300,
+        "output_freq": 50,
+        "ref-t": "300 300",
+        "verlet-buffer-tolerance":"-1",
+        "rlist": 1,
+        "rvdw": 0.9,
+        "rvdw-switch": 0,
+        "rcoulomb": 0.9,
+        "rcoulomb-switch": 0,
+        "epsilon-r":1,
+        "epsilon-rf":80,
+        "dt": 0.002,
+        "fourierspacing": "0.12",
+        "output_mode": "single",
+        "ntmpi": 1,
+        "nt": 8,
+        "max_warning": 2
+    },
+
+    "SelectorConfig": {
+        "numb_cluster_lower": 12,
+        "numb_cluster_upper": 22,
+        "cluster_threshold": 1.5,
+        "max_selection": 30,
+        "numb_cluster_threshold": 6,
+        "slice_mode": "gmx"
+    },
+
+    "LabelMDConfig": {
+        "nsteps": 50000,
+        "temperature":300,
+        "method": "restrained",
+        "type": "gmx",
+        "output_freq": 50,
+        "ref-t": "300 300",
+        "rlist": 1,
+        "verlet-buffer-tolerance":"-1",
+        "rvdw": 0.9,
+        "rvdw-switch": 0,
+        "rcoulomb": 0.9,
+        "rcoulomb-switch": 0,
+        "epsilon-r":1,
+        "epsilon-rf":80,
+        "dt": 0.002,
+        "fourierspacing": "0.12",
+        "output_mode": "single",
+        "ntmpi": 1,
+        "nt": 8,
+        "max_warning": 2,
+        "kappas": [ 500, 500 ],
+        "std_threshold": 1.5
+    },
+
+    "Train": {
+        "numb_models": 4,
+        "neurons": [40, 40, 40, 40],
+        "resnet": true,
+        "batch_size": 128,
+        "epoches": 8000,
+        "init_lr": 0.0008,
+        "decay_steps": 120,
+        "decay_rate": 0.96,
+        "drop_out_rate": 0.1,
+        "numb_threads": 8,
+        "use_mix": false,
+        "restart": false
+    }
+}

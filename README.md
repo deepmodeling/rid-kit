@@ -66,6 +66,13 @@ rid submit -i ./tests/data/000 -c ./rid/template/rid_gmx_dih.json -m ./rid/templ
 ```
 After successful submission you can login into your Bohrium account at [deepmodeling k8s](https://workflows.deepmodeling.com/) to monitor your job status, where the workflow is displayed using the `Argo` UI.
 
+If you want to run Rid-kit using your own customized CVs, an example is given (see [configure simulations](docs/source/rid_configuration.md) for more details):
+
+**Note** that the length of **angular_mask**, **weights** and **kappas** keys in rid.json should all be equal to the length of your defined CV number.
+```bash
+rid submit -i ./tests/data/001 -c ./rid/template/rid_gmx_custom.json -m ./rid/template/machine_bohrium_k8s.json
+```
+
 You can also run the example on a Slurm machine (But you need to configure a conda environment on the slurm, see [Installation](docs/source/install.md))
 
 ```bash

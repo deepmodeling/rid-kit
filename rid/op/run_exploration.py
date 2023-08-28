@@ -173,7 +173,7 @@ class RunExplore(OP):
 
             if op_in["cv_file"] is not None:
                 for file in op_in["cv_file"]:
-                    if file.name != "colvar":
+                    if os.path.basename(file).endswith("pdb"):
                         if not os.path.islink(file.name):
                             os.symlink(file, file.name)
                             

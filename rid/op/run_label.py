@@ -146,7 +146,7 @@ class RunLabel(OP):
                     os.symlink(op_in["index_file"], op_in["index_file"].name)
             if op_in["cv_file"] is not None:
                 for file in op_in["cv_file"]:
-                    if file.name != "colvar":
+                    if os.path.basename(file).endswith("pdb"):
                         if not os.path.islink(file.name):
                             os.symlink(file, file.name)
             if op_in["inputfile"] is not None:

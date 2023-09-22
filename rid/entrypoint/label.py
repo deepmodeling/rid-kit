@@ -20,6 +20,7 @@ from rid.utils import normalize_resources
 from rid.superop.label import Label
 from rid.op.prep_label import PrepLabel, CheckLabelInputs
 from rid.op.run_label import RunLabel
+from rid.op.label_stats import LabelStats
 from rid.constants import label_task_pattern
 
 def label_rid(
@@ -47,6 +48,7 @@ def label_rid(
         CheckLabelInputs,
         PrepLabel,
         RunLabel,
+        LabelStats,
         prep_config = normalized_resources[tasks["prep_label_config"]],
         run_config = normalized_resources[tasks["run_label_config"]],
         retry_times=1)
@@ -144,10 +146,23 @@ def label_rid(
     else:
         top_artifact = upload_artifact(Path(topology), archive=None)
 
-    conf_tags = []
+    conf_tags = {}
     for index in range(len(confs)):
-        conf_tags.append({Path(confs[index]).name:label_task_pattern.format(index)})
+        conf_tags[Path(confs[index]).name] = label_task_pattern.format(index)
         
+    if isinstance(confs, str):
+        conf_tags_path = os.path.join(Path(confs).parent.absolute(), "conf.json")
+        with open(conf_tags_path, "w") as f:
+            json.dump(conf_tags,f)
+    elif isinstance(confs, List):
+        conf_tags_path = os.path.join(Path(confs[0]).parent.absolute(), "conf.json")
+        with open(conf_tags_path,"w") as f:
+            json.dump(conf_tags,f)
+    else:
+        raise RuntimeError("Invalid type of `confs`.")
+    
+    conf_tags_artifact = upload_artifact(Path(conf_tags_path), archive=None)
+    
     rid_steps = Step("rid-label",
             label_op,
             artifacts={
@@ -159,12 +174,12 @@ def label_rid(
                 "at": None,
                 "index_file": index_file_artifact,
                 "dp_files": dp_files_artifact,
-                "cv_file": cv_file_artifact
+                "cv_file": cv_file_artifact,
+                "conf_tags": conf_tags_artifact
             },
             parameters={
                 "label_config": label_config,
                 "cv_config": cv_config,
-                "conf_tags": conf_tags,
                 "block_tag" : "000"
             },
         )

@@ -11,7 +11,7 @@ from rid.constants import (
         plumed_input_name,
     )
 from rid.utils import read_txt
-from rid.common.mol import get_distance_from_atomid
+from rid.common.mol import get_distance_from_atomid,get_dihedral_value_from_resid
 from rid.common.gromacs import make_md_mdp_string
 from rid.common.plumed import make_deepfe_plumed, make_restraint_plumed, make_constraint_plumed, get_cv_name,make_distance_list_from_file
 
@@ -288,11 +288,20 @@ def build_plumed_restraint_dict(
         mode: str = "torsion"
     ):
     plumed_task_files = {}
-    if selected_atomid is not None:
-        at = []
-        cv_info = get_distance_from_atomid(conf, selected_atomid)
-        for dis_id in range(len(selected_atomid)):
-            at.append(cv_info["%s %s"%(selected_atomid[dis_id][0],selected_atomid[dis_id][1])])
+    if at is None:
+        if selected_atomid is not None:
+            at = []
+            cv_info = get_distance_from_atomid(conf, selected_atomid)
+            for dis_id in range(len(selected_atomid)):
+                at.append(cv_info["%s %s"%(selected_atomid[dis_id][0],selected_atomid[dis_id][1])])
+        if selected_resid is not None:
+            at = []
+            cv_value = get_dihedral_value_from_resid(conf, selected_resid)
+            for key in sorted(cv_value.keys()):
+                if 'phi' in cv_value[key]:
+                    at.append(cv_value[key]['phi'])
+                if 'psi' in cv_value[key]:
+                    at.append(cv_value[key]['psi'])
     plm_content = make_restraint_plumed(
         conf=conf, cv_file=cv_file, selected_resid=selected_resid,selected_atomid = selected_atomid,
         kappa=kappa, at=at, stride=stride,

@@ -47,6 +47,43 @@ def get_dihedral_info(file_path: str):
                 dihedral_angle[residue.index+1]["psi"] = psi_info[residue.index+1]
     return dihedral_angle
 
+def get_dihedral_value_from_resid(file_path: str, selected_resid: List[int])-> Dict:
+    if len(selected_resid) == 0:
+        return {}
+    # Load the .gro file
+    traj = md.load(file_path)
+    
+    atom_list = []
+    atom_indices = [atom.index for atom in traj.topology.atoms 
+                    if ((atom.residue.index) in selected_resid or (atom.residue.index + 1) in selected_resid
+                        or (atom.residue.index - 1) in selected_resid)]
+    atom_list.extend(atom_indices)
+    traj = traj.atom_slice(atom_list)
+    # Compute the phi and psi angles for all residues
+    phi_indices, phi_angles = md.compute_phi(traj)
+    psi_indices, psi_angles = md.compute_psi(traj)
+    
+    cv_info = get_dihedral_from_resid(file_path, selected_resid)
+    
+    # Extract the angles from the lists
+    psi_angles = psi_angles[0]
+    phi_angles = phi_angles[0]
+
+    # Create the correspondence dictionary
+    selected_dihedral_value = {}
+    psi_counter = 0
+    phi_counter = 0
+
+    for key, value in cv_info.items():
+        selected_dihedral_value[key] = {}
+        if 'psi' in value:
+            selected_dihedral_value[key]['psi'] = psi_angles[psi_counter]
+            psi_counter += 1
+        if 'phi' in value:
+            selected_dihedral_value[key]['phi'] = phi_angles[phi_counter]
+            phi_counter += 1
+    
+    return selected_dihedral_value
 
 def get_dihedral_from_resid(file_path: str, selected_resid: List[int]) -> Dict:
     if len(selected_resid) == 0:

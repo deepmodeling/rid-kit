@@ -162,7 +162,7 @@ class PrepLabel(OP):
         
         #print("what is cv", cv_file)
         if op_in["label_config"]["method"] == "restrained":
-            at = 0.0
+            at = None
             if op_in["at"] is not None:
                 at = load_txt(op_in["at"])
             gmx_task_builder = RestrainedMDTaskBuilder(

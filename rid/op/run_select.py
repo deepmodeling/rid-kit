@@ -110,6 +110,10 @@ class RunSelect(OP):
             else:
                 stds = make_std(cls_sel_data, models=op_in["models"])
                 save_txt("cls_"+model_devi_name, stds, fmt=model_devi_precision)
+                assert max(stds) > trust_lvl_1, f"""
+                The maximum deviation of the models ({max(stds)}) is smaller than trust_lvl_1
+                ({trust_lvl_1}), causing the selected indices to be empty. Please enlarge trust_lvl_1.
+                """
                 _selected_idx = select_from_devi(stds, op_in["trust_lvl_1"])
             sel_idx = cls_sel_idx[_selected_idx]
             np.save(sel_ndx_name, sel_idx)

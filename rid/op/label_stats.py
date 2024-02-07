@@ -91,6 +91,8 @@ class LabelStats(OP):
                     higher_index.add(i)
         higher_index_list = list(higher_index)
         print("higher index list", list(cv_forces_list[higher_index_list]))
+        assert len(higher_index_list) < len(mf_all_std_list), \
+            f"All the std are higher than the std_threshold ({op_in["std_threshold"]}), please lower the std_threshold."
         mf_all_std_list_modified = np.delete(mf_all_std_list, higher_index_list, axis=0)
         cv_forces_list_modified = np.delete(cv_forces_list, higher_index_list, axis=0)
         assert len(mf_all_std_list_modified) == len(cv_forces_list_modified)

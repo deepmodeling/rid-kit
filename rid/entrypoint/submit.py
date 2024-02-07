@@ -2,7 +2,7 @@ from distutils.command.config import dump_file
 import json
 from pathlib import Path
 from typing import List, Union, Optional
-from rid.utils import load_json
+from rid.utils import load_json, check_cv_file
 import os
 
 from dflow import (
@@ -224,6 +224,8 @@ def submit_rid(
     if len(cvfile_list) == 0:
         cv_file_artifact = None
     else:
+        Rsl, Rmsg = check_cv_file(cvfile_list)
+        assert Rsl, f"An error occurred while parsing cv_files:\n\n{Rmsg}"
         cv_file_artifact = upload_artifact([Path(p) for p in cvfile_list], archive=None)
         
     if len(dpfile_list) == 0:

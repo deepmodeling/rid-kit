@@ -18,6 +18,7 @@ conda create -n rid-drop python=3.9 libtensorflow_cc=2.6.2=*cuda110* tensorflow=
 ```bash
 conda activate rid-drop
 conda install mdtraj nccl -c conda-forge
+conda install cudatoolkit-dev -c conda-forge
 pip install cmake cython
 pip install matplotlib parmed scikit-learn dpdata
 ```

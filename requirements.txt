@@ -4,6 +4,10 @@ pydflow
 tensorflow==2.6.2
 typeguard==2.10.0
 pandas==1.4.4
+scipy==1.10.1
+matplotlib==3.6.3
+dargs==0.3.5
+dpdispatcher==0.6.0
 google
 mdtraj
 dpdata

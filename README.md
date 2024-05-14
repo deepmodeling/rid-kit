@@ -37,6 +37,7 @@ export BOHRIUM_USERNAME="<bohrium-email>"
 export BOHRIUM_PASSWORD="<bohrium-password>"
 export BOHRIUM_PROJECT_ID="<bohrium-project-id>"
 ```
+A convenient way is to put these lines in a bash script such as `env.sh`, and then execute command `source env.sh`.
 
 **Note** that the "bohrium-project-id" is the specific ID related to your own Bohrium account, which can be created in [Bohrium Project](https://bohrium.dp.tech/projects) after login into your own account. You can create multiple project IDs for your account.
 

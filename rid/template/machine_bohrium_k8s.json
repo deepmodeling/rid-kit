@@ -12,7 +12,6 @@
                 "requests" : {"ephemeral-storage": "4Gi"}
             },
             "executor":{
-            "image": "dptechnology/dpdispatcher:latest",
             "machine_dict":{
                 "batch_type": "Bohrium",
                 "context_type": "Bohrium",
@@ -26,7 +25,7 @@
                         "job_type": "container",
                         "log_file": "tmp_log",
                         "job_name": "test_rid",
-                        "scass_type":"c8_m32_1 * NVIDIA V100",
+                        "scass_type":"c12_m92_1 * NVIDIA V100",
                         "platform": "ali",
                         "image_name":"registry.dp.tech/public/pkufjhdocker/rid-gmx-exploration:stable"
                         }
@@ -42,7 +41,6 @@
                 "requests" : {"ephemeral-storage": "4Gi"}
             },
             "executor":{
-            "image": "dptechnology/dpdispatcher:latest",
             "machine_dict":{
                 "batch_type": "Bohrium",
                 "context_type": "Bohrium",
@@ -56,7 +54,7 @@
                         "job_type": "container",
                         "log_file": "tmp_log",
                         "job_name": "test_rid",
-                        "scass_type":"c8_m32_1 * NVIDIA V100",
+                        "scass_type":"c12_m92_1 * NVIDIA V100",
                         "platform": "ali",
                         "image_name":"registry.dp.tech/public/pkufjhdocker/rid-gmx-plumed:stable"
                         }
@@ -72,7 +70,6 @@
                 "requests" : {"ephemeral-storage": "4Gi"}
             },
             "executor":{
-            "image": "dptechnology/dpdispatcher:latest",
             "machine_dict":{
                 "batch_type": "Bohrium",
                 "context_type": "Bohrium",
@@ -86,7 +83,7 @@
                         "job_type": "container",
                         "log_file": "tmp_log",
                         "job_name": "test_rid",
-                        "scass_type":"c8_m32_1 * NVIDIA V100",
+                        "scass_type":"c12_m92_1 * NVIDIA V100",
                         "platform": "ali",
                         "image_name":"registry.dp.tech/public/pkufjhdocker/rid-gmx-tf:stable"
                         }
@@ -102,7 +99,6 @@
                 "requests" : {"ephemeral-storage": "4Gi"}
             },
             "executor":{
-            "image": "dptechnology/dpdispatcher:latest",
             "machine_dict":{
                 "batch_type": "Bohrium",
                 "context_type": "Bohrium",
@@ -116,7 +112,7 @@
                         "job_type": "container",
                         "log_file": "tmp_log",
                         "job_name": "test_rid",
-                        "scass_type":"c8_m32_1 * NVIDIA V100",
+                        "scass_type":"c12_m92_1 * NVIDIA V100",
                         "platform": "ali",
                         "image_name":"registry.dp.tech/public/pkufjhdocker/rid-tf-gpu:stable"
                         }

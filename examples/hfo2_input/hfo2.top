@@ -1,0 +1,194 @@
+[ defaults ]
+; nbfunc        comb-rule       gen-pairs       fudgeLJ fudgeQQ
+1               2               yes             0.5     0.8333
+
+[ atomtypes ]
+; name      at.num  mass     charge ptype  sigma      epsilon
+Si           96     28.085  0.0000  A   0.00000e+00  0.00000e+00
+O          32        14.00    0.0000  A   0.00000e+00  0.00000e+00
+H          32        3.000    0.0000  A   0.00000e+00  0.00000e+00
+Hf          1      178.49    0.0000  A   0.00000e+00  0.00000e+00
+Cl          4      35.453    0.0000  A   0.00000e+00  0.00000e+00
+
+[ moleculetype ]
+;name            nrexcl
+MOL        3
+
+[ atoms ]
+; id  at type     res nr  res name  at name  cg nr  charge    mass
+  1   Si          1       MOL       Si      1      0.000    28.085
+  2   Si          1       MOL       Si      1      0.000    28.085
+  3   Si          1       MOL       Si      1      0.000    28.085
+  4   Si          1       MOL       Si      1      0.000    28.085
+  5   Si          1       MOL       Si      1      0.000    28.085
+  6   Si          1       MOL       Si      1      0.000    28.085
+  7   Si          1       MOL       Si      1      0.000    28.085
+  8   Si          1       MOL       Si      1      0.000    28.085
+  9   Si          1       MOL       Si      1      0.000    28.085
+  10   Si          1       MOL       Si      1      0.000    28.085
+  11   Si          1       MOL       Si      1      0.000    28.085
+  12   Si          1       MOL       Si      1      0.000    28.085
+  13   Si          1       MOL       Si      1      0.000    28.085
+  14   Si          1       MOL       Si      1      0.000    28.085
+  15   Si          1       MOL       Si      1      0.000    28.085
+  16   Si          1       MOL       Si      1      0.000    28.085
+  17   Si          1       MOL       Si      1      0.000    28.085
+  18   Si          1       MOL       Si      1      0.000    28.085
+  19   Si          1       MOL       Si      1      0.000    28.085
+  20   Si          1       MOL       Si      1      0.000    28.085
+  21   Si          1       MOL       Si      1      0.000    28.085
+  22   Si          1       MOL       Si      1      0.000    28.085
+  23   Si          1       MOL       Si      1      0.000    28.085
+  24   Si          1       MOL       Si      1      0.000    28.085
+  25   Si          1       MOL       Si      1      0.000    28.085
+  26   Si          1       MOL       Si      1      0.000    28.085
+  27   Si          1       MOL       Si      1      0.000    28.085
+  28   Si          1       MOL       Si      1      0.000    28.085
+  29   Si          1       MOL       Si      1      0.000    28.085
+  30   Si          1       MOL       Si      1      0.000    28.085
+  31   Si          1       MOL       Si      1      0.000    28.085
+  32   Si          1       MOL       Si      1      0.000    28.085
+  33   Si          1       MOL       Si      1      0.000    28.085
+  34   Si          1       MOL       Si      1      0.000    28.085
+  35   Si          1       MOL       Si      1      0.000    28.085
+  36   Si          1       MOL       Si      1      0.000    28.085
+  37   Si          1       MOL       Si      1      0.000    28.085
+  38   Si          1       MOL       Si      1      0.000    28.085
+  39   Si          1       MOL       Si      1      0.000    28.085
+  40   Si          1       MOL       Si      1      0.000    28.085
+  41   Si          1       MOL       Si      1      0.000    28.085
+  42   Si          1       MOL       Si      1      0.000    28.085
+  43   Si          1       MOL       Si      1      0.000    28.085
+  44   Si          1       MOL       Si      1      0.000    28.085
+  45   Si          1       MOL       Si      1      0.000    28.085
+  46   Si          1       MOL       Si      1      0.000    28.085
+  47   Si          1       MOL       Si      1      0.000    28.085
+  48   Si          1       MOL       Si      1      0.000    28.085
+  49   Si          1       MOL       Si      1      0.000    28.085
+  50   Si          1       MOL       Si      1      0.000    28.085
+  51   Si          1       MOL       Si      1      0.000    28.085
+  52   Si          1       MOL       Si      1      0.000    28.085
+  53   Si          1       MOL       Si      1      0.000    28.085
+  54   Si          1       MOL       Si      1      0.000    28.085
+  55   Si          1       MOL       Si      1      0.000    28.085
+  56   Si          1       MOL       Si      1      0.000    28.085
+  57   Si          1       MOL       Si      1      0.000    28.085
+  58   Si          1       MOL       Si      1      0.000    28.085
+  59   Si          1       MOL       Si      1      0.000    28.085
+  60   Si          1       MOL       Si      1      0.000    28.085
+  61   Si          1       MOL       Si      1      0.000    28.085
+  62   Si          1       MOL       Si      1      0.000    28.085
+  63   Si          1       MOL       Si      1      0.000    28.085
+  64   Si          1       MOL       Si      1      0.000    28.085
+  65   Si          1       MOL       Si      1      0.000    28.085
+  66   Si          1       MOL       Si      1      0.000    28.085
+  67   Si          1       MOL       Si      1      0.000    28.085
+  68   Si          1       MOL       Si      1      0.000    28.085
+  69   Si          1       MOL       Si      1      0.000    28.085
+  70   Si          1       MOL       Si      1      0.000    28.085
+  71   Si          1       MOL       Si      1      0.000    28.085
+  72   Si          1       MOL       Si      1      0.000    28.085
+  73   Si          1       MOL       Si      1      0.000    28.085
+  74   Si          1       MOL       Si      1      0.000    28.085
+  75   Si          1       MOL       Si      1      0.000    28.085
+  76   Si          1       MOL       Si      1      0.000    28.085
+  77   Si          1       MOL       Si      1      0.000    28.085
+  78   Si          1       MOL       Si      1      0.000    28.085
+  79   Si          1       MOL       Si      1      0.000    28.085
+  80   Si          1       MOL       Si      1      0.000    28.085
+  81   Si          1       MOL       Si      1      0.000    28.085
+  82   Si          1       MOL       Si      1      0.000    28.085
+  83   Si          1       MOL       Si      1      0.000    28.085
+  84   Si          1       MOL       Si      1      0.000    28.085
+  85   Si          1       MOL       Si      1      0.000    28.085
+  86   Si          1       MOL       Si      1      0.000    28.085
+  87   Si          1       MOL       Si      1      0.000    28.085
+  88   Si          1       MOL       Si      1      0.000    28.085
+  89   Si          1       MOL       Si      1      0.000    28.085
+  90   Si          1       MOL       Si      1      0.000    28.085
+  91   Si          1       MOL       Si      1      0.000    28.085
+  92   Si          1       MOL       Si      1      0.000    28.085
+  93   Si          1       MOL       Si      1      0.000    28.085
+  94   Si          1       MOL       Si      1      0.000    28.085
+  95   Si          1       MOL       Si      1      0.000    28.085
+  96   Si          1       MOL       Si      1      0.000    28.085
+  97   O           1       MOL       O       1      0.000     14.00
+  98   O           1       MOL       O       1      0.000     14.00
+  99   O           1       MOL       O       1      0.000     14.00
+  100   O           1       MOL       O       1      0.000     14.00
+  101   O           1       MOL       O       1      0.000     14.00
+  102   O           1       MOL       O       1      0.000     14.00
+  103   O           1       MOL       O       1      0.000     14.00
+  104   O           1       MOL       O       1      0.000     14.00
+  105   O           1       MOL       O       1      0.000     14.00
+  106   O           1       MOL       O       1      0.000     14.00
+  107   O           1       MOL       O       1      0.000     14.00
+  108   O           1       MOL       O       1      0.000     14.00
+  109   O           1       MOL       O       1      0.000     14.00
+  110   O           1       MOL       O       1      0.000     14.00
+  111   O           1       MOL       O       1      0.000     14.00
+  112   O           1       MOL       O       1      0.000     14.00
+  113   O           1       MOL       O       1      0.000     14.00
+  114   O           1       MOL       O       1      0.000     14.00
+  115   O           1       MOL       O       1      0.000     14.00
+  116   O           1       MOL       O       1      0.000     14.00
+  117   O           1       MOL       O       1      0.000     14.00
+  118   O           1       MOL       O       1      0.000     14.00
+  119   O           1       MOL       O       1      0.000     14.00
+  120   O           1       MOL       O       1      0.000     14.00
+  121   O           1       MOL       O       1      0.000     14.00
+  122   O           1       MOL       O       1      0.000     14.00
+  123   O           1       MOL       O       1      0.000     14.00
+  124   O           1       MOL       O       1      0.000     14.00
+  125   O           1       MOL       O       1      0.000     14.00
+  126   O           1       MOL       O       1      0.000     14.00
+  127   O           1       MOL       O       1      0.000     14.00
+  128   O           1       MOL       O       1      0.000     14.00
+  129   H           1       MOL       H       1      0.00      3.000
+  130   H           1       MOL       H       1      0.00      3.000
+  131   H           1       MOL       H       1      0.00      3.000
+  132   H           1       MOL       H       1      0.00      3.000
+  133   H           1       MOL       H       1      0.00      3.000
+  134   H           1       MOL       H       1      0.00      3.000
+  135   H           1       MOL       H       1      0.00      3.000
+  136   H           1       MOL       H       1      0.00      3.000
+  137   H           1       MOL       H       1      0.00      3.000
+  138   H           1       MOL       H       1      0.00      3.000
+  139   H           1       MOL       H       1      0.00      3.000
+  140   H           1       MOL       H       1      0.00      3.000
+  141   H           1       MOL       H       1      0.00      3.000
+  142   H           1       MOL       H       1      0.00      3.000
+  143   H           1       MOL       H       1      0.00      3.000
+  144   H           1       MOL       H       1      0.00      3.000
+  145   H           1       MOL       H       1      0.00      3.000
+  146   H           1       MOL       H       1      0.00      3.000
+  147   H           1       MOL       H       1      0.00      3.000
+  148   H           1       MOL       H       1      0.00      3.000
+  149   H           1       MOL       H       1      0.00      3.000
+  150   H           1       MOL       H       1      0.00      3.000
+  151   H           1       MOL       H       1      0.00      3.000
+  152   H           1       MOL       H       1      0.00      3.000
+  153   H           1       MOL       H       1      0.00      3.000
+  154   H           1       MOL       H       1      0.00      3.000
+  155   H           1       MOL       H       1      0.00      3.000
+  156   H           1       MOL       H       1      0.00      3.000
+  157   H           1       MOL       H       1      0.00      3.000
+  158   H           1       MOL       H       1      0.00      3.000
+  159   H           1       MOL       H       1      0.00      3.000
+  160   H           1       MOL       H       1      0.00      3.000
+  161   Hf          1       MOL       Hf      1      0.00     178.49
+  162   Cl          1       MOL       Cl      1      0.00     35.453
+  163   Cl          1       MOL       Cl      1      0.00     35.453
+  164   Cl          1       MOL       Cl      1      0.00     35.453
+  165   Cl          1       MOL       Cl      1      0.00     35.453
+
+
+[ system ]
+; Name
+hafnium dioxide 
+
+[ molecules ]
+; Compound        #mols
+MOL               1
+
+[ constraints ]
